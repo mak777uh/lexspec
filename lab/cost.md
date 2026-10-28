@@ -9,6 +9,42 @@ Nothing here is an estimate unless it says `estimate`.
 | # | clause | atoms | closed | open | minutes to first verdict | minutes to pass | codes hit | origin |
 |---|---|---|---|---|---|---|---|---|
 | 1 | GDPR Art. 17 (CELEX 32016R0679), revision 2026-10-28 | 4 | 3 | 1 | ~9 (session wall clock) | — (stops at `CHECKED`) | two span-uniqueness misses caused by line wrapping, then `OPEN_TERM`, `THIN_COVERAGE` | model:deepseek-v4.1-flash@2026-10-28 |
+| 2 | ГК РФ ст. 395 (ред. 03.07.2016 / 08.03.2015), ревизия 2026-10-28 | 6 | 3 | 3 | ~14 (session wall clock) | — (stops at `CHECKED`, coverage 0.500) | three spans failed on line wrapping, then three escapes — one per missing layer — and `THIN_COVERAGE` | model:deepseek-v4.1-flash@2026-10-28 |
+
+## Measurement 2 — ГК РФ ст. 395, the computational provision ADR-0008 selects
+
+**Why this article.** It is the first corpus of the pivot: interest on a monetary obligation, where the rate
+arrives by reference to the Bank of Russia key rate, and where the article carries two carve-outs and a court
+power with a floor.
+
+**Result.** `CHECKED`, **coverage 0.500** (3 of 6 atoms closed), **6 of 6 anchored**, 0 refusals, 3 escapes.
+Statement `8f90e5f4…`, corpus `798ff59f…`, example
+[`08-gk-rf-395.lex.json`](../examples/08-gk-rf-395.lex.json).
+
+**What the numbers say, and it is the cleanest result the project has produced so far.** The three unclosed atoms
+are not three arbitrary gaps — they are the three layers the architecture has been asking for, each met in one
+article:
+
+| Escape | Atom | Missing layer |
+|---|---|---|
+| `a2` — «размер процентов определяется ключевой ставкой» | the duty to pay at a rate that is *not in the statute* | **L5 quantity**: an external dated series, pinned by digest. Verified available: 209 dated records of the key rate for 2026 over the Central Bank's SOAP service |
+| `a4` — «проценты не подлежат взысканию» при согласованной неустойке | a provision that *removes* the claim of п. 1 | **defeat** ([`docs/13`](../docs/13-DEFEASIBILITY-CHOICE.md)) |
+| `a6` — court may reduce the interest «но не менее чем до суммы по ставке п. 1» | a power bounded below by a quantity | **quantity inside a position**, i.e. L5 and the power construct together |
+
+So a real computational provision — the kind ADR-0008 says the product is for — is **half encodable in v0.1**,
+and the other half is exactly the roadmap. That is a much stronger argument for the layer order than any of the
+twenty hypotheses: the article needed all three, at once, in six atoms.
+
+**Second finding, now systematic.** Three of six candidate spans failed again because the source wraps at ~100
+characters and the quote crossed a line break (measurement 1: three of five). Across two real articles, **6 of 14
+candidate spans** were rejected for this reason. The checker is right and the experience is bad: the refusal says
+"span does not occur", when the useful message is "it occurs after collapsing line breaks at offset N; copy the
+bytes". A `span_hint` helper that reports the byte-exact span is now the highest-value small tool in the project.
+
+**Third finding.** The article is a better test of the model than either earlier one: it exercises power (п. 2,
+п. 6), a prohibition expressed as a correlative duty (п. 5), a temporal condition (п. 3), and two independent
+carve-outs (п. 1, п. 4). Four of the six atoms are *second-order* positions — which is the Hohfeld layer doing
+real work rather than decorating a contract clause.
 
 ## External baselines (not our measurements — quoted from primary sources)
 
