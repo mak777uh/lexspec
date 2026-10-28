@@ -149,3 +149,15 @@ ambiguity.
 **One claim strengthened.** Row 5's boundary said our corpora are "mirrors". They are official *expressions*
 published on pravo.gov.ru, retrieved through a **non-official manifestation**; the defect is transport and
 licensing, not authority. The corpus headers now say exactly that.
+
+
+---
+
+## §9 Verified addition, 2026-10-29
+
+| Claim | Verified by | Boundary |
+|---|---|---|
+| The anchoring procedure can recover every quote that failed in our real measurements | `tools/span_hint.py` run against the six previously failed quotes — 6 of 6 recovered, each with the raw span including its line break; `python tests/run_span_tests.py` passes 6 of 6 | it recovers quotes that are *present after normalisation*; it cannot recover a quote from a different revision, and it does not decide whether the recovered span says what the atom claims |
+
+This moves the blame for the earlier 6-of-14 failures from the anchoring rule to our procedure — which is where
+the standard said it belonged ([`docs/26`](26-ROUND-03-MERGED.md) §W6).

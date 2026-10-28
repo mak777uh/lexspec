@@ -112,3 +112,34 @@ Not a product. Three sentences true at once:
 
 That is the closed loop of [`docs/18`](18-CLOSED-LOOP.md) with numbers attached. Everything else is a way of
 saying it.
+
+
+---
+
+## §7 Status, 2026-10-29 — stage 1 is done, and it was measured on real failures
+
+`tools/span_hint.py` implements the corrected procedure from [`docs/26`](26-ROUND-03-MERGED.md) §W6:
+normalise with the declared policy, then match, then print the **raw** bytes to paste into `anchor.span`,
+plus the `prefix`/`suffix` that make the region unique.
+
+**Acceptance test, run on the real quotes that failed during the two measurements — not on synthetic ones:**
+
+| Quote that failed before | Result now |
+|---|---|
+| GDPR: "the controller shall have the obligation to erase personal data without undue delay where one of the following grounds applies" | recovered, span contains the line break |
+| GDPR: "shall take reasonable steps, including technical measures, to inform controllers which are processing the personal data" | recovered |
+| ГК 395: "Размер процентов определяется ключевой ставкой Банка России" | recovered |
+| ГК 395: "он вправе требовать от должника возмещения убытков в части, превышающей эту сумму" | recovered |
+| ГК 395: "суд по заявлению должника вправе уменьшить предусмотренные договором проценты" | recovered |
+| ЗоЗПП 26.1: the seven-day sentence | recovered |
+
+**6 of 6.** The failure class the plan budgeted 1–2 days for is closed, and it closed by *normalising*, not by
+weakening the rule — which is the difference the standard forced on us.
+
+The tool also reports the number of regions with and without context, so an author can see whether their quote
+needs a wider window before writing the statement. Six unit tests pin the behaviour: a quote crossing a line
+break, a quote carrying an entity, a genuinely repeated quote that needs context, a quote unique given its own
+context, a quote from the wrong revision, and the usage error.
+
+Next in the plan: stage 2 (quantity layer). The open wall there is unchanged — the day-count and rounding
+convention (round 03, W1), with the claimed 23-row judgment still `[unverified]`.

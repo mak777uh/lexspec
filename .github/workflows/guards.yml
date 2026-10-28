@@ -56,5 +56,10 @@ jobs:
       - name: The consistency guard actually catches contradictions
         run: python lab/selftest-checkspec.py
 
+      # The anchoring procedure is normalise-then-match (spec §5 rule 0, docs/26 §W6). Six of the
+      # fourteen quotes in our first two measurements failed because we skipped the first half.
+      - name: Span hint (normalise, then report byte-exact spans)
+        run: python tests/run_span_tests.py
+
       - name: Status block
         run: python tools/lexspec_status.py
