@@ -65,14 +65,15 @@ COVER ALL TWELVE WORK PACKAGES. Do not choose a subset. Other models are answeri
 tables will be merged with yours, so a WP you skip is a WP we must notice.
 
 OUTPUT: one markdown table with this column order, and one row per approach:
-  wp | name | first year you can VERIFY | type (logic|language|standard|tool|product|paper|project)
+  wp | name | year + year_basis (repo_created|paper_published|spec_recommendation|first_release)
+  | type (logic|language|standard|tool|product|paper|project)
   | unit of representation (clause|rule|norm|policy|obligation|computation) | claimed guarantee, QUOTED
   | explicitly NOT done, quote if the source states it | how it binds a rule to its legal source
   (provenance/anchor) or "none" | conflict semantics when two norms apply, or "none"
   | availability: open-source|spec-only|closed + licence + code link | alive in 2026: yes|no|unknown +
-  evidence | max 2 primary URLs | one-line mechanism: how it actually works
-  | what a checked-legal-language project should BORROW | what it should REFUSE
-  | verification: verified|unverified|paywalled|dead-link (+ what would verify it)
+  evidence (release, commit, citation — a resolving homepage is not evidence) | max 2 primary URLs
+  | one-line mechanism: how it actually works | what a checked-legal-language project should BORROW
+  | what it should REFUSE | verification: verified|unverified|paywalled|dead-link (+ what would verify it)
 
 BUDGETS
 - 6 to 10 rows per work package. Depth beats breadth: a WP with 10 verified rows is worth more than one with
@@ -94,6 +95,13 @@ RULES
    line why. "Nothing found" is a result; empty space is not.
 8. No introduction, no conclusion, no methodology paragraph. Table, then the two lists.
 9. If you have no web access, say so and stop. Do not answer from memory.
+10. END WITH A SIGNATURE LINE: your model name and the date, exactly like
+    "Returned by <model>, 2026-10-28; brief opened at <the URL you actually used>". An unsigned table is
+    useless to us: we merge four or more passes and cannot attribute a row, a contradiction or a fabrication
+    without knowing which pass said it.
+11. ONLINE-OFFLINE MARK: if a URL opened only because a search engine showed you an excerpt, say so in the
+    verification cell ("excerpt only"). We distinguish an opened page from a search snippet, and one fabricated
+    repository in the first round came from exactly that confusion.
 ```
 
 ---
