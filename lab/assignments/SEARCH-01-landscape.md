@@ -15,9 +15,10 @@ surveyed), [`lab/sources.md`](../sources.md) (the register these results feed).
 ## §1 How to run this
 
 **Default mode: every model gets the whole brief.** Twelve work packages in one message, one model per pass.
-The models are expected to differ; the differences are the point, because a row found by six models and a row
-found by one are different kinds of evidence about how well-known something is, and a WP that one model covers
-and another ignores is a gap we can see.
+The models are expected to differ, and the differences are useful in two directions: a WP one model covers and
+another ignores shows a corner that only that model reached, and a summary several models repeat identically
+shows where a single wrong reading would propagate furthest. Neither is evidence of anything — see §6 — but
+both tell us where to point our own reading.
 
 | Mode | When | How |
 |---|---|---|
@@ -291,21 +292,35 @@ policy engine as a compliance proof | verified
 
 ---
 
-## §6 How results are merged (so the models know what happens next)
+## §6 How results are merged
+
+**The governing principle: this register is not a vote.** Models are instruments for seeing the field better,
+not sources of authority. A row stands or falls on one thing only — whether a stranger can open the URL and
+find the quoted claim. How many models named something has **no evidential weight at all**: six models can
+repeat the same wrong summary, and one model can be the only one to have actually read the specification.
+
+Two consequences, and they are the whole discipline of this step:
+
+- **We re-open every URL ourselves before a row is used.** A model's `verified` is a claim about the model's
+  session, not about the world; it becomes our `verified` only when we fetch the page and see the sentence.
+  Rows we have not re-opened stay in the register marked `unverified-by-us`, whatever the model said.
+- **A row with one checkable URL outranks a row with six mentions and none.** That ordering is the opposite of
+  what a poll would produce, and it is the correct one.
 
 1. **Dedupe key** = (canonical name, primary URL). The same approach from six models becomes one row, with the
    union of verified URLs and the most specific claim quoted — the longest quoted guarantee wins, because it
    is the one a stranger can check.
-2. **Grade** = the weakest verification among the cited URLs. A row with one dead link and one live primary
-   source is `verified`; two dead links is `dead-link`.
-3. **Agreement is recorded as a count, never as truth.** Each merged row gains `found_by: <n>/<models>`. Six
-   of six means a well-known approach; one of six means either an obscure corner or an invention, and the URL
-   decides which. Agreement tells us where to look first, not what to believe.
+2. **Grade** = the weakest verification among the cited URLs *after our own re-check*. A row with one dead
+   link and one live primary source is `verified`; two dead links is `dead-link`.
+3. **`reported_by: n/models` is recorded, and it means only "how many models thought of it".** It is used to
+   order our own re-checking — go first where several models point, because that is where a wrong summary
+   would do the most damage — never to decide whether a row is true.
 4. **Per-WP coverage is reported.** For each WP: how many models covered it, how many rows survived dedupe,
    and which models listed it under "not covered". A WP that every model skipped is a signal that our WP
    text is wrong — too vague, or asking for something that does not exist.
-5. **Contradictions are kept, not resolved.** If two models disagree on whether something is alive in 2026,
-   both statements go in the register with their evidence, and the disagreement is the finding.
+5. **Contradictions are kept, not resolved by majority.** If two models disagree on whether something is alive
+   in 2026, both statements go in the register with their evidence, and the URL settles it — or it stays open
+   and says so.
 6. **Every merged row lands in [`lab/sources.md`](../sources.md)** or in a new
    `docs/08-LANDSCAPE-REGISTER.md`, with the date and the WP it came from.
 7. **An empty WP is recorded** with the reason and the models that found nothing. That is how we know a
