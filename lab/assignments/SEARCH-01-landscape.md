@@ -44,7 +44,7 @@ Rules for the human handing this out:
 
 ---
 
-## §2 The universal prompt (paste this before every WP block)
+## §2 The universal prompt (same text to every model)
 
 ```
 You are collecting an evidence-graded register, not writing an essay.
