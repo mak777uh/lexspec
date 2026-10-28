@@ -163,3 +163,37 @@ supports today.
 **What did not change:** the two-jurisdiction plan, the refusal vocabulary's size, and the stage order. W4 unblocks
 stage 2 rather than reordering it, and W6 makes stage 1 smaller than planned — `span_hint` is now "normalize, then
 report the byte-exact span", which is a strictly easier tool.
+
+
+---
+
+## Addendum, 2026-10-29 — W1's segmentation and rate source are now verified, not quoted
+
+After `pypdf` was installed, the court PDFs turned out to be unreachable anyway (TLS failure to `vsrf.ru`,
+`sudact.ru`, `kad.arbitr.ru`, `garant.ru`). But `consultant.ru` answers, and it carries the Plenum text. Reading
+п. 39 directly produced this sentence:
+
+> «…размер процентов за пользование чужими денежными средствами, начисляемых за периоды просрочки, имевшие место
+> после 31 июля 2016 года, определяется на основании **ключевой ставки Банка России, действовавшей в
+> соответствующие периоды** (пункт 1 статьи 395 ГК РФ в редакции Федерального закона от 3 июля 2016 года
+> N 315-ФЗ)».
+
+And, immediately after it, a sentence we had not been told about and which matters more for the quantity layer:
+
+> «Источниками информации о средних ставках банковского процента по вкладам физических лиц, а также о ключевой
+> ставке Банка России являются **официальный сайт Банка России в сети "Интернет"** и официальное издание Банка
+> России "Вестник Банка России"».
+
+**Three consequences.**
+
+1. **Segmentation is verified**: the rate is the one "in force in the relevant periods", so a delay spanning rate
+   changes must be cut at each change. What three answers said, now read at source.
+2. **The authority for the rate series is named by the Plenum itself** — the Bank of Russia website. Our SOAP
+   probe of `cbr.ru` (209 dated records) is therefore not a convenience, it is the source the ruling points at.
+   The quantity layer can cite it: `basis: Plenum No. 7 п. 39` → `series: cbr.ru key rate` → digest.
+3. **Day-count and rounding remain open.** Nothing in п. 39 states them, and the claimed 23-row judgment
+   (А09-14/2020) is behind a TLS wall from this machine. Until it is read, the quantity layer encodes those two as
+   **declared parameters with a cited authority**, printed in every report — not as facts.
+
+The `[unverified]` marking on that judgment stands, and the reason is now specific: not "we did not look", but
+"the host refuses this client at TLS".

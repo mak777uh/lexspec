@@ -85,3 +85,29 @@ returns five negatives has done its job, provided the negatives are specific.
 
 Round 03 ([`docs/24`](24-ROUND-03-QUESTIONS.md)) is exactly these six walls, one question each, none of them a
 repeat of rounds 01–02.
+
+
+---
+
+## §6 What this machine can and cannot reach (measured 2026-10-29)
+
+`lab/probe-egress.py` probes three groups of hosts. Result:
+
+| Group | Reachable | Detail |
+|---|---|---|
+| **search** (discovery) | 5 of 5 answer, **0 usable** | DuckDuckGo returns its anomaly page (HTTP 202), Mojeek a JavaScript captcha, Qwant a JS shell whose API answers 403, Bing and Startpage challenge pages, SearXNG instances unreachable |
+| **docs** (retrieval) | 3 of 4 | IETF and arXiv fine; EUR-Lex answers 202 with an empty body; w3.org answers 403 to a plain client but works through the harness fetcher |
+| **legal** | 3 of 7 | ConsultantPlus, `publication.pravo.gov.ru` and `pravo.gov.ru` fine; **`vsrf.ru`, `sudact.ru`, `kad.arbitr.ru`, `garant.ru` fail at TLS** (`UNEXPECTED_EOF_WHILE_READING`) |
+
+**The distinction that governs this stage: retrieval works, discovery does not.** With a URL we can open a
+primary source and quote it. Without one we cannot find it, so any question that needs discovery must be answered
+by a human or deferred to a round — and a round cannot be answered by us either, because *finding* the sources is
+the same blocked capability.
+
+Practical consequences recorded here so they are not re-learned:
+
+1. `lab/search.py` is kept but is **not functional in this network**; it is written for an environment where
+   engines answer. Do not treat its empty result as "nothing exists".
+2. Round answers that supply URLs are far more valuable than answers that supply names, for exactly this reason.
+3. Russian court acts are unreachable from here; the day-count/rounding convention (W1) therefore cannot be
+   verified on this machine even though it is one URL away.
