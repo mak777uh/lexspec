@@ -1,0 +1,66 @@
+{
+  "lexspec": "0.1",
+  "id": "opposite-conflict",
+  "kind": "scenario",
+  "jurisdiction": ["RU"],
+  "corpus": [
+    {
+      "id": "gk-rf",
+      "title": "Гражданский кодекс РФ, извлечение (ст. 506, ст. 309)",
+      "revision": "2026-10-01",
+      "text": "corpus/gk-rf-2026-10-01.txt",
+      "text_sha256": "fc6f39a0237b2cb745506d80466b02c6f317bec8bc21665225074afd5461f36d"
+    }
+  ],
+  "terms": [
+    {
+      "name": "поставщик",
+      "def": "лицо, осуществляющее предпринимательскую деятельность и передающее товары",
+      "status": "closed"
+    },
+    {
+      "name": "покупатель",
+      "def": "лицо, приобретающее товары для использования в предпринимательской деятельности",
+      "status": "closed"
+    },
+    {
+      "name": "товары",
+      "def": "производимые или закупаемые поставщиком предметы передачи",
+      "status": "closed"
+    }
+  ],
+  "atoms": [
+    {
+      "id": "a1",
+      "relation": "duty",
+      "bearer": "поставщик",
+      "counterparty": "покупатель",
+      "action": { "verb": "передать", "object": "товары", "open": false },
+      "conditions": ["в обусловленный срок или сроки"],
+      "temporal": { "from": "2026-01-01", "until": null },
+      "anchor": {
+        "corpus": "gk-rf",
+        "article": "ст. 506",
+        "span": "обязуется передать в обусловленный срок или сроки",
+        "note": "формальная иллюстрация: обязанность передать товары"
+      }
+    },
+    {
+      "id": "a2",
+      "relation": "no-right",
+      "bearer": "поставщик",
+      "counterparty": "покупатель",
+      "action": { "verb": "передать", "object": "товары", "open": false },
+      "conditions": [],
+      "temporal": { "from": "2026-01-01", "until": null },
+      "anchor": {
+        "corpus": "gk-rf",
+        "article": "ст. 506",
+        "span": "производимые или закупаемые им товары",
+        "note": "формальная иллюстрация: та же четвёрка (bearer, verb, object, counterparty), противоположная позиция duty ↔ no-right"
+      }
+    }
+  ],
+  "conflicts_policy": { "default": "report", "lex_specialis": [] },
+  "escapes": []
+}

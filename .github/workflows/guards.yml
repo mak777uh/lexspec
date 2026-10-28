@@ -1,0 +1,50 @@
+# Guards: every push and every pull request re-measures the claims in this repo.
+#
+# Why these four steps and not more: each one answers a question a reader would
+# otherwise have to take on trust — do the tests pass, is the tree free of
+# credentials and machine-local paths, does every example still produce the
+# verdict published in tests/expected.json, and what does the status block say
+# right now. The last step is printed for the log, not asserted: a status page
+# that fails the build would be an opinion, not a measurement.
+#
+# No secrets are used here, and none are needed: the whole point of the checker
+# is that it runs on a bare Python with no network and no packages.
+
+name: guards
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: guards-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: tests, secrets, examples, status
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Tests (stdlib unittest, no dependencies)
+        run: python tests/run_tests.py
+
+      - name: Secrets and local absolute paths
+        run: python lab/check-secrets.py
+
+      - name: Examples still match tests/expected.json
+        run: python tools/check_examples.py
+
+      - name: Status block
+        run: python tools/lexspec_status.py

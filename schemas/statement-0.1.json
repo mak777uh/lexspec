@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:lexspec:statement:0.1",
+  "title": "LexSpec v0.1 statement",
+  "description": "One legal statement a machine can check. This file is the prose contract; the executable contract is tools/lexcheck.py, and where they disagree the spec in docs/10-SPEC-v0.1.md decides (see §12). Two things JSON Schema cannot express and this document therefore only states: (a) the canonical byte form of §3 — keys sorted at every depth, no insignificant whitespace, UTF-8 without BOM, LF line endings, no floating-point numbers — is enforced by C0_CANON; (b) every constraint here is re-checked by the tool with a stable refusal code, because a validator that cannot say *which* code fired is not useful to an author.",
+  "type": "object",
+  "required": ["lexspec", "id", "kind", "jurisdiction", "corpus", "terms", "atoms", "conflicts_policy", "escapes"],
+  "additionalProperties": true,
+  "$comment": "additionalProperties is true on purpose: spec §2 says unknown fields are allowed and ignored, and a checker must not fail on them. A v0.1 document has no extension mechanism, but an extra field is not thereby invalid.",
+  "properties": {
+    "lexspec": {
+      "description": "Version of this spec the statement claims. The checker refuses any other value.",
+      "const": "0.1"
+    },
+    "id": {
+      "description": "Stable identifier chosen by the author; not a hash and not derived from the content.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "kind": {
+      "description": "What sort of claim this is. v0.1 does not change any check by kind; the field exists so a report can be read without opening the file.",
+      "enum": ["norm", "clause", "scenario"]
+    },
+    "jurisdiction": {
+      "description": "Uppercase jurisdiction codes. Uppercase is load-bearing: 'ru' and 'RU' must not both exist in one corpus of statements.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{2,3}(-[A-Z0-9]{1,8})?$"
+      }
+    },
+    "corpus": {
+      "description": "Pinned texts this statement cites. Never 'the law' — a corpus is a set of bytes with a digest.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/corpusRef" }
+    },
+    "terms": {
+      "description": "The declared vocabulary. Atoms may only name terms declared here (S4_UNDEFINED_REF), and a term with status 'open' makes every atom citing it open (OPEN_TERM).",
+      "type": "array",
+      "items": { "$ref": "#/$defs/term" }
+    },
+    "atoms": {
+      "description": "The asserted legal positions. Zero atoms is allowed structurally and yields coverage 0.0, which is never a pass.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/atom" }
+    },
+    "conflicts_policy": {
+      "description": "How incompatible positions are to be resolved. 'report' refuses every conflict; the other policies require the conflict to be named.",
+      "type": "object",
+      "required": ["default", "lex_specialis"],
+      "additionalProperties": true,
+      "properties": {
+        "default": { "enum": ["report", "lex_specialis", "lex_posterior"] },
+        "lex_specialis": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/lexSpecialis" }
+        }
+      }
+    },
+    "escapes": {
+      "description": "Declared non-closure, checked against what the checker computes. A computed escape that is not declared is S4_UNDECLARED_ESCAPE; a declared escape that is not computed is S4_STALE_ESCAPE. Declaring an escape does not silence a defect — it records one.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/escape" }
+    }
+  },
+  "$defs": {
+    "corpusRef": {
+      "type": "object",
+      "required": ["id", "title", "revision", "text", "text_sha256"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "revision": {
+          "description": "YYYY-MM-DD of the edition used. A real calendar date: 2026-02-31 is a defect, not a typo the tool should guess at.",
+          "type": "string",
+          "format": "date",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "text": {
+          "description": "Path to the pinned text, relative to the repository root. No drive letters, no backslashes, no '..': a statement must not be able to cite a file outside the repository it ships with.",
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?!.*\\\\)(?!.*\\.\\.)(?!.*:).+$"
+        },
+        "text_sha256": {
+          "description": "sha256 of the file's bytes, lowercase hex. The hash is the identity; a URL is only provenance metadata.",
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "term": {
+      "type": "object",
+      "required": ["name", "def", "status"],
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "def": { "type": "string", "minLength": 1 },
+        "status": {
+          "description": "'open' means: not defined precisely enough to be checked. It is a claim by the author, and it costs coverage — that is the point.",
+          "enum": ["closed", "open"]
+        }
+      }
+    },
+    "atom": {
+      "type": "object",
+      "required": ["id", "relation", "bearer", "counterparty", "action", "conditions", "temporal", "anchor"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "maxLength": 64 },
+        "relation": { "$ref": "#/$defs/relation" },
+        "bearer": { "type": "string", "minLength": 1 },
+        "counterparty": {
+          "description": "String, or null only for the relations the spec calls absolute (power, immunity, disability). The conditional below encodes that; S3_MISSING_COUNTERPARTY enforces it per atom.",
+          "type": ["string", "null"]
+        },
+        "action": {
+          "type": "object",
+          "required": ["verb", "object", "open"],
+          "additionalProperties": true,
+          "properties": {
+            "verb": { "type": "string", "minLength": 1 },
+            "object": { "type": "string", "minLength": 1 },
+            "open": {
+              "description": "true when the action itself is not defined precisely enough to be checked; it makes the atom open (OPEN_TERM).",
+              "type": "boolean"
+            }
+          }
+        },
+        "conditions": {
+          "description": "Free-text conditions. v0.1 does not interpret them: they are listed in the report and nothing more. A condition that matters must become another atom or another statement.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "temporal": {
+          "type": "object",
+          "required": ["from", "until"],
+          "additionalProperties": true,
+          "properties": {
+            "from": { "type": "string", "format": "date", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+            "until": {
+              "description": "Inclusive last day, or null for 'no declared end'. from > until is S5_EMPTY_INTERVAL.",
+              "type": ["string", "null"],
+              "format": "date",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+            }
+          }
+        },
+        "anchor": {
+          "type": "object",
+          "required": ["corpus", "article", "span"],
+          "additionalProperties": true,
+          "properties": {
+            "corpus": { "type": "string", "minLength": 1 },
+            "article": {
+              "description": "For humans only: the provision a lawyer would open. v0.1 never checks it against anything.",
+              "type": "string",
+              "minLength": 1
+            },
+            "span": {
+              "description": "Exact substring of the pinned text, occurring exactly once. Ambiguity is a refusal, not a warning.",
+              "type": "string",
+              "minLength": 1
+            },
+            "note": { "type": "string" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "Spec §4.3: counterparty may be omitted only for absolute relations.",
+          "if": {
+            "required": ["relation"],
+            "properties": { "relation": { "enum": ["right", "duty", "privilege", "no-right", "liability"] } }
+          },
+          "then": {
+            "properties": { "counterparty": { "type": "string", "minLength": 1 } }
+          }
+        }
+      ]
+    },
+    "relation": {
+      "description": "One of the eight Hohfeldian positions. Correlatives: right↔duty, privilege↔no-right, power↔liability, immunity↔disability. Opposites: right↔privilege, duty↔no-right, power↔immunity, liability↔disability.",
+      "enum": ["right", "duty", "privilege", "no-right", "power", "liability", "immunity", "disability"]
+    },
+    "lexSpecialis": {
+      "type": "object",
+      "required": ["prevailing", "over"],
+      "additionalProperties": true,
+      "properties": {
+        "prevailing": { "type": "string", "minLength": 1 },
+        "over": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "reason": { "type": "string" }
+      }
+    },
+    "escape": {
+      "type": "object",
+      "required": ["atom", "reason", "detail"],
+      "additionalProperties": true,
+      "properties": {
+        "atom": { "type": "string", "minLength": 1 },
+        "reason": { "$ref": "#/$defs/refusalCode" },
+        "detail": { "type": "string", "minLength": 1 }
+      }
+    },
+    "refusalCode": {
+      "description": "The closed vocabulary of docs/11-REFUSAL-CODES.md. A reason outside it is not a code and would make the report unreadable, so it is S1_SCHEMA.",
+      "enum": [
+        "C0_CANON",
+        "S1_SCHEMA",
+        "S2_NO_CORPUS",
+        "S2_HASH_MISMATCH",
+        "S2_SPAN_NOT_FOUND",
+        "S2_SPAN_AMBIGUOUS",
+        "S3_UNKNOWN_RELATION",
+        "S3_MISSING_COUNTERPARTY",
+        "S3_OPPOSITE_CONFLICT",
+        "S4_UNDEFINED_REF",
+        "OPEN_TERM",
+        "S4_UNDECLARED_ESCAPE",
+        "S4_STALE_ESCAPE",
+        "S5_EMPTY_INTERVAL",
+        "S6_CONFLICT",
+        "S6_UNRESOLVED_CONFLICT",
+        "THIN_COVERAGE"
+      ]
+    }
+  }
+}

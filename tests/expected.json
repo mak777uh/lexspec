@@ -1,0 +1,54 @@
+{
+  "coverage_threshold": 0.8,
+  "examples": {
+    "01-delivery-ok.lex.json": {
+      "codes": [],
+      "coverage": 1.0,
+      "exit_code": 0,
+      "verdict": "CHECKED_ANCHORED"
+    },
+    "02-opposite-conflict.lex.json": {
+      "codes": [
+        "S3_OPPOSITE_CONFLICT"
+      ],
+      "coverage": 1.0,
+      "exit_code": 1,
+      "verdict": "REFUSED"
+    },
+    "03-no-anchor.lex.json": {
+      "codes": [
+        "OPEN_TERM",
+        "S2_SPAN_NOT_FOUND",
+        "THIN_COVERAGE"
+      ],
+      "coverage": 0.0,
+      "exit_code": 1,
+      "verdict": "REFUSED"
+    },
+    "04-unresolved-conflict.lex.json": {
+      "codes": [
+        "S6_UNRESOLVED_CONFLICT"
+      ],
+      "coverage": 1.0,
+      "exit_code": 1,
+      "verdict": "REFUSED"
+    },
+    "05-open-term.lex.json": {
+      "codes": [
+        "OPEN_TERM"
+      ],
+      "coverage": 0.8,
+      "exit_code": 0,
+      "verdict": "CHECKED"
+    },
+    "06-thin-coverage.lex.json": {
+      "codes": [
+        "OPEN_TERM",
+        "THIN_COVERAGE"
+      ],
+      "coverage": 0.667,
+      "exit_code": 0,
+      "verdict": "CHECKED"
+    }
+  }
+}

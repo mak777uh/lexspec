@@ -1,0 +1,17 @@
+# Line endings are part of the contract.
+#
+# A statement's identity is sha256 over its canonical bytes, and a corpus is pinned
+# by sha256 of the file. If a Windows checkout rewrites LF to CRLF in a corpus file,
+# every anchor in the repository fails with S2_HASH_MISMATCH — the tool is right and
+# the clone is wrong. These rules make a fresh clone byte-identical to the pinned
+# content, so the first experience is a pass rather than a mystery.
+#
+* text=auto eol=lf
+
+# Pinned corpora are bytes, not text: no conversion on checkout or commit.
+corpus/** -text
+
+*.json text eol=lf
+*.md   text eol=lf
+*.py   text eol=lf
+*.yml  text eol=lf
