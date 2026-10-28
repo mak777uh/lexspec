@@ -97,6 +97,7 @@ refusals — what each code means, and what a reader should do — is
 | Why and how | `docs/00-CHARTER.md` · `docs/20-METHOD.md` · `docs/02-DESIGN-SPACE.md` |
 | Machine | `schemas/` · `tools/lexcheck.py` · `tools/lexspec_status.py` |
 | Evidence | `examples/` · `tests/` · `corpus/` · `tools/SELFTEST.md` |
+| Process | [lab/sources.md](lab/sources.md) — source intake register · [lab/decisions/](lab/decisions/) — decisions; ADR-0001 explains why we are gathering sources before building |
 | Guards | `lab/check-secrets.py` · `.github/workflows/guards.yml` |
 
 ## What this repository does not claim

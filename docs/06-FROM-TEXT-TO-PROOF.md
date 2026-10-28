@@ -356,6 +356,11 @@ Each of these is cheap. Each should be run before any claim of a v1.
 
 ## §4 What this costs, honestly
 
+**Status: proposal, deferred.** On 2026-10-28 the owner's decision was to gather sources before building
+anything here; the governing record is [`lab/decisions/ADR-0001-gather-before-build.md`](../lab/decisions/ADR-0001-gather-before-build.md),
+and the active work item is the intake register [`lab/sources.md`](../lab/sources.md). What follows is kept
+because it is the order the evidence currently supports, not because it is scheduled.
+
 T2 is the only part of this document that requires a proof assistant, and it is the smallest part: the algebra
 is eight positions with two maps, intervals over dates, and a detector that is a bounded pairwise scan. The
 hard part is not the proof — it is H1, H4, H5 and H11, which are engineering on text, and H7, which is a
