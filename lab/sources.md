@@ -13,6 +13,10 @@ Status vocabulary, deliberately coarse:
 | **read** | the parts relied on were read in full; numbers taken from the page itself |
 | **audited** | claim-by-claim grading against source files, with what could not be opened recorded |
 
+Rows arrive two ways: directly (someone reads a source and records it) or through a work package of
+[`lab/assignments/SEARCH-01-landscape.md`](assignments/SEARCH-01-landscape.md), which is the distributed
+search brief — twelve work packages, one per model, fixed output schema, mergeable by dedupe key.
+
 ---
 
 ## Received
