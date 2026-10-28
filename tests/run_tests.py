@@ -276,15 +276,20 @@ class ExampleVerdicts(FixtureCase):
                 self.assertEqual(NOT_CLAIMED, report["not_claimed"])
 
     def test_examples_pin_the_corpus_that_ships_with_them(self):
-        actual = corpus_digest()
+        # Each example is checked against the corpus it names, not against one global corpus:
+        # the repository now ships two pinned texts (a Russian civil-code excerpt and a GDPR
+        # article), and a test that assumes a single file would either miss a wrong digest or
+        # force every future example onto the same source.
         for path in sorted((ROOT / "examples").glob("*.lex.json")):
             with self.subTest(example=path.name):
                 document = json.loads(path.read_text(encoding="utf-8"))
                 self.assertTrue(document["corpus"], "an example without a pinned corpus proves nothing")
                 for entry in document["corpus"]:
+                    pinned = ROOT / entry["text"]
+                    self.assertTrue(pinned.is_file(), f"{path.name} names a corpus file that does not exist")
+                    actual = hashlib.sha256(pinned.read_bytes()).hexdigest()
                     self.assertEqual(actual, entry["text_sha256"],
                                      f"{path.name} declares a digest the corpus does not have")
-                    self.assertEqual(CORPUS_TEXT, entry["text"])
 
     def test_report_shape_is_the_documented_one(self):
         _code, report, _out = run_check(ROOT / "examples" / "01-delivery-ok.lex.json")

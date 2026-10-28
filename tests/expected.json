@@ -49,6 +49,15 @@
       "coverage": 0.667,
       "exit_code": 0,
       "verdict": "CHECKED"
+    },
+    "07-gdpr-art17.lex.json": {
+      "codes": [
+        "OPEN_TERM",
+        "THIN_COVERAGE"
+      ],
+      "coverage": 0.75,
+      "exit_code": 0,
+      "verdict": "CHECKED"
     }
   }
 }

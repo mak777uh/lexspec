@@ -1,0 +1,112 @@
+{
+  "lexspec": "0.1",
+  "id": "gdpr-art17-erasure",
+  "kind": "clause",
+  "jurisdiction": ["EU"],
+  "corpus": [
+    {
+      "id": "gdpr-art17",
+      "title": "Regulation (EU) 2016/679 (GDPR), Article 17, excerpt",
+      "revision": "2026-10-28",
+      "text": "corpus/gdpr-art17-2026-10-28.txt",
+      "text_sha256": "7880be6d15e0e8f1fd2ea34c091ef4c5d7834cb6f897e714cc58d29880e0757c"
+    }
+  ],
+  "terms": [
+    {
+      "name": "data subject",
+      "def": "an identified or identifiable natural person whose personal data are processed",
+      "status": "closed"
+    },
+    {
+      "name": "controller",
+      "def": "the natural or legal person which determines the purposes and means of the processing",
+      "status": "closed"
+    },
+    {
+      "name": "personal data",
+      "def": "any information relating to an identified or identifiable natural person",
+      "status": "closed"
+    },
+    {
+      "name": "erasure",
+      "def": "destruction of the personal data so that they are no longer available to the controller",
+      "status": "closed"
+    },
+    {
+      "name": "processing",
+      "def": "any operation performed on personal data; the Article does not fix its boundaries here",
+      "status": "open"
+    }
+  ],
+  "atoms": [
+    {
+      "id": "a1",
+      "relation": "right",
+      "bearer": "data subject",
+      "counterparty": "controller",
+      "action": { "verb": "obtain erasure of", "object": "personal data", "open": false },
+      "conditions": ["without undue delay"],
+      "temporal": { "from": "2018-05-25", "until": null },
+      "anchor": {
+        "corpus": "gdpr-art17",
+        "article": "Art. 17(1)",
+        "span": "The data subject shall have the right to obtain from the controller the erasure of personal data",
+        "note": "the right is stated before the grounds; the grounds are conditions, not a separate position"
+      }
+    },
+    {
+      "id": "a2",
+      "relation": "duty",
+      "bearer": "controller",
+      "counterparty": "data subject",
+      "action": { "verb": "erase", "object": "personal data", "open": false },
+      "conditions": ["without undue delay", "where one of the grounds (a)-(f) applies"],
+      "temporal": { "from": "2018-05-25", "until": null },
+      "anchor": {
+        "corpus": "gdpr-art17",
+        "article": "Art. 17(1)",
+        "span": "the controller shall have the obligation to erase personal data",
+        "note": "correlative of a1; written as a duty rather than restating the right"
+      }
+    },
+    {
+      "id": "a3",
+      "relation": "duty",
+      "bearer": "controller",
+      "counterparty": "controller",
+      "action": { "verb": "inform", "object": "personal data", "open": false },
+      "conditions": ["the personal data have been made public", "taking account of available technology and the cost of implementation"],
+      "temporal": { "from": "2018-05-25", "until": null },
+      "anchor": {
+        "corpus": "gdpr-art17",
+        "article": "Art. 17(2)",
+        "span": "take reasonable steps, including technical measures, to inform controllers which are processing the personal",
+        "note": "the counterparty is a class of controllers, not a named party; the term used is a placeholder for that class"
+      }
+    },
+    {
+      "id": "a4",
+      "relation": "privilege",
+      "bearer": "controller",
+      "counterparty": "data subject",
+      "action": { "verb": "continue processing", "object": "personal data", "open": true },
+      "conditions": ["to the extent that processing is necessary for one of the purposes (a)-(e)"],
+      "temporal": { "from": "2018-05-25", "until": null },
+      "anchor": {
+        "corpus": "gdpr-art17",
+        "article": "Art. 17(3)",
+        "span": "Paragraphs 1 and 2 shall not apply to the extent that processing is necessary",
+        "note": "recorded as an atom only so that the carve-out is visible; it defeats a1/a2 and v0.1 has no construct for defeat"
+      }
+    }
+  ],
+  "conflicts_policy": { "default": "report", "lex_specialis": [] },
+  "escapes": [
+    {
+      "atom": "a4",
+      "reason": "OPEN_TERM",
+      "detail": "the carve-out cannot be closed: 'processing' is defined in Art. 4 and not in this corpus, and the Article's own five purposes are open-textured; more importantly, v0.1 has no 'defeats' relation, so this atom is recorded as an ordinary position and does not actually defeat a1/a2"
+    }
+  ]
+}

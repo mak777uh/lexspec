@@ -1,7 +1,7 @@
 # ADR-0002 — Implementation language: Rust primary, Python as the permanent twin
 
 - **Date:** 2026-10-28
-- **Status:** accepted as a direction; **nothing is implemented** — [ADR-0001](ADR-0001-gather-before-build.md) still governs when building starts
+- **Status:** accepted as a direction; **confirmed by the owner on 2026-10-28** ("хорошо"); **nothing is implemented** — [ADR-0001](ADR-0001-gather-before-build.md) still governs when building starts
 - **Evidence:** [`docs/09-IMPLEMENTATION-LANGUAGE.md`](../../docs/09-IMPLEMENTATION-LANGUAGE.md) — requirements, candidate matrices, measurements taken on this machine, download list, and what would overturn the choice
 
 ## Context

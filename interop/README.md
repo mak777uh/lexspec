@@ -16,7 +16,11 @@ of that exchange; the other side keeps its copies in `flowguard-spec/interop/`.
    a note is an opinion.
 4. Notes travel in the language of the conversation — Russian, the language the flowguard↔VecDHT thread runs
    in. This repository's own documents are English; a note is archived here as sent — not translated, not
-   re-typed. (flowguard archives its side in English and links the original.)
+   re-typed. (flowguard archives its side in English and links the original.) **Decided from the evidence,
+   2026-10-28:** VecDHT's notes in flowguard's tree are Russian, and flowguard's own note carries the sentence
+   "The original is in Russian … this repository keeps documents in English" — so a Russian note in a foreign
+   tree is the established practice, not a deviation. Anything we rely on substantively gets an English
+   rendering in `docs/`.
 5. No reply is required, but **a note without a reply is a debt, not a rhythm**. Silence means "no answer
    yet", never "agreed".
 6. **Nothing but files under `interop/`** ever goes into the other repository: no edits, no dependencies, no

@@ -175,6 +175,13 @@ Rule 4 is the load-bearing one. A span that appears twice anchors nothing: a rea
 occurrence the author meant, so a later amendment to one of them silently re-points the citation. Ambiguity
 is a defect of the anchor, so it is a refusal, not a warning.
 
+**A span is a byte sequence, not a sentence.** It may contain newlines, and it must be copied from the file
+rather than retyped from a rendered page: official texts wrap at a fixed width, so a quote transcribed from the
+screen usually crosses a line break and does not exist in the file. This was the single most common failure in
+the first real measurement ([`lab/cost.md`](../lab/cost.md), GDPR Art. 17 — three of five candidate spans).
+`S2_SPAN_NOT_FOUND` should therefore say *whether the span occurs after collapsing line breaks*, because that
+distinguishes "the text is not here" from "you quoted the page instead of the file".
+
 `anchor.article` is for humans and is not checked against anything in v0.1. It exists so that a refusal report
 can name the provision a lawyer would look at.
 
