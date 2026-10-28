@@ -10,6 +10,23 @@ Nothing here is an estimate unless it says `estimate`.
 |---|---|---|---|---|---|---|---|---|
 | 1 | GDPR Art. 17 (CELEX 32016R0679), revision 2026-10-28 | 4 | 3 | 1 | ~9 (session wall clock) | — (stops at `CHECKED`) | two span-uniqueness misses caused by line wrapping, then `OPEN_TERM`, `THIN_COVERAGE` | model:deepseek-v4.1-flash@2026-10-28 |
 
+## External baselines (not our measurements — quoted from primary sources)
+
+These exist so that our own numbers have a scale. Verified by reading the paper text, not a summary
+([`docs/16` §1](../docs/16-ROUND-01-ANSWERS.md)).
+
+| Source | Artifact | Size | Effort |
+|---|---|---|---|
+| Catala (arXiv 2103.03198 §6.3) | French family benefits: 27 articles of the Social Security Code + orders | ≈1,500 lines including the law text; 6 scopes, 63 context variables, 83 definitions and rules | not stated; presented by the authors as representative of "a medium-size legal document" |
+| Catala (§6.3) | US IRC §121 up to (b)(4) — ≈15 % of one complex section | ≈350 lines including the law text | four 2-hour pair sessions with tax lawyers ≈ 8 pair-hours ≈ 16 person-hours |
+| Catala (§4.5) | F\* mechanisation of the compiler core | ≈3,500 lines | 1 person-month |
+| Catala (§5) | the compiler itself | — | ≈5 person-months |
+
+**What these say about our unit.** "Minutes per article" is not a unit; an article ranges from a definition to a
+provision with exceptions, cross-references, dates and external calculations. The usable units are **hours per
+computational provision** and **lines per medium document**. Our measurement 1 is consistent with that scale: we
+were fast because we encoded almost nothing.
+
 ## Measurement 1 — GDPR Art. 17, the right to erasure
 
 **What was done.** Fetched the article, saved it as a pinned corpus file, computed its sha256, split the text
