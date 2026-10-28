@@ -43,6 +43,13 @@ listed, never quietly dropped. A verdict computed over half an encoded clause is
 not a limitation of the checker, except where the limitation is the point (`THIN_COVERAGE`). A refusal that
 cannot be distinguished from a parse error is a bug in the vocabulary.
 
+**C5. Clarity comes from survivable rows, not from volume.** What makes the truth clearer is not how much was
+read but that every statement carries its own refutation: a quote someone else can open, a code that names the
+defect, a number with the command that produced it, and a list of what was not claimed. So this repository
+keeps three things ordinary research throws away — **refusals, dead ends, and contradictions** — and files them
+as results. A model, a paper, or a colleague who says "verified" without an openable source has said nothing,
+and no amount of agreement between such statements adds up to evidence.
+
 ## 4. Non-goals (deliberate, and reversible only by the owner)
 
 1. **Not legal advice.** The checker has no opinion about what a court would do. It checks the internal
