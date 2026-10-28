@@ -12,7 +12,7 @@ Everything else in this repository is in service of that sentence or is scaffold
 
 ## 2. Why it is hard, mechanically
 
-"Legal language formalised" sounds like one problem. It is at least four, and each has its own failure mode:
+"Legal language formalised" sounds like one problem. It is at least seven, and each has its own failure mode:
 
 | Layer | Question | Typical failure when collapsed into the others |
 |---|---|---|
@@ -20,11 +20,15 @@ Everything else in this repository is in service of that sentence or is scaffold
 | **L2 Model** | what kind of legal position is this — duty, permission, power, immunity? | everything becomes "obligation", and permissions silently become duties |
 | **L3 Inference** | what follows, and what conflicts? | a general-purpose prover proves a tautology of the encoding, not a fact about law |
 | **L4 Provenance** | which exact text, at which revision, says so? | the citation points at a document, not at a span; the article was amended last week |
+| **L5 Quantity** | how much, in what unit, rounded how, over what period? | a number enters from the encoder's head, looks authoritative and is unverifiable — and this is the layer that market regulation is actually made of |
+| **L6 Compilation** | which rule in which engine enforces it? | the rule loses its reference to the position, and the boundary enforces something no one can trace |
+| **L7 Enforcement** | did the boundary permit or refuse, and can that be re-checked? | a compliant-looking system whose decisions cite nothing, or cite a rule that no longer matches the text |
 
-The tooling world loves to collapse L1–L3 into "AI reads the contract" and to skip L4. That combination
-produces the worst artifact in this field: a confident verdict with no traceable anchor. A reader cannot
-check it, so its only remaining function is persuasion. This project is built to make that artifact
-impossible to produce with our tools.
+The tooling world loves to collapse L1–L3 into "AI reads the contract" and to skip L4. It then stops at L4's
+neighbours entirely: quantities are left to the code, compilation to the engineer, and enforcement to whoever
+deploys. That combination produces the worst artifact in this field: a confident verdict with no traceable
+anchor, followed by a system that enforces something else. A reader cannot check either, so their only remaining
+function is persuasion. This project is built to make that artifact impossible to produce with our tools.
 
 ## 3. The four commitments
 
@@ -76,9 +80,13 @@ judged by whether the answer gets *checkable*, not by whether they are new.
    v0.1 is a *typechecker for legal positions* plus an *anchoring gate*; a prover can be attached later at a
    declared seam.
 4. **Not a contract generator.** No drafting, no templating, no "generate a compliant policy".
-5. **Not a court-ready artifact.** Nothing here is offered as evidence of anything; it is offered as a
+5. **Not an enforcement runtime.** We do not build the system that permits or refuses actions. We compile a
+   statement into a rule for a declared engine (Cedar, OPA, XACML, ODRL) and certify the chain from the rule back
+   to the span. Building the runtime would make us responsible for a guarantee we cannot make — see
+   [`docs/14`](14-ARCHITECTURE.md) §6.
+6. **Not a court-ready artifact.** Nothing here is offered as evidence of anything; it is offered as a
    check that a third party can repeat.
-6. **Not a jurisdiction-neutral ontology.** v0.1 is honest about being a skeleton with a Russian-law
+7. **Not a jurisdiction-neutral ontology.** v0.1 is honest about being a skeleton with a Russian-law
    example; the corpus is pinned excerpts, not the law.
 
 ## 5. Falsifiers — what would prove this project wrong

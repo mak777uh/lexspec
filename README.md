@@ -88,6 +88,8 @@ refusals — what each code means, and what a reader should do — is
 | [docs/07-ROUND-01-QUESTIONS.md](docs/07-ROUND-01-QUESTIONS.md) | sixteen questions we could not answer from inside, for external models and practitioners — anchoring, Hohfeld for civil law, whether the soundness theorem is trivial, measured encoding cost, evidence admissibility |
 | [docs/09-IMPLEMENTATION-LANGUAGE.md](docs/09-IMPLEMENTATION-LANGUAGE.md) | the language choice on evidence: twelve requirements derived from the spec, four candidates, the seven byte-level traps, and the Lean 4 bridge — Rust primary, Python twin ([ADR-0002](lab/decisions/ADR-0002-implementation-language.md)) |
 | [docs/12-LANDSCAPE-REGISTER.md](docs/12-LANDSCAPE-REGISTER.md) | four search passes merged: 53 distinct approaches, graded by our own re-check, with the defects found — including one fabricated repository and our own schema defect |
+| [docs/13-DEFEASIBILITY-CHOICE.md](docs/13-DEFEASIBILITY-CHOICE.md) | the blocking sub-problem: carve-outs. Five requirements as tests, seven candidate mechanisms with where each stops, and the five scenarios that settle the choice |
+| [docs/14-ARCHITECTURE.md](docs/14-ARCHITECTURE.md) | **the chain**: law text → positions → quantities and flows → compiled rule → enforced decision → evidence walkable back to a span. Says what "reliably protected" can honestly mean, and what it cannot |
 | [AGENTS.md](AGENTS.md) | the twelve rules for anyone, human or agent, who changes this repository |
 | [schemas/statement-0.1.json](schemas/statement-0.1.json) | the schema, with the closed sets in one place |
 | [examples/](examples/) | three statements: one that passes, one with opposite positions, one with a broken anchor |
