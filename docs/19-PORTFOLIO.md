@@ -57,6 +57,7 @@ a stranger cannot re-check is a claim, and claims are not results.**
 | **flowguard → lexspec** | their verifier's byte-level binding is describable well enough for us to copy the shape | **asked**, unanswered |
 | **lexspec → VecDHT** | a statement's identity (canonical hash + certificate hash) can be published as a signed intent, found by meaning, and re-checked by a stranger | **not built**; note 1 to VecDHT asks exactly this |
 | **VecDHT → lexspec** | a discovered intent can be verified against its publisher's anchored statement without the publisher being online | **not built** |
+| **lexspec → code** (compilation with provenance) | every emitted rule carries its atom id and anchor hash, and the decision record names the atom | **specified publicly, not built by us** — CAP-RRS (IETF individual draft, 2026) defines exactly this chain for Cedar: Regulation Record → compilation profile → `authority_source_uri` → decision reason code. We must adopt its shape, not invent it; what we add is span-level uniqueness ([`docs/20`](20-ROUND-02-MERGED.md) §1) |
 | **any → cases** | a result worth recording becomes a case with evidence and a verdict | manual today |
 | **any → `-`** | the bench rule (numbers carry commands) applies to every number we print | **held** by `tools/lexspec_status.py` and `tools/SELFTEST.md` |
 

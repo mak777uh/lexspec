@@ -55,3 +55,22 @@ Arxo's edition model independently arrived at.
 The transition layer is a **schema change**, so it lands with tests or not at all (ADR-0001). It is ordered after
 the quantity layer (L5) and before contract clauses (ADR-0008), because computational provisions need quantities
 far more than they need transitions.
+
+## Amendment, 2026-10-28 — the vocabulary exists, and it is Symboleo
+
+Round 02 (docs/20 §2) found prior art that this decision did not account for: **Symboleo** — *Towards a
+Specification Language for Legal Contracts* (RE 2020) and *Specification and analysis of legal contracts with
+Symboleo* (SoSyM 2022) — a contract ontology with **legal positions, obligations, powers**, events, and
+**statecharts for obligation lifecycles**, with verification support.
+
+Consequences, in place of §"Why not just add a ninth position":
+
+1. The transition layer is still needed *for this project's purpose*, but its **vocabulary must be Symboleo's**,
+   not invented here. Inventing a parallel vocabulary would violate charter C6 (source or gap) — the gap we must
+   name is narrower: Symboleo does not carry the **evidence** each event requires, and does not target Russian
+   civil-law events (ГК 450.1, 157(3)).
+2. The deliverable of this layer is therefore a **mapping** from our atoms to Symboleo concepts plus an evidence
+   slot per event, not a new event language.
+3. The three-case test in Q19 stands: 450.1 (notice terminating), 157(3) (bad faith deemed fulfilment), and an
+   exercise-of-power-creating-duty case. If Symboleo expresses all three with the evidence slot added, the layer
+   is adoption, not construction.

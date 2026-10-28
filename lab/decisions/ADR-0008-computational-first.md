@@ -67,3 +67,25 @@ case works — but only in one shape, which is now the rule:
 A provision whose number cannot be pinned this way is **refused**, not evaluated against a live source. Details
 in [`docs/16` §11](../../docs/16-ROUND-01-ANSWERS.md). Still missing: an official worked example to compare our
 computation against — round 02, Q23.
+
+## Addendum 2, 2026-10-28 — the selection criteria, tightened after round 02
+
+ГК 395 stays as the **anchoring** test and is demoted as the **correctness** test, on the evidence merged in
+[docs/20](../../docs/20-ROUND-02-MERGED.md) §3:
+
+- its rate is periodised by delegated acts — the pre-2016 regime used regional average deposit rates, the post-2016
+  regime uses the key rate, and a 2022 government moratorium suspended accrual for a window
+  (Постановление Правительства № 497, unverified by us);
+- it has **no official recomputable oracle**: the calculators found are court "reference" services or commercial
+  products, and one answer reported a Constitutional Court ruling (No. 61-П, 22 October 2026) touching the article —
+  also unverified. If true it is the strongest warning: simple arithmetic, moving legal rule.
+
+Therefore a provision may enter the corpus only if all three hold, and each is written down before coding:
+
+1. **Stable rule** — no pending constitutional challenge or moratorium;
+2. **Anchored parameters** — every external value is an official dated series, pinned by digest;
+3. **Authoritative oracle** — an official calculator or a published court judgment with principal, dates, rate
+   periods and arithmetic, so our computation can be compared rather than merely described.
+
+A provision that fails (1) is refused as a *correctness* target. A provision that fails (3) may still be encoded,
+but its measurement is labelled **anchoring**, never **correctness**.
