@@ -53,3 +53,17 @@ deliberate: the square stays, but it stops being the thing under test until the 
 - If the rate-by-reference case cannot be anchored (the key rate is published by the central bank, not in the
   statute), then quantity anchoring is impossible for exactly the provisions this ADR selects, and the pivot
   fails — which would be a major, and useful, negative result.
+
+## Addendum, 2026-10-28 — the rate is anchorable
+
+Tested: the Bank of Russia key rate is published as a **dated machine-readable series** through its SOAP service
+(209 dated records for 2026 to date; the raw response hashes to `e394f342…1c701d`). So the "referenced number"
+case works — but only in one shape, which is now the rule:
+
+> an external quantity is a **pinned reference to an official dated series**, resolved at encoding time and
+> carried as (identifier, date, value, digest); it is never a runtime call, because a live feed destroys
+> reproducibility and reproducibility is the certificate.
+
+A provision whose number cannot be pinned this way is **refused**, not evaluated against a live source. Details
+in [`docs/16` §11](../../docs/16-ROUND-01-ANSWERS.md). Still missing: an official worked example to compare our
+computation against — round 02, Q23.

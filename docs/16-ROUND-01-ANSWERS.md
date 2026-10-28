@@ -187,3 +187,30 @@ the system, and the test is falsifier F4.
 | Q14 | the label misleads; scope must be on the same line | yes (four agree) | planned verdict-wording change |
 | Q15 | delete H3 first, or the composite label | — | both recorded |
 | Q16 | computational provisions before contracts | **yes (paper + all four)** | ADR-0008 |
+
+---
+
+## §11 Addendum — ГК РФ ст. 395 is anchorable, and this defines the quantity pattern
+
+ADR-0008 picks art. 395 (interest on a monetary obligation) as the first computational provision, on the condition
+that its rate — which the article does **not** state, but refers to the Bank of Russia key rate — can be pinned.
+
+**Tested in this session, and it can.** The Bank of Russia publishes the key rate as a dated series through its
+SOAP service (`https://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx`, method `KeyRate`, from/to dates). The response
+for 2026-01-01…2026-10-28 contains **209 dated records** (`DT`, `Rate`, e.g. 2026-10-28 → 14.00 %), and the raw
+response hashes to `e394f342…1c701d`. So the number arrives **by reference**, and the reference is resolvable to
+an official, dated, machine-readable artefact that can be pinned by digest.
+
+This is the pattern the quantity layer needs, and it is worth naming precisely:
+
+> An external quantity is **not** a runtime call. It is a pinned reference to an official dated series, resolved at
+> encoding time, carried as (identifier, date, value, digest of the retrieved artefact) — and recomputable offline
+> from the pinned copy.
+
+Which also fixes the question ADR-0008 left open: if a rate cannot be pinned this way, the provision is refused
+rather than evaluated against a live feed. A live feed breaks reproducibility, and reproducibility is the whole
+certificate.
+
+**Not yet done, and the next measurement:** an official *worked example* — a court calculation or a regulator's
+published figure — to compare our encoding against. That is Q23 of [round 02](17-ROUND-02-QUESTIONS.md), and
+without it we can show anchoring but not correctness.
