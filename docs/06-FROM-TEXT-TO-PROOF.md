@@ -1,4 +1,4 @@
-# 06 — From legal text to a proof obligation: fifteen hypotheses
+# 06 — From legal text to a proof obligation: twenty hypotheses
 
 Status: hypothesis register, not spec and not a plan. Authority stays with
 [`00-CHARTER.md`](00-CHARTER.md) and [`10-SPEC-v0.1.md`](10-SPEC-v0.1.md). Every hypothesis here is a
@@ -32,12 +32,14 @@ forever. T1 must be re-run per clause; T2 is amortised. This is the same economi
 
 ---
 
-## §2 Fifteen hypotheses
+## §2 Twenty hypotheses
 
 Format: **claim → why it is plausible → what to build → the test that kills it.** Numbering is permanent;
 hypotheses are never renumbered, only superseded by a dated entry. H1–H12 come from the proof-run and
 verification-survey material; H13–H15 come from reading `nearai/ironclaw`'s code, where each is already
-enforced on a different subject — which is the only reason to take them seriously here.
+enforced on a different subject; H16–H20 come from NEAR AI's hardware-attestation documentation, which turned
+out to be the most directly transferable source of the three — not because of the cryptography, but because it
+is a complete discipline for *when a check counts as evidence*.
 
 ### H1 — Anchor-first, proof-last
 
@@ -253,6 +255,87 @@ tools do the opposite, because a helpful fallback demos better.
 often the permissive one would have silently fallen back. If that count is high enough to make the corpus
 unusable, the correct instrument is a declared, cited `escape` (H6), not a quiet fallback.
 
+### H16 — Acceptance criteria belong to the relying party, not the producer
+
+**Claim.** A verdict must be consumed under a **verification policy** declared by the party that relies on it:
+which corpus editions are acceptable, which checker versions are acceptable, how old evidence may be, whether
+a signature is required, and what happens when a required check is unavailable.
+**Why plausible.** NEAR AI's attestation docs make this the first rule: "Attestation verifies particular
+cryptographic statements. Your application must decide which statements it requires and what software,
+hardware, and source provenance it accepts", and they require the policy to be defined **before**
+verification. A producer that also chooses the acceptance criteria is grading its own work — the same defect
+as a model accepting its own proof (H13), one level up.
+**Build.** A `verification_policy` document, separate from the statement: accepted corpora ids + revisions,
+accepted `lexspec` versions, `max_evidence_age`, `require_signature`, `on_unavailable: reject | unverified`.
+The checker evaluates a statement *against a policy*; the same statement can pass for one consumer and fail
+for another, and that is a feature.
+**Kill test.** Two policies over the same corpus (strict: only the official edition, ≤ 90 days old; loose: any
+pinned edition) must produce different verdicts on at least one statement. If they never differ, the policy is
+decoration.
+
+### H17 — Freshness and nonce binding
+
+**Claim.** A verdict is evidence for a **specific** (statement hash, corpus revision, checker version, issue
+time), with a validity window. "Same article, same result" is false, and a cited amendment is exactly how that
+falsehood enters.
+**Why plausible.** The attestation rule is explicit: "A report is not evidence for a later request merely
+because it came from the same hostname", so every flow starts with a client-generated nonce that the verified
+quote must contain, and evidence age is a policy parameter. Legal counterpart: a verdict computed against
+revision R is not evidence for a clause checked against revision R+1 — and today our spec says so in prose
+(§3, "the previous verdict is void") but nothing in the artifact binds it.
+**Build.** The certificate carries `issued_at`, `valid_until`, and the four identifiers; verification refuses a
+certificate whose window has lapsed or whose corpus revision no longer matches. A nonce field binds the
+certificate to the specific request that asked for it, so a certificate cannot be re-used for a neighbouring
+statement.
+**Kill test.** Take a passing certificate, change one byte in the corpus file and re-run verification. If the
+certificate still verifies, freshness binding is absent.
+
+### H18 — Evidence precedes the thing it justifies
+
+**Claim.** The anchoring check must run **before** the claim is used or proved. Evidence gathered afterwards
+cannot retro-justify it — not as a matter of taste, but because "find a citation that supports what I already
+concluded" is how a false conclusion acquires a true-looking basis.
+**Why plausible.** "A report fetched after the completion cannot replace that preflight check" — the
+attestation flow verifies the model's evidence *before* accepting the completion, precisely because the
+completion is the thing that would otherwise create the incentive. In the PutnamBench run the same ordering
+appears as the frozen statement: the theorem was fixed before the agent started, so the agent could not adjust
+it afterwards.
+**Build.** Pipeline order enforced by construction: resolution → anchoring → closure → structural checks →
+verdict. A prover, if ever attached, receives only atoms that already passed; the report records the order.
+**Kill test.** Instrument the checker to log the order of operations; search for any path where a verdict field
+is written before anchoring completes. One such path falsifies the hypothesis.
+
+### H19 — "What this does not establish" is written per mechanism
+
+**Claim.** Every mechanism in the pipeline ships with its own non-claim list, not merely a report-level
+`not_claimed`.
+**Why plausible.** The attestation page ends with a section titled exactly "What attestation does not establish
+by itself": it does not validate response quality, does not secure a compromised client device, does not
+establish image provenance without a separate cryptographic check, and does not turn a *reachable* build record
+into a *verified* provenance statement. Four sentences, each killing a specific overclaim that a customer would
+otherwise make. Our `not_claimed` is one list for the whole report — accurate, but too coarse to stop the
+specific misreadings that will actually happen.
+**Build.** Per-check non-claims in the code catalogue: what `S2_*` does not establish (that the span says what
+the atom claims), what `S3_*` does not establish (that the positions were classified correctly), what `S4_*`
+does not establish (that the term definitions are adequate for the dispute).
+**Kill test.** Ask a lawyer to read a `CHECKED_ANCHORED` report and state what it means. If their sentence
+contains a claim that a per-check non-claim would have blocked, the list is missing that row.
+
+### H20 — Hash the bytes, never a re-serialisation
+
+**Claim.** Every hash in the pipeline is taken over exact bytes. A value that has been parsed and re-printed is
+a different object, and the difference is silent.
+**Why plausible.** The attestation reference spells out the trap in one line: hash `app_compose` with
+`jq -j` and **not** `jq -r`, because `-r` appends a newline and produces a different hash. This is our spec §3
+made empirical: a formatter, a trailing newline, a normalised quote, or a re-encoded key order all change the
+identity of a legal text without changing a single visible character.
+**Build.** Every hash in the certificate names what it was computed over (`raw_bytes` / `canonical_json`) and
+the pipeline never hashes a parsed structure. A test feeds the same content through pretty-printing and
+round-trip parsing and asserts the hash differs — pinning the trap as expected behaviour, the way IronClaw
+pins its known pattern bypasses (H10).
+**Kill test.** Re-serialise a corpus file pretty-printed; if any hash in the repo stays equal, some path is
+hashing a re-print.
+
 ---
 
 ## §3 What would falsify the program as a whole
@@ -282,12 +365,14 @@ Stated as an ordering, because doing them out of order wastes the effort:
 
 1. H1 + H8 + H13 (the gate, the one-way seam, and the type that only the checker can construct) — two of the
    three are already true in v0.1; H13 is one module boundary and a test.
-2. H11 + H12 (term identity, certificate with a hash chain) — both small, both unlock everything else.
+2. H11 + H12 + H16 + H17 + H20 (term identity, certificate, a relying-party policy, freshness binding, no
+   hashing of re-serialisations) — this is one object, not five tasks: a certificate that a stranger can check
+   is worthless without a policy that says what "checks" means and a window that says when.
 3. H3 — prove the detector. This is the publication-grade artifact and the reason to use Lean at all.
 4. H7 — measure cost per closed atom on real clauses; publish the failures.
-5. H4 + H5 + H15 (closed-world citation, boundary injection, fail-closed to `Unasserted`) — where the
-   encoding stops being paraphrased and starts being cited.
-6. H2, H6, H14 — refinements: the embedding, the severity vocabulary, and the contains/constrains labelling.
+5. H4 + H5 + H15 + H18 (closed-world citation, boundary injection, fail-closed to `Unasserted`, evidence
+   before the claim) — where the encoding stops being paraphrased and starts being cited.
+6. H2, H6, H19 — refinements: the embedding, the severity vocabulary, and per-mechanism non-claims.
 7. H9 — temporal algebra edge cases.
 8. H10 — never; it is a standing prohibition, not a task.
 
