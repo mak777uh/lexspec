@@ -98,6 +98,7 @@ refusals — what each code means, and what a reader should do — is
 | Machine | `schemas/` · `tools/lexcheck.py` · `tools/lexspec_status.py` |
 | Evidence | `examples/` · `tests/` · `corpus/` · `tools/SELFTEST.md` |
 | Process | [lab/sources.md](lab/sources.md) — source intake register · [lab/decisions/](lab/decisions/) — decisions; ADR-0001 explains why we are gathering sources before building |
+| Interop | [interop/](interop/) — the note channel with [flowguard-spec](https://github.com/mak777uh/flowguard-spec); messages are append-only and pinned to commits |
 | Guards | `lab/check-secrets.py` · `.github/workflows/guards.yml` |
 
 ## What this repository does not claim
