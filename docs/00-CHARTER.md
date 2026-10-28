@@ -10,6 +10,11 @@ this one wins until the owner amends it.
 
 Everything else in this repository is in service of that sentence or is scaffolding around it.
 
+**And the closure behind it** ([`docs/18`](18-CLOSED-LOOP.md)): three objects — the pinned text, the statement,
+and the code that enforces it — where **every pair is checked**, and where any gap that cannot be closed is
+written down instead of absorbed. A system that checks only the text against the statement checks paper against
+paper; that is what this repository is today, and the distance to the closure is the work.
+
 ## 2. Why it is hard, mechanically
 
 "Legal language formalised" sounds like one problem. It is at least seven, and each has its own failure mode:

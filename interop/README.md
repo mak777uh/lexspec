@@ -48,8 +48,9 @@ much of it was closed. Where the two agree, that is two checks agreeing, not one
 ## Ledger
 
 The table below **is** the ledger: the only place a note is registered, one row appended per published note,
-never rewritten. It mirrors the index in `flowguard-spec/interop/README.md`.
+never rewritten. It mirrors the index in `flowguard-spec/interop/README.md` and `VecDHT/interop/README.md`.
 
 | date | from | to | about |
 |---|---|---|---|
 | 2026-10-28 | LexSpec | flowguard-spec | first note: who we are and what we do not have; three asks (byte-level binding of the verifier, what happens when one of two external anchors is unavailable, whether a normative constraint has a seam); two offers; one boundary statement |
+| 2026-10-28 | LexSpec | VecDHT | first note: the anchor rule and the relative verdict; three questions (what an intent can carry, how a stranger verifies a served record, whether a slot exists for an external certificate); two offers; one boundary |
