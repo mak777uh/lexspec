@@ -80,6 +80,20 @@ The corollary is uncomfortable and intended: when prior art settles a question, 
 prior art does not reach — the corpus, the terms, the jurisdiction, the refusal vocabulary — and those parts are
 judged by whether the answer gets *checkable*, not by whether they are new.
 
+**C7. Movement is measured by shrinking residue, not by growing documents.** The project moves toward the truth
+in exactly one sense that can be checked: **the fraction of our claims that is opinion goes down, and the fraction
+that is *named* residue goes up** — because a residue is opinion that has been located and bounded
+([`docs/19`](19-PORTFOLIO.md) §6). Hence three tests, cheap to apply at any time:
+
+1. Does a built edge exist where none existed? (The graph in docs/19 counts them; today three of seven.)
+2. Did the residue shrink *for the layer that was supposed to absorb it* — and if not, was the claim deleted
+   rather than renamed?
+3. Was any agreement counted as evidence? If yes, that is regression, not progress.
+
+What this forbids is the comfortable version of "ever sharper": more prose, more hypotheses, more citations, same
+unbuilt edges. Truth-aptness here is relative to declared artifacts — a span resolves or it does not — and the
+repository must never claim that the sum of its artifacts approaches the truth about law.
+
 ## 4. Non-goals (deliberate, and reversible only by the owner)
 
 1. **Not legal advice.** The checker has no opinion about what a court would do. It checks the internal
