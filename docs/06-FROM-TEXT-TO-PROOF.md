@@ -350,6 +350,36 @@ hashing a re-print.
 
 ---
 
+## Amendments of 2026-10-28, after round 01
+
+Four independent answers to [`docs/07`](07-ROUND-01-QUESTIONS.md) were merged in [`docs/16`](16-ROUND-01-ANSWERS.md).
+Three amendments follow, and hypotheses are never edited silently — the original text stays above.
+
+**H3 — second amendment (Q7, Q15).** The theorem is only useful as **relative soundness against an independently
+axiomatised algebra**: "if the checker reports no conflict, none exists in the algebra", where the algebra is
+stated separately (model-theoretically, or as a proved translation to SMT) rather than being the code's own data
+structures. If the statement collapses into `checker = checker`, it must be dropped. **Consequence: Lean is out
+of v0.2** unless such an algebra exists; the formal ambition is replaced by metrics we can actually produce —
+determinism of refusals, stability of verdicts under irrelevant edits, coverage.
+
+**H12 — amendment (Q12).** A hash is not a certificate. FRE 902(13) requires certification by a **qualified
+person** that the *process or system* produces an accurate result; 902(14) authenticates a *copy*. Therefore the
+certificate must carry a **process attestation naming a responsible person**, plus the checker's version,
+configuration and trusted base — and it must stop describing itself as evidence of accuracy, let alone as
+admissible evidence.
+
+**H17 — amendment (Q13).** A validity window is not an evidence record. Long-term verifiability requires
+**RFC 4998 Evidence Record Syntax**: timestamp renewal and hash-tree renewal, performed *while the old evidence is
+still trusted*, with the whole renewal chain preserved and re-verified. A certificate that merely expires has not
+been preserved; it has been lost on schedule.
+
+**H9 — note (Q6).** Deferring defeasibility does not avoid its cost; it moves the cost into encoding, where every
+"unless" must be folded into a guard, and the link between the exception and the article it comes from is lost.
+The propositional defeasible-logic fragment is decidable in linear time (Maher 2001), which is the argument for
+adopting it in [`docs/13`](13-DEFEASIBILITY-CHOICE.md) rather than hand-rolling guards.
+
+---
+
 ## §3 What would falsify the program as a whole
 
 Not individual hypotheses — the whole idea:

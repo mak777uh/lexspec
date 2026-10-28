@@ -160,6 +160,28 @@ combinatorial, not semantic.
 
 ## §5 Anchoring
 
+### §5.0 v0.2: an anchor is a triple, because three different things can fail
+
+Verified publisher evidence ([`docs/16` §2](16-ROUND-01-ANSWERS.md)) says a citation can break in three
+independent ways, and v0.1 collapses all three into one span:
+
+| Part | What it is | Where it comes from | Failure it produces |
+|---|---|---|---|
+| **structural path** | the publisher's own identifier for the provision — ELI subdivision URI, Akoma Ntoso `eId`, legislation.gov.uk provision URI, USLM element path | the publisher, where it exists; not ours to invent | the provision was renumbered, or the identifier resolves to a different version |
+| **quote selector** | the span (this section) | us | the quote is not unique, or not present |
+| **representation digest** | sha256 of the retrieved bytes | us | the text under a stable identifier changed — a stable identifier does **not** identify immutable wording |
+
+v0.1 carries the second and third and keeps the first as prose in `anchor.article`. v0.2 makes all three typed,
+and each gets its own refusal — the third is the one that distinguishes "the article was amended under a citation
+that still resolves" from "your quote is wrong". Neither exists in the v0.1 code yet; the proposed codes are
+recorded in [`docs/16` §3](16-ROUND-01-ANSWERS.md) and enter the catalogue only with a test (AGENTS §7).
+
+**The claim this permits**, and it is narrower than "this is the law": *this is our anchored copy of the expression
+identified by X, as retrieved at date Y, with digest Z.* For EU and Russian sources that is the strongest honest
+claim, because consolidated texts there are documentation rather than authoritative law.
+
+### §5.1 The four conditions
+
 An atom is anchored when all four hold:
 
 1. `anchor.corpus` names a `CorpusRef` in the statement (`S2_NO_CORPUS` otherwise);
