@@ -14,24 +14,32 @@ surveyed), [`lab/sources.md`](../sources.md) (the register these results feed).
 
 ## §1 How to run this
 
+**Default mode: every model gets the whole brief.** Twelve work packages in one message, one model per pass.
+The models are expected to differ; the differences are the point, because a row found by six models and a row
+found by one are different kinds of evidence about how well-known something is, and a WP that one model covers
+and another ignores is a gap we can see.
+
 | Mode | When | How |
 |---|---|---|
-| **One WP per model** (preferred) | 8+ models available | paste the universal prompt + one WP block; collect twelve tables |
-| **Grouped** | 3–4 models | give each model 3–4 WPs, in one message, one table per WP |
-| **Single pass** | 1 model | all twelve WPs at once; expect lower depth, and say so in the register |
+| **Full pass** (default) | any number of models | same prompt to every model, nothing removed; collect one table each |
+| **Split** | the model's context cannot hold a twelve-WP output | give 3–4 WPs to a model that has already done a full pass, or to a model known to truncate |
+| **Follow-up** | a pass ends mid-table | send "continue the table from WP-07; do not repeat rows already given" — do not accept a truncated answer as final |
 
 Rules for the human handing this out:
 
-1. **Name the work package in the last line** ("WORK PACKAGE: WP-06 — Solvers and rule engines applied to
-   compliance"). The prompt carries the URL of this document, so a model with working web access reads its
-   own §3 block and §4 by itself. No need to paste the block.
-2. **If the model cannot open GitHub** — some can fetch any page but not `raw.`, some cannot reach github.com
-   at all — paste the WP block from §3 after the word `WORK PACKAGE:`. The prompt already tells it to say so
-   when that happens, so you will know which answer came from the pasted block and which from the document.
-3. One WP per message. If a model gets two WPs in one message it will merge them and lose rows.
-4. Ask for the table only. A model that writes an essay has ignored the brief; re-ask with "table only".
-5. If a model has no web access, it must say so and stop. Answers from memory are worse than no answers.
-6. Keep every model's raw reply. The register needs its `[unverified]` rows and its dead ends — those are
+1. **Do not vary the prompt between models.** Diversity has to come from the model, not from us, or the
+   comparison stops meaning anything and we cannot tell "this model missed WP-09" from "we changed the
+   question".
+2. **Record the model and the date** next to every returned table. An unlabelled table is unusable, because
+   the agreement column (§6) depends on knowing who said what.
+3. **If the answer stops mid-table**, ask for continuation rather than accepting it. A model that stops is not
+   a model that finished; the same lesson as the harness owning the stopping rule in a proof run.
+4. **If the model cannot open GitHub** — some fetch any page but not `raw.`, some cannot reach github.com at
+   all — paste the WP blocks from §3 after the prompt. The prompt tells it to say so when that happens, so the
+   register records which answer came from the document and which from the paste.
+5. Ask for the table only. A model that writes an essay has ignored the brief; re-ask with "table only".
+6. If a model has no web access, it must say so and stop. Answers from memory are worse than no answers.
+7. Keep every model's raw reply. The register needs its `[unverified]` rows and its dead ends — those are
    results, not noise.
 
 ---
@@ -48,14 +56,15 @@ BRIEF (open this first):
   https://github.com/mak777uh/lexspec/blob/main/lab/assignments/SEARCH-01-landscape.md
   raw markdown, if the page does not render for you:
   https://raw.githubusercontent.com/mak777uh/lexspec/main/lab/assignments/SEARCH-01-landscape.md
-Read section 3 for the full block of the work package named below, and section 4 for the list of approaches
-that are ALREADY covered — do not spend rows re-reporting those. If you cannot open links at all, work from
-the WORK PACKAGE block pasted at the end of this message and say that you could not open the brief.
+Read section 3 for the twelve work packages and section 4 for the list of approaches that are ALREADY
+covered — do not spend rows re-reporting those. If you cannot open links at all, say so in one line and work
+from this message; you will be asked to continue without the brief.
 
-Your scope is that one work package and nothing else. Do not summarise the whole field.
+COVER ALL TWELVE WORK PACKAGES. Do not choose a subset. Other models are answering the same brief and their
+tables will be merged with yours, so a WP you skip is a WP we must notice.
 
-For every approach you report, fill exactly one row with these fields:
-  name | first year you can VERIFY | type (logic|language|standard|tool|product|paper|project)
+OUTPUT: one markdown table with this column order, and one row per approach:
+  wp | name | first year you can VERIFY | type (logic|language|standard|tool|product|paper|project)
   | unit of representation (clause|rule|norm|policy|obligation|computation) | claimed guarantee, QUOTED
   | explicitly NOT done, quote if the source states it | how it binds a rule to its legal source
   (provenance/anchor) or "none" | conflict semantics when two norms apply, or "none"
@@ -63,6 +72,13 @@ For every approach you report, fill exactly one row with these fields:
   evidence | max 2 primary URLs | one-line mechanism: how it actually works
   | what a checked-legal-language project should BORROW | what it should REFUSE
   | verification: verified|unverified|paywalled|dead-link (+ what would verify it)
+
+BUDGETS
+- 6 to 10 rows per work package. Depth beats breadth: a WP with 10 verified rows is worth more than one with
+  30 unverified names.
+- If you are running out of space, finish the row you are on, then stop and list the unfinished WPs under
+  "not covered". Do not silently truncate a table.
+- After the table, add two short lists: "could not verify" and "not covered" (WP numbers, or "none").
 
 RULES
 1. Every row needs at least one URL you actually opened in this session. No exceptions.
@@ -73,12 +89,10 @@ RULES
    bibliography.
 6. Prefer primary sources: specification documents, repositories, official documentation, the paper PDF.
    Blog posts, listicles and vendor marketing are leads only, never evidence.
-7. If your work package yields nothing you can verify, answer "no new entries" and one line why.
-   That is a valid, useful answer. Do not fill space.
-8. OUTPUT: one markdown table, then a short list "could not verify". No introduction, no conclusion.
+7. If a work package yields nothing you can verify, still emit its WP number under "not covered" with one
+   line why. "Nothing found" is a result; empty space is not.
+8. No introduction, no conclusion, no methodology paragraph. Table, then the two lists.
 9. If you have no web access, say so and stop. Do not answer from memory.
-
-WORK PACKAGE: <WP number and name, e.g. "WP-06 — Solvers and rule engines applied to compliance">
 ```
 
 ---
@@ -256,19 +270,20 @@ encodings, WP-07 entirely, WP-09 entirely, WP-10 entirely, WP-11 entirely, WP-12
 
 ## §5 Output schema, and an example row
 
-Columns, in this order (pipe-separated; keep them even if a cell is "none"):
+Columns, in this order (pipe-separated; keep them even if a cell is "none") — note `wp` first, so twelve
+packages from one model and one package from another merge into the same table:
 
 ```
-name | year | type | unit | claimed guarantee | explicitly not | source binding | conflict semantics
+wp | name | year | type | unit | claimed guarantee | explicitly not | source binding | conflict semantics
 | availability | alive 2026 | urls | mechanism | borrow | refuse | verification
 ```
 
 Example — a real row from our own work, to show the target density:
 
 ```
-Cedar | 2023 | language | policy | "a sound and complete logical encoding, which enables precise policy
-analysis" | whether the policy expresses the intended business rule | none (the policy is the artifact) |
-not specified by the language; deployment decides | open-source (Apache-2.0) | yes (active repo) |
+WP-05 | Cedar | 2023 | language | policy | "a sound and complete logical encoding, which enables precise
+policy analysis" | whether the policy expresses the intended business rule | none (the policy is the
+artifact) | not specified by the language; deployment decides | open-source (Apache-2.0) | yes (active repo) |
 https://arxiv.org/abs/2403.04651 | policies compiled to a Lean-modelled authorizer; analysis via SMT over the
 encoded semantics | prove properties of the *language/analyser*, not of individual policies | treating a
 policy engine as a compliance proof | verified
@@ -278,16 +293,23 @@ policy engine as a compliance proof | verified
 
 ## §6 How results are merged (so the models know what happens next)
 
-1. **Dedupe key** = (canonical name, primary URL). The same approach from three models becomes one row, with
-   the union of verified URLs and the most specific claim quoted.
+1. **Dedupe key** = (canonical name, primary URL). The same approach from six models becomes one row, with the
+   union of verified URLs and the most specific claim quoted — the longest quoted guarantee wins, because it
+   is the one a stranger can check.
 2. **Grade** = the weakest verification among the cited URLs. A row with one dead link and one live primary
    source is `verified`; two dead links is `dead-link`.
-3. **Contradictions are kept, not resolved.** If two models disagree on whether something is alive in 2026,
+3. **Agreement is recorded as a count, never as truth.** Each merged row gains `found_by: <n>/<models>`. Six
+   of six means a well-known approach; one of six means either an obscure corner or an invention, and the URL
+   decides which. Agreement tells us where to look first, not what to believe.
+4. **Per-WP coverage is reported.** For each WP: how many models covered it, how many rows survived dedupe,
+   and which models listed it under "not covered". A WP that every model skipped is a signal that our WP
+   text is wrong — too vague, or asking for something that does not exist.
+5. **Contradictions are kept, not resolved.** If two models disagree on whether something is alive in 2026,
    both statements go in the register with their evidence, and the disagreement is the finding.
-4. **Every merged row lands in [`lab/sources.md`](../sources.md)** or in a new
+6. **Every merged row lands in [`lab/sources.md`](../sources.md)** or in a new
    `docs/08-LANDSCAPE-REGISTER.md`, with the date and the WP it came from.
-5. **A WP that returns nothing** is recorded as an empty WP with the reason. That is how we know a corner of
-   the field has been looked at and found empty, which is worth more than an unexamined corner.
+7. **An empty WP is recorded** with the reason and the models that found nothing. That is how we know a
+   corner of the field has been looked at and found empty, which is worth more than an unexamined corner.
 
 ---
 
