@@ -46,5 +46,15 @@ jobs:
       - name: Examples still match tests/expected.json
         run: python tools/check_examples.py
 
+      # The owner's condition for shipping any software: the specification must be clear and
+      # non-contradictory first. This pair is what "non-contradictory" means mechanically —
+      # codes, fields, relations, squares, verdicts, examples and $refs must agree across the
+      # documents, the schema and the checker. The selftest proves the guard is not decorative.
+      - name: Spec consistency (codes, fields, relations, squares, verdicts, examples)
+        run: python lab/check-spec.py
+
+      - name: The consistency guard actually catches contradictions
+        run: python lab/selftest-checkspec.py
+
       - name: Status block
         run: python tools/lexspec_status.py

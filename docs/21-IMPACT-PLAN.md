@@ -16,7 +16,7 @@ The first thing each stage does is replace its own estimate with a number.
 
 | # | Stage | Artifact | Acceptance test | Est. | Kills |
 |---|---|---|---|---|---|
-| **0** | Settle the schema by adoption, not invention | `docs/21-ADOPTION.md` + one ADR | a field-by-field mapping of CAP-RRS §4/§5/§9 onto our statement; every remaining divergence has a named gap | 1 day | the risk of rewriting the schema after code exists |
+| **0** | Settle the schema by adoption, not invention | `docs/22-ADOPTION.md` + one ADR | a field-by-field mapping of CAP-RRS §4/§5/§9 onto our statement; every remaining divergence has a named gap | 1 day | the risk of rewriting the schema after code exists |
 | **1** | Make anchoring usable | `tools/span_hint.py` | every quote that failed on line wrapping in the 4 existing corpora is now resolved to its byte-exact span; minutes/atom measured before and after on one article | 1–2 days | the largest single source of encoding friction (**measured: 6 of 14 spans**) |
 | **2** | Quantity layer (L5), minimal | spec §2 amendment + schema + tests + re-encoded ГК 395 | ГК 395 coverage 0.500 → ≥0.750 with the key-rate series pinned by digest; a second example with a cap over a period | 2–4 days | the whole computational class that ADR-0008 pivots to |
 | **3** | Defeat (L2b), minimal, on Symboleo's vocabulary | spec + tests + re-encoded GDPR 17 | the five scenarios of [`docs/13`](13-DEFEASIBILITY-CHOICE.md) §5 reproduced exactly; GDPR 17 coverage 0.750 → 1.000 | 1–2 weeks | the second blocking gap: EU acts are unwritable without it |
