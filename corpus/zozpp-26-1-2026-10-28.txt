@@ -2,8 +2,11 @@
 #          Закон РФ от 07.02.1992 N 2300-1 "О защите прав потребителей", ст. 26.1 п. 4
 #          (ред. от 28.12.2025, с изм. от 27.10.2026)
 # REVISION: retrieved 2026-10-28
-# NOTE: excerpt for testing only. ConsultantPlus is a commercial database, NOT an authoritative source;
-#       the official publication is the Official Gazette / publication.pravo.gov.ru. Do not cite as law.
+# NOTE: excerpt for testing only. The wording is an official expression published on pravo.gov.ru; this copy
+#       was retrieved through a NON-OFFICIAL manifestation (ConsultantPlus). No sanctioned automated full-text
+#       access was verified from outside the Russian Federation. Do not cite this file as the law.
+#       (Earlier label, kept for traceability: "ConsultantPlus is a commercial database, NOT an authoritative
+#       source; the official publication is the Official Gazette / publication.pravo.gov.ru.")
 # LICENSE: официальный документ органа государственной власти; текст нормативного акта не является
 #          объектом авторских прав (ГК РФ ст. 1259 п. 6).
 

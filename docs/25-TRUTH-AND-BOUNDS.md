@@ -122,3 +122,30 @@ document is wrong:
 
 If all three hold, this document has earned the right to be read as the project's account of what it knows — and
 nothing more.
+
+
+---
+
+## §8 Correction block, 2026-10-28 (round 03)
+
+Appended rather than edited, per the repository's rule that a published statement keeps its wrong sentence next
+to the one that fixed it.
+
+**Two verified facts added:**
+
+| Fact | Verified how |
+|---|---|
+| W3C's `TextQuoteSelector` requires the quote to be **normalized** before recording, and treats multiple matches after prefix/suffix as matching **all** of them | fetched `w3.org/TR/annotation-model`, located the clause by search, quoted verbatim in [`docs/26`](26-ROUND-03-MERGED.md) |
+| `publication.pravo.gov.ru/robots.txt` excludes `/Search` and `/File`, and publishes a sitemap of daily, weekly and monthly listings per issuing body | fetched `robots.txt` (286 bytes) and `sitemap.xml` (116 KB) in this session |
+
+**One claim corrected — row 10 was wrong about the cause.** The 6-of-14 span failures were reported as
+"byte-level anchoring fails often on real wrapped text". The standard says the text must be normalized before
+recording, so those failures are a **normalization gap in our procedure**, not evidence that the rule is
+over-strict. The rule *is* over-strict, but for the opposite reason: exact-span uniqueness is not the field's
+convention at all (W3C permits multiple matches and selects all of them), so our `S2_SPAN_AMBIGUOUS` is a product
+requirement we are entitled to impose — provided we say so, and provided we stop mislabelling line wraps as
+ambiguity.
+
+**One claim strengthened.** Row 5's boundary said our corpora are "mirrors". They are official *expressions*
+published on pravo.gov.ru, retrieved through a **non-official manifestation**; the defect is transport and
+licensing, not authority. The corpus headers now say exactly that.

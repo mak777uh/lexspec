@@ -36,8 +36,20 @@ hundred codes that all mean "not a statement".
 |---|---|---|
 | `S2_NO_CORPUS` | `anchor.corpus` names no `CorpusRef` in the statement | add the corpus, or fix the handle |
 | `S2_HASH_MISMATCH` | sha256 of the corpus file ≠ declared `text_sha256` | re-pin the corpus: either the file changed or the declaration is wrong. Never fix by editing the hash alone |
-| `S2_SPAN_NOT_FOUND` | `span` does not occur in the pinned text | the quote is not from this revision, or it was paraphrased, or it was copied from a rendered page and crosses a line break. Quote the raw bytes |
-| `S2_SPAN_AMBIGUOUS` | `span` occurs more than once, counted **by start position with overlaps included** (spec §5 rule 4) | widen the span until it is unique, or anchor to a larger context |
+| `S2_SPAN_NOT_FOUND` | `span` does not occur in the pinned text **after normalization** (spec §5) | the quote is not from this revision, or it was paraphrased, or it was copied from a rendered page so a line break or a character entity sits inside it. The detail must say whether the span occurs in the *raw* text: if it does, the defect is normalization, not absence |
+| `S2_SPAN_AMBIGUOUS` | `span` **with its context** (`prefix`/`suffix`) still selects more than one region, counted by start position with overlaps included (spec §5 rule 4) | widen the context window until one region remains, or anchor to a structural identifier. Note: the W3C convention permits multiple matches and selects all of them; our single-target requirement is stricter **by declaration**, not by standard |
+
+**Two corrections from round 03** ([`docs/26`](../docs/26-ROUND-03-MERGED.md) W6), verified against
+[w3.org/TR/annotation-model](https://www.w3.org/TR/annotation-model/) §4.2.4:
+
+1. The standard requires the text to be **normalized before recording** (markup removed, entities decoded).
+   Therefore a quote that fails because it crosses a line break is a **normalization defect in our procedure**,
+   not a repeated quote. Mislabelling it as ambiguity was our error, and it was the cause of 6 of 14 failures in
+   two real measurements.
+2. Exact-span uniqueness is **not** the field's rule. `TextQuoteSelector` uses `exact` plus `prefix`/`suffix`, and
+   when several matches remain the specification says the selection "SHOULD be treated as matching all of the
+   matches". We still refuse, because a citation that selects three places is not a citation — but the refusal is
+   our product requirement and is now declared as such.
 
 **Why ambiguity is a refusal and not a warning.** Two identical occurrences of a phrase mean the citation
 does not identify a provision. If one occurrence is later amended, the anchor silently follows the other one.

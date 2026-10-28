@@ -2,14 +2,16 @@
   "lexspec": "0.1",
   "id": "delivery-ok",
   "kind": "clause",
-  "jurisdiction": ["RU"],
+  "jurisdiction": [
+    "RU"
+  ],
   "corpus": [
     {
       "id": "gk-rf",
       "title": "Гражданский кодекс РФ, извлечение (ст. 506, ст. 309)",
       "revision": "2026-10-01",
       "text": "corpus/gk-rf-2026-10-01.txt",
-      "text_sha256": "fc6f39a0237b2cb745506d80466b02c6f317bec8bc21665225074afd5461f36d"
+      "text_sha256": "5fee7dadad023cceb9f94247f76a42931dedf95c3977f04654ab758d47612cb0"
     }
   ],
   "terms": [
@@ -40,9 +42,18 @@
       "relation": "duty",
       "bearer": "поставщик",
       "counterparty": "покупатель",
-      "action": { "verb": "передать", "object": "товары", "open": false },
-      "conditions": ["в обусловленный срок или сроки"],
-      "temporal": { "from": "2026-01-01", "until": null },
+      "action": {
+        "verb": "передать",
+        "object": "товары",
+        "open": false
+      },
+      "conditions": [
+        "в обусловленный срок или сроки"
+      ],
+      "temporal": {
+        "from": "2026-01-01",
+        "until": null
+      },
       "anchor": {
         "corpus": "gk-rf",
         "article": "ст. 506",
@@ -55,9 +66,16 @@
       "relation": "right",
       "bearer": "покупатель",
       "counterparty": "поставщик",
-      "action": { "verb": "передать", "object": "товары", "open": false },
+      "action": {
+        "verb": "передать",
+        "object": "товары",
+        "open": false
+      },
       "conditions": [],
-      "temporal": { "from": "2026-01-01", "until": null },
+      "temporal": {
+        "from": "2026-01-01",
+        "until": null
+      },
       "anchor": {
         "corpus": "gk-rf",
         "article": "ст. 506",
@@ -70,9 +88,19 @@
       "relation": "duty",
       "bearer": "поставщик",
       "counterparty": "покупатель",
-      "action": { "verb": "исполнить", "object": "обязательство", "open": false },
-      "conditions": ["надлежащим образом", "в соответствии с условиями обязательства"],
-      "temporal": { "from": "2026-01-01", "until": null },
+      "action": {
+        "verb": "исполнить",
+        "object": "обязательство",
+        "open": false
+      },
+      "conditions": [
+        "надлежащим образом",
+        "в соответствии с условиями обязательства"
+      ],
+      "temporal": {
+        "from": "2026-01-01",
+        "until": null
+      },
       "anchor": {
         "corpus": "gk-rf",
         "article": "ст. 309",
@@ -81,6 +109,9 @@
       }
     }
   ],
-  "conflicts_policy": { "default": "report", "lex_specialis": [] },
+  "conflicts_policy": {
+    "default": "report",
+    "lex_specialis": []
+  },
   "escapes": []
 }

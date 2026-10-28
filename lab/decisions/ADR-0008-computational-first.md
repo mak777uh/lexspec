@@ -89,3 +89,26 @@ Therefore a provision may enter the corpus only if all three hold, and each is w
 
 A provision that fails (1) is refused as a *correctness* target. A provision that fails (3) may still be encoded,
 but its measurement is labelled **anchoring**, never **correctness**.
+
+## Addendum 3, 2026-10-28 — the oracle requirement is satisfiable
+
+Round 03 (`docs/26`) produced four official, fully published worked examples. The requirement in Addendum 2 is
+therefore not a blocker but a filter:
+
+| Fixture | What it exercises | Status |
+|---|---|---|
+| GOV.UK residential SDLT, GBP 295,000 → GBP 4,750 (bands 0 / 2 / 5 %) | progressive bands over one amount | **first fixture** — arithmetic reproduced here by hand, short enough to check on paper |
+| US SSA PIA bend points (1977 AWI 9,779.44; 2025 AWI 72,800.33; 1979 bend points 180 / 1,085) | indexation by reference to a published average, then rounding | candidate second fixture; structurally our key-rate case |
+| ФНС России, УСН «доходы минус расходы» (25,000,000 / 24,000,000 → minimum tax 250,000) | two rules compared, one defeats the other | candidate `defeat` fixture |
+| ФНС России, НДФЛ на вклады 2023 (154,597 taxable, threshold 150,000, 4,597 × 13 % = 598) | threshold | candidate |
+
+**Rules that follow, and they are strict:**
+
+1. A fixture is usable only if the **rounding rule is printed**, not inferrable. SSA's own companion page yields a
+   figure reproducible only by truncating to the next lower $0.10, which that page does not state — an official
+   oracle that hides a rounding step is the W1 failure mode in another domain.
+2. Every fixture records the **page, the retrieval date and the intermediate values**, so that a stranger
+   reproduces our comparison rather than our conclusion.
+3. ГК 395 remains the **anchoring** test, not the correctness test, until a judgment printing its full
+   arithmetic is opened by us. One answer claims such a judgment (А09-14/2020, 23-row table, per-period rounding
+   to kopecks, sum of rounded rows) — `[unverified]` here, and it is the next thing to open.

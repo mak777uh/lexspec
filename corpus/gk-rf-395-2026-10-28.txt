@@ -1,8 +1,11 @@
 # SOURCE: https://www.consultant.ru/document/cons_doc_LAW_5142/93383099dc4f06165d8d4aac4eeb159db4f6da3d/
 #          (ГК РФ часть первая, ст. 395, в редакции ФЗ от 03.07.2016 N 315-ФЗ и от 08.03.2015 N 42-ФЗ)
 # REVISION: retrieved 2026-10-28
-# NOTE: excerpt for testing only. ConsultantPlus is a commercial database, NOT an authoritative source:
-#       the official publication is the Official Gazette / publication.pravo.gov.ru. Do not cite this file as law.
+# NOTE: excerpt for testing only. The wording is an official expression published on pravo.gov.ru; this copy
+#       was retrieved through a NON-OFFICIAL manifestation (ConsultantPlus). No sanctioned automated full-text
+#       access was verified from outside the Russian Federation. Do not cite this file as the law.
+#       (Earlier label, kept for traceability: "ConsultantPlus is a commercial database, NOT an authoritative
+#       source; the official publication is the Official Gazette / publication.pravo.gov.ru.")
 # LICENSE: официальный документ органа государственной власти; текст нормативного акта не является
 #          объектом авторских прав (ГК РФ ст. 1259 п. 6). Оформление базы данных - отдельный предмет.
 

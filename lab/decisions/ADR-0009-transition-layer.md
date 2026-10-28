@@ -74,3 +74,20 @@ Consequences, in place of §"Why not just add a ninth position":
 3. The three-case test in Q19 stands: 450.1 (notice terminating), 157(3) (bad faith deemed fulfilment), and an
    exercise-of-power-creating-duty case. If Symboleo expresses all three with the evidence slot added, the layer
    is adoption, not construction.
+
+## Addendum 2, 2026-10-28 — Symboleo covers two of the three cases, and the third is ours
+
+Round 03 (`docs/26`, W2) converged across three answers:
+
+- **(a) notice-triggered termination** — covered *idiomatically*: a notice is a domain event and termination is a
+  `Power` whose antecedent references it. No dedicated Notice construct exists, and that is fine.
+- **(c) power creating a duty with a deadline** — the two halves exist (powers carry deadlines, obligations carry
+  deadlines), but the *composition* has no published worked example anyone found. Treat as an implementation
+  risk, not as covered vocabulary.
+- **(b) ГК 157(3), bad faith deeming a condition fulfilled** — **not expressible.** Symboleo has no Condition
+  class; conditions appear only as propositions in a trigger or antecedent, and its semantics is a deterministic
+  event calculus over observed events, which has no operator for a legal fiction that deems an unobserved
+  condition satisfied.
+
+**Consequence.** The layer adopts Symboleo for (a) and (c), and (b) is an **authored rule with the statute as its
+basis**, recorded as such. ADR-0009 may not claim that the vocabulary supplies all three Russian transitions.

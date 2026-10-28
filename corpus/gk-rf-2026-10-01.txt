@@ -1,6 +1,9 @@
 # SOURCE: http://pravo.gov.ru/
 # REVISION: 2026-10-01
-# NOTE: excerpt for testing only; verify against the official text before relying on it
+# NOTE: excerpt for testing only. The wording is an official expression published on pravo.gov.ru; this copy was
+#       assembled for testing and no sanctioned automated full-text access was verified from outside the Russian
+#       Federation. Verify against the official publication before relying on it.
+#       (Earlier label: "excerpt for testing only; verify against the official text before relying on it")
 # SCOPE: ГК РФ часть вторая, ст. 506 (поставка); часть первая, ст. 309 (общие положения об исполнении обязательств).
 # LICENSE: официальный документ органа государственной власти; не является объектом авторских прав (ГК РФ ст. 1259 п. 6)
 

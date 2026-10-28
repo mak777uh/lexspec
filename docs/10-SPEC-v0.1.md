@@ -180,18 +180,35 @@ recorded in [`docs/16` §3](16-ROUND-01-ANSWERS.md) and enter the catalogue only
 identified by X, as retrieved at date Y, with digest Z.* For EU and Russian sources that is the strongest honest
 claim, because consolidated texts there are documentation rather than authoritative law.
 
-### §5.1 The four conditions
+### §5.1 The conditions
 
-An atom is anchored when all four hold:
+An atom is anchored when all of the following hold:
 
+0. **the text is normalized before matching.** The normalization policy is declared by the statement and printed
+   in the report; for v0.1 it is: LF line endings, runs of whitespace including line breaks collapsed, character
+   entities decoded, HTML/XML markup removed. This is not our invention — the W3C `TextQuoteSelector` requires
+   that "the text MUST be normalized before recording in the Annotation", verified 2026-10-28
+   ([`docs/26`](26-ROUND-03-MERGED.md) §W6);
 1. `anchor.corpus` names a `CorpusRef` in the statement (`S2_NO_CORPUS` otherwise);
 2. the file at `CorpusRef.text` hashes to `CorpusRef.text_sha256` (`S2_HASH_MISMATCH` otherwise);
-3. `anchor.span` occurs in that file (`S2_SPAN_NOT_FOUND` otherwise);
-4. it occurs **exactly once** (`S2_SPAN_AMBIGUOUS` otherwise), where occurrences are counted **by start
-   position, overlapping included**: every index `p` with `text[p:p+len(span)] == span`. The distinction is
-   not academic — in the text `"aaa"` the span `"aa"` has one non-overlapping occurrence but two possible
-   positions, and a citation that can start at two places is ambiguous regardless of how a substring count
-   function happens to be implemented.
+3. `anchor.span` occurs in that file **after normalization** (`S2_SPAN_NOT_FOUND` otherwise; the report also says
+   whether the span occurs in the raw text, because that separates "the text is not here" from "the quote carries
+   a line break and was never normalized");
+4. `anchor.span` **together with `anchor.prefix`/`anchor.suffix`** selects exactly one region
+   (`S2_SPAN_AMBIGUOUS` otherwise), where occurrences are counted **by start position, overlapping included**:
+   every index `p` with `text[p:p+len(span)] == span`. In the text `"aaa"` the span `"aa"` has one non-overlapping
+   occurrence but two possible positions, and a citation that can start in two places is ambiguous regardless of
+   how a substring counter behaves.
+
+`prefix` and `suffix` are optional in v0.1 and become part of the anchor in v0.1.1; the field is declared now so
+the rule reads in one place. A statement that supplies no context is asserting that its quote is unique on its
+own — a checkable assertion, and the one that fails most often on real wrapped legal text.
+
+**Why uniqueness is still required when the standard permits multi-match.** W3C says that if several matches
+remain after `prefix`/`exact`/`suffix`, the selection "SHOULD be treated as matching all of the matches" — so an
+ambiguous reference satisfies the standard. It does not satisfy this product: a citation selecting three places
+cannot be re-checked by a stranger. The refusal is **our declared requirement**, and it must never be presented as
+the field's convention ([`docs/26`](26-ROUND-03-MERGED.md) §W6).
 
 Rule 4 is the load-bearing one. A span that appears twice anchors nothing: a reader cannot tell which
 occurrence the author meant, so a later amendment to one of them silently re-points the citation. Ambiguity
