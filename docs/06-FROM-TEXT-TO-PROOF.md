@@ -1,4 +1,4 @@
-# 06 — From legal text to a proof obligation: twelve hypotheses
+# 06 — From legal text to a proof obligation: fifteen hypotheses
 
 Status: hypothesis register, not spec and not a plan. Authority stays with
 [`00-CHARTER.md`](00-CHARTER.md) and [`10-SPEC-v0.1.md`](10-SPEC-v0.1.md). Every hypothesis here is a
@@ -32,10 +32,12 @@ forever. T1 must be re-run per clause; T2 is amortised. This is the same economi
 
 ---
 
-## §2 Twelve hypotheses
+## §2 Fifteen hypotheses
 
 Format: **claim → why it is plausible → what to build → the test that kills it.** Numbering is permanent;
-hypotheses are never renumbered, only superseded by a dated entry.
+hypotheses are never renumbered, only superseded by a dated entry. H1–H12 come from the proof-run and
+verification-survey material; H13–H15 come from reading `nearai/ironclaw`'s code, where each is already
+enforced on a different subject — which is the only reason to take them seriously here.
 
 ### H1 — Anchor-first, proof-last
 
@@ -168,11 +170,15 @@ engineering mistake as regex-based prompt-injection defence: the adversary contr
 **Why plausible.** IronClaw layers pattern detection *and* capability restriction *and* credential
 non-exposure. The pattern layer is the weakest of the three and is kept only because it is cheap; the property
 that actually holds comes from declarations enforced at boundaries.
-**Build.** Nothing to build — a rule to keep: every check in LexSpec must be either a positive declaration
-enforced structurally, or a decidable property of the encoding. No "suspicious phrase" lists, ever, in the
-verdict path.
+**Build.** Nothing in the verdict path — a rule to keep: every check in LexSpec must be either a positive
+declaration enforced structurally, or a decidable property of the encoding. A small frozen denylist is
+permitted for **triage only** (deciding what a reviewer looks at first), and it must ship with tests that pin
+each known bypass as *expected behaviour*, so the limit is a ratchet rather than a surprise. IronClaw does
+exactly this: its safety module asserts that a zero-width space between `DROP` and `TABLE` defeats the pattern,
+annotated "known bypass". Steal the annotation, refuse the reliance.
 **Kill test.** Write a clause that is structurally identical to an egregious one but uses no flagged words; if
-the tool's output changes, a denylist has crept in.
+the tool's output changes, a denylist has crept into the verdict path. Second test: ablate the denylist and
+show the defect recall of the structural checks is unchanged.
 
 ### H11 — Term identity must be content-addressed
 
@@ -191,12 +197,61 @@ surface the divergence, the identity layer is not doing work.
 **Claim.** The output that matters is a small, offline-checkable record: statement hash, encoding version,
 every corpus hash, checker version, verdict, findings, `not_claimed`. Everything else is convenience.
 **Why plausible.** CompCert, seL4, IronFleet and the PutnamBench entry all publish their trusted base, because
-a claim whose trusted base is unstated is unauditable. IronClaw's audit log is the same instinct at a
-different scale.
+a claim whose trusted base is unstated is unauditable. A concrete warning comes from the IronClaw audit log:
+its event log is explicitly **best-effort** ("a sink failure must never alter a runtime outcome") and
+**redacted at construction**, with no hash chain and no signature — so it is a diagnostic, not evidence, and
+it cannot be handed to a third party. That is a legitimate engineering choice for a daemon and a fatal one for
+a certificate.
 **Build.** `lexspec report --certificate` emitting JSON that a third party can re-check with the repo and no
-network. The checker must be able to *replay* a certificate and reproduce the verdict.
+network, with the findings **hash-chained** so a single mutated row is detectable. The checker must be able to
+*replay* a certificate and reproduce the verdict.
 **Kill test.** Hand the certificate and the repo to someone who has never seen the project. If they cannot
-reproduce the verdict, the certificate is documentation, not evidence.
+reproduce the verdict, or cannot tell whether one row was edited, the certificate is documentation, not
+evidence.
+
+### H13 — The proposer must not be the acceptor
+
+**Claim.** The encoder — human or model — is untrusted input. It may propose candidate atoms; it must be
+unable to declare a verdict, and this must be enforced by construction rather than by convention.
+**Why plausible.** IronClaw's capability membrane mints a sealed `Authorized` witness that "only this crate
+can construct", and a source-scanning test fails closed if any other crate tries. The same split is the whole
+point of the PutnamBench harness: the model could call `completed()`, but the *verifier* re-ran and decided.
+A prompt instruction ("do not mark your own work as passed") is not an enforcement mechanism; a type the
+acceptor alone can build is.
+**Build.** `Verdict` constructible only inside the checker module; the encoder-facing API returns
+`CandidateAtom` with no conversion to `Verdict`; a build-blocking scan asserts no other module names the
+constructor.
+**Kill test.** Run the pipeline with the split and without it. If propose-only gives the same results as
+propose-and-accept, the split costs accuracy and buys nothing — but if the *without* arm ever produces a
+`CHECKED_ANCHORED` on a statement with an unanchored atom, the split is load-bearing.
+
+### H14 — A capability boundary is not a containment boundary
+
+**Claim.** Every check must be labelled either **contains** (the defect cannot survive it) or **constrains**
+(it narrows what may be relied on without saying anything about meaning). Naming a check as containment
+without a mutation test is the most expensive kind of overclaim.
+**Why plausible.** IronClaw's own internal rule file records a postmortem (`#6170`) where a scoped virtual
+filesystem bounded the *filesystem capability* but a spawned OS process "sees the real kernel filesystem and
+ignores those mounts" — someone read a capability restriction as an isolation guarantee. The legal analogue is
+exact: "every atom cites an existing article" constrains what an atom may rely on; it says nothing about
+interpretation, which is where legal error lives.
+**Build.** A `contains`/`constrains` label per check in the spec and in the report, with `contains` permitted
+only where a mutation test shows the defect cannot pass.
+**Kill test.** For each check labelled `contains`, construct a statement that exhibits the defect and passes.
+There should be none; every one that passes demotes the label.
+
+### H15 — Fail closed to the absence of the capability
+
+**Claim.** An unresolvable citation makes the atom **unasserted**, never "asserted with a note" and never
+"asserted against a looser corpus". The dangerous default is always the convenient one.
+**Why plausible.** IronClaw's lane README states the design rule directly: missing Docker or sandbox "degrades
+to 'no shell,' never 'host shell'", and the absent backend hides the capability instead of downgrading it. Most
+tools do the opposite, because a helpful fallback demos better.
+**Build.** Resolution failure returns `Unasserted` (a first-class state), not a `Finding` with a warning;
+`CHECKED` can never be reached by an atom whose anchor failed.
+**Kill test.** Build a permissive variant and a strict variant, run both over the same corpus, and count how
+often the permissive one would have silently fallen back. If that count is high enough to make the corpus
+unusable, the correct instrument is a declared, cited `escape` (H6), not a quiet fallback.
 
 ---
 
@@ -225,14 +280,16 @@ measurement campaign.
 
 Stated as an ordering, because doing them out of order wastes the effort:
 
-1. H1 + H8 (already true in v0.1) — the gate and the one-way seam.
-2. H11 + H12 — term identity and the certificate; both are small and both unlock everything else.
+1. H1 + H8 + H13 (the gate, the one-way seam, and the type that only the checker can construct) — two of the
+   three are already true in v0.1; H13 is one module boundary and a test.
+2. H11 + H12 (term identity, certificate with a hash chain) — both small, both unlock everything else.
 3. H3 — prove the detector. This is the publication-grade artifact and the reason to use Lean at all.
 4. H7 — measure cost per closed atom on real clauses; publish the failures.
-5. H4 + H5 — the closed-world and boundary-injection rules, which are where the encoding stops being
-   paraphrased and starts being cited.
-6. H2, H6, H9 — refinements, in that order.
-7. H10 — never; it is a standing prohibition, not a task.
+5. H4 + H5 + H15 (closed-world citation, boundary injection, fail-closed to `Unasserted`) — where the
+   encoding stops being paraphrased and starts being cited.
+6. H2, H6, H14 — refinements: the embedding, the severity vocabulary, and the contains/constrains labelling.
+7. H9 — temporal algebra edge cases.
+8. H10 — never; it is a standing prohibition, not a task.
 
 ## §5 The sentence this whole file has to earn
 

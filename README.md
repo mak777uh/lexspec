@@ -84,7 +84,7 @@ refusals — what each code means, and what a reader should do — is
 | [docs/02-DESIGN-SPACE.md](docs/02-DESIGN-SPACE.md) | prior art: Catala, L4, LegalRuleML, Akoma Ntoso, deontic logic, proof assistants, LLM legal checking — what we borrow and what we refuse |
 | [docs/04-SEMANTIC-VS-FORMAL.md](docs/04-SEMANTIC-VS-FORMAL.md) | when a machine-checked proof pays and when it is money wasted: CompCert, seL4, Cedar, TLA+, PBT, policy engines, and the PutnamBench incident where two formalised statements were wrong |
 | [docs/05-HARNESS-LESSONS.md](docs/05-HARNESS-LESSONS.md) | what a published 672/672 proof run teaches a checker: the harness owns the stopping rule, identity is checked on the elaborated form, cost is recorded per attempt — failures included |
-| [docs/06-FROM-TEXT-TO-PROOF.md](docs/06-FROM-TEXT-TO-PROOF.md) | **the research program**: twelve numbered hypotheses on turning legal text into a proof obligation, each with the test that would kill it — and why the provable target is the checker, not the clause |
+| [docs/06-FROM-TEXT-TO-PROOF.md](docs/06-FROM-TEXT-TO-PROOF.md) | **the research program**: fifteen numbered hypotheses on turning legal text into a proof obligation, each with the test that would kill it — and why the provable target is the checker, not the clause |
 | [AGENTS.md](AGENTS.md) | the twelve rules for anyone, human or agent, who changes this repository |
 | [schemas/statement-0.1.json](schemas/statement-0.1.json) | the schema, with the closed sets in one place |
 | [examples/](examples/) | three statements: one that passes, one with opposite positions, one with a broken anchor |
