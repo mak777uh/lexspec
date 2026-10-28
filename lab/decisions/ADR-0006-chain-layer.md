@@ -1,9 +1,15 @@
 # ADR-0006 — The chain layer is optional, outward, and must carry an erasure policy
 
+> **Amended 2026-10-28 by [ADR-0007](ADR-0007-substrate-independence.md).** The requirement turned out to be
+> *continuity* — switching substrate when the legacy system is shaken — not publication. This ADR survives as the
+> correct treatment of one substrate among several: commitments only, the erasure policy, and the one-way seam.
+> The document it pointed at, `docs/15-BLOCKCHAIN-LAYER.md`, has been replaced by
+> [`docs/15-SUBSTRATE-INDEPENDENCE.md`](../../docs/15-SUBSTRATE-INDEPENDENCE.md).
+
 - **Date:** 2026-10-28
 - **Status:** accepted (owner: *"слой блокчейна любых типов тоже предусмотри, возможность его построить поверх
   наших систем"*)
-- **Evidence:** [`docs/15-BLOCKCHAIN-LAYER.md`](../../docs/15-BLOCKCHAIN-LAYER.md)
+- **Evidence:** [`docs/15-SUBSTRATE-INDEPENDENCE.md`](../../docs/15-SUBSTRATE-INDEPENDENCE.md) §7
 
 ## Decision
 
