@@ -71,6 +71,18 @@ shallow embedding is not shallow enough — the legal vocabulary is leaking into
 
 ### H3 — Prove the checker, not the clause (the Cedar move)
 
+> **Amendment, 2026-10-28 — the novelty claim in this hypothesis is dead.** A direct search after four model
+> passes missed it (see [`docs/12` §6](12-LANDSCAPE-REGISTER.md)) found the work already done, twice, better:
+> **LegalLean** proves six solver-property theorems (monotonicity, determinism, soundness) over a generic
+> defeasibility solver, and **Arxo Law** ships a Lean 4 checker — 21 modules, 91 theorems and lemmas, no
+> `sorry` — that validates an evaluation document against the least model of its semantics, rather than against
+> a previous run. Their checker's first corpus run found a dangling-reference defect both independent evaluators
+> shared, which is precisely the argument for this hypothesis and no longer an argument for us.
+> What survives is narrower: nobody found has tied a checked encoding to a **unique byte span of a pinned
+> revision** (H1's uniqueness clause), and nobody found has used a Hohfeld square as a *type discipline with
+> correlative pairing* rather than as a vocabulary. H3 stays in the register as a requirement for our own code,
+> not as a contribution. It must not be presented as new.
+
 **Claim.** The provable artifact is the detector's correctness: *soundness* (if it reports no conflict, none
 exists) and *completeness* (if a conflict exists on the declared fragment, it is reported).
 **Why plausible.** Cedar did exactly this for a policy language: a sound and complete logical encoding,

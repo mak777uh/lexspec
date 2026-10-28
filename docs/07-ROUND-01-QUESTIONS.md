@@ -15,6 +15,27 @@ How to answer, in order of usefulness:
 
 ---
 
+## A0. The question that now outranks the rest
+
+**Q0.** Given [Arxo Law](https://blog.arxo.io/law-as-function-law-as-data) — byte-pinned sources, a compiler that
+rejects any quoted fragment which is not an exact substring of the pinned publication, four-valued support with
+"silence is not negation", editions applied by event date, and a Lean 4 checker (91 theorems) validating the
+evaluation document against the semantics — and given [LegalLean](https://github.com/edu-ap/legal-lean) —
+`RequiresHumanDetermination` with the contested boundary, six solver-property theorems, factorial
+equivalence testing, and false-precision rate as a release gate — **what is actually left to contribute?**
+
+Answer in the form: a property they do not prove, a guarantee they do not make, or a domain they cannot reach.
+Do not answer "better UX" or "more jurisdictions" unless you can name the property that becomes checkable as a
+result.
+
+*Why we cannot answer it ourselves:* we found both of these **after** four search passes and after writing
+twenty hypotheses; our judgement about our own novelty is exactly the judgement most likely to be wrong.
+*What would change:* if nothing is left, the honest move is to stop being a research project and become an
+integration of Arxo's or LegalLean's approach into the one domain nobody has touched — civil-law jurisdictions
+and the refusal vocabulary — and to say so in the README.
+
+---
+
 ## A. Anchoring — the rule the whole design rests on
 
 **Q1.** Does any official legal publisher expose a **stable, dereferenceable identifier for a byte range or a

@@ -176,7 +176,84 @@ Pass C could not open the brief and returned six unassigned rows in Russian; the
 duplicate A/B/D (Cedar, ODRL, XACML, Catala, eFLINT, s(LAW)) and its eFLINT and s(LAW) rows were the most
 careful in the set — it quoted the negative build reports instead of hiding them.
 
-**The one systematic gap:** no pass found an approach that binds a rule to an *exact byte range of a pinned
+**The one systematic gap:** no approach found an approach that binds a rule to an *exact byte range of a pinned
 revision*. Rows 42–46 are the closest, and they bind to an asset or a process, not to a statutory span. That is
 either our differentiator or evidence that the requirement is unrealistic — and we cannot tell which from
 search alone. It is the first question of round 01.
+
+*(That paragraph was written before §6. §6 answers it, and the answer is that the gap was in our search, not in
+the field.)*
+
+---
+
+## §6 What the fabricated row actually pointed at
+
+After the merge I went looking for the phantom project. It does not exist — but the *idea* does, and the real
+work is stronger than anything in the four returns. None of it appeared in any pass.
+
+All of the following were opened in this session and are graded `V`.
+
+**1. Arxo Law — a package of norms with byte-pinned sources.** From their own comparison article (2026-09-22):
+every source, edition and publication carries a content hash, and "the compiler rejects any quoted fragment
+that is not an exact substring of the pinned official publication". A call returns an *evaluation document* —
+manifest, results, proof graph, deontic positions in force, registered conflicts, content hashes — and a **Lean 4
+checker (21 modules, 91 theorems and lemmas, no `sorry`, toolchain 4.33.0)** verifies that certificate against the
+least model of the monotone fragment. The semantics is four-valued: `TRUE_ONLY`, `FALSE_ONLY`, `BOTH`, `NEITHER`,
+with "silence is not negation" and a theorem that incomparable defeasible grounds both survive. Deontic
+positions — duty, liberty, **power, immunity** — are declarations with a lifecycle. Editions are applied by the
+date of the event. Engine in **Rust**, reference implementation in **Python**. Parity with Catala on one Kazakh
+regulation: 65 reference cases, 240 random cases, 20/20 mutations killed, `github.com/arxohq/arxo-catala-parity`
+(Apache-2.0).
+One sentence from that article is worth more than most papers: their checker's first run over the corpus found a
+**dangling-reference defect that both independent evaluators shared and that byte-for-byte comparison could
+never have surfaced.**
+
+**2. LegalLean** — [`edu-ap/legal-lean`](https://github.com/edu-ap/legal-lean), MIT, Lean 4, 87 theorems,
+created 2026-03-24. Every legal conclusion is either formally verified or carries
+`RequiresHumanDetermination` with "the contested boundary". Typed legal IR with eight factors (voice, modality,
+negation, exceptions, temporal, thresholds, definitions, cross-references). A generic defeasibility solver with
+**six solver-property theorems** (monotonicity, determinism, soundness). Factorial hardening: two English variants
+→ Lean, then ask Lean to prove `T₁ ↔ T₂`, with three outcomes — equivalence proved, semantic divergence, coverage
+gap. **False precision rate** as a primary release gate. And a section headed "What LegalLean Does Not Do".
+
+**3. Vernie & Grabmair, [arXiv 2605.25186](https://arxiv.org/abs/2605.25186)** (EMNLP 2026). Compares
+formalizations of the same provision *by the decisions they encode*: node-level matching, then a SAT solver
+enumerates edge cases where two formalizations disagree, then those cases are verbalised for a legal expert. Ten
+EU provisions, nine frontier LLMs. Their finding is the one that should worry us most: **behavioural divergence
+between formalizations is essentially uncorrelated with their structural agreement.**
+
+**4. Saka, [arXiv 2609.01741](https://arxiv.org/abs/2609.01741)**. A "survival certificate" for machine-extracted
+statutory logic. Two independently written extractors diverge on numeric-threshold presence at a **false-negative
+rate of 0.43** on Missouri statutes. Implication basis, Monte Carlo replay, one-sided Wilson lower bound, 29,365
+Missouri sections; the preregistered gate passes, and **93.2 % of held-out chapters still fall below the
+informativeness floor** under one globally deployed error model. Released with an audit trail "including one
+retracted claim".
+
+**5. Smaller, real, and none of them model-visible:** `arnavdandu/catala-lean` (Lean formalization and soundness
+proof of Catala, 2026-05); "Debugging Tax Forms with Lean" (ProLaLa 2022); arXiv 2610.02792 "Law And Order: Tax
+Law Autoformalization" (2026-10); Pramaana Labs formalising Indian ITR-2 tax logic (2026-06).
+
+### What this does to our claims
+
+| Our hypothesis | Status after §6 |
+|---|---|
+| H3 — prove the detector's soundness | **not novel.** Done twice: LegalLean's six solver-property theorems, Arxo's 91-theorem certificate checker |
+| H12 — certificate with hashes and a proof graph | **already shipped** by Arxo, with a stronger property: their checker validates against the semantics, not against a previous run |
+| H15 — fail closed to `Unasserted` | **already shipped** as `NEITHER`, with an explicit theorem that ambiguity is preserved rather than resolved |
+| H17 — edition by event date | **already shipped** by Arxo |
+| H1 — anchor to an exact span, or refuse | partly: Arxo requires an exact substring of the pinned publication. **Uniqueness** — the span must occur exactly once — is the part I have found nowhere else. Narrow, but real |
+| Hohfeld as a closed eight-position type with correlative pairing and opposite detection | **possibly ours.** Arxo names four of the eight (duty, liberty, power, immunity) as declarations; I saw no claim of correlative-pair checking or opposite-conflict detection |
+| coverage + escapes as first-class numbers | **adjacent**: LegalLean has `RequiresHumanDetermination` and a false-precision rate; I saw no coverage ratio with declared escapes |
+
+### The finding that matters more than any row
+
+The field converged in 2026 on exactly the architecture this repository has been deriving from first principles,
+and **four independent model passes missed all of it**. That is not a failure of the passes' honesty — they were
+accurate about the field as it stood when their training data ended. It is a structural limit of
+search-by-model: work published between May and September 2026 is exactly the work a model is least likely to
+recall and most likely to confabulate around. The fabricated `lawlib` row is what that limit looks like from the
+inside.
+
+Consequence for the plan: round 01's first question is no longer "is this possible" but **"what is left"**, and
+the answer must be argued against Arxo and LegalLean specifically, not against a generic field. That question is
+now Q0 in [`docs/07`](07-ROUND-01-QUESTIONS.md).
