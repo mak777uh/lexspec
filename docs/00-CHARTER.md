@@ -50,6 +50,21 @@ keeps three things ordinary research throws away — **refusals, dead ends, and 
 as results. A model, a paper, or a colleague who says "verified" without an openable source has said nothing,
 and no amount of agreement between such statements adds up to evidence.
 
+**C6. Correctness is the objective; authorship is not.** The project exists to make a legal statement
+checkable, not to be the first to do it. Where somebody has already built a mechanism that is better than ours,
+we adopt theirs, cite it, and say so; where we build something, it is because a named gap in the available work
+forces it, not because it would be ours. Two rules follow, and both are enforceable in review:
+
+1. **Every mechanism names its source or its gap.** A construct in the spec that has no source and no stated
+   gap is either copied without credit or invented without need — both disqualify it.
+2. **A test of adoption is the test of truth.** If adopting a published mechanism makes the answer more
+   checkable, adopt it even if that leaves nothing original to report. "We did it ourselves" is not a property
+   of a verdict.
+
+The corollary is uncomfortable and intended: when prior art settles a question, the effort moves to the parts
+prior art does not reach — the corpus, the terms, the jurisdiction, the refusal vocabulary — and those parts are
+judged by whether the answer gets *checkable*, not by whether they are new.
+
 ## 4. Non-goals (deliberate, and reversible only by the owner)
 
 1. **Not legal advice.** The checker has no opinion about what a court would do. It checks the internal

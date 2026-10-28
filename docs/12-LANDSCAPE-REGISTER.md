@@ -233,27 +233,38 @@ retracted claim".
 proof of Catala, 2026-05); "Debugging Tax Forms with Lean" (ProLaLa 2022); arXiv 2610.02792 "Law And Order: Tax
 Law Autoformalization" (2026-10); Pramaana Labs formalising Indian ITR-2 tax logic (2026-06).
 
-### What this does to our claims
+### What we adopt, from whom
 
-| Our hypothesis | Status after §6 |
-|---|---|
-| H3 — prove the detector's soundness | **not novel.** Done twice: LegalLean's six solver-property theorems, Arxo's 91-theorem certificate checker |
-| H12 — certificate with hashes and a proof graph | **already shipped** by Arxo, with a stronger property: their checker validates against the semantics, not against a previous run |
-| H15 — fail closed to `Unasserted` | **already shipped** as `NEITHER`, with an explicit theorem that ambiguity is preserved rather than resolved |
-| H17 — edition by event date | **already shipped** by Arxo |
-| H1 — anchor to an exact span, or refuse | partly: Arxo requires an exact substring of the pinned publication. **Uniqueness** — the span must occur exactly once — is the part I have found nowhere else. Narrow, but real |
-| Hohfeld as a closed eight-position type with correlative pairing and opposite detection | **possibly ours.** Arxo names four of the eight (duty, liberty, power, immunity) as declarations; I saw no claim of correlative-pair checking or opposite-conflict detection |
-| coverage + escapes as first-class numbers | **adjacent**: LegalLean has `RequiresHumanDetermination` and a false-precision rate; I saw no coverage ratio with declared escapes |
+The question is not whether we were first — [ADR-0004](../lab/decisions/ADR-0004-correctness-not-novelty.md)
+removed authorship as a criterion. The question is which of these is better than what we have, and what it still
+does not do. Column three is the decision; column four is what must be tested before that decision is trusted.
+
+| Our sub-problem | Best available answer found | What we adopt | What must be tested |
+|---|---|---|---|
+| binding a rule to its source (H1) | Arxo: a compiler that rejects any quoted fragment which is not an exact substring of the pinned publication | the rule, extended by our uniqueness condition — a span that occurs twice is not an identifier | whether uniqueness is achievable on real consolidated text, or whether it refuses too much (round-01 Q1) |
+| the certificate (H12) | Arxo: evaluation document with proof graph and content hashes, validated by a Lean checker against the semantics | the shape, and the stronger property: validate against the semantics, not against a previous run | read the checker; confirm it never compares two engines with each other |
+| fail-closed on uncertainty (H15) | Arxo: four-valued `TRUE_ONLY` / `FALSE_ONLY` / `BOTH` / `NEITHER`, "silence is not negation", with a theorem that incomparable grounds both survive | the four values; they are more honest than our single `Unasserted` | whether four values survive contact with our refusal vocabulary without doubling the code count |
+| defeat / carve-outs (H9, the blocking gap) | LegalLean: a generic applicability-aware defeat solver with six property theorems; Arxo: `BOTH` preserved rather than resolved; classical alternatives: ASP defaults, LegalRuleML `Override`, Catala priorities | to be decided in [`docs/13`](13-DEFEASIBILITY-CHOICE.md) | it must reproduce GDPR Art. 17(3) without a hand-written exception list |
+| proving the checker (H3) | LegalLean's six solver-property theorems; Arxo's 91-theorem certificate checker | the *targets*: monotonicity, determinism, soundness of the detector | that our theorem is not a restatement of the code (round-01 Q7) |
+| vagueness handled honestly | LegalLean: `RequiresHumanDetermination` with the contested boundary, and **false-precision rate** as a release gate | the metric and the vocabulary | whether a false-precision rate is computable for a non-computational clause |
+| editions in time (H17) | Arxo: a query evaluated on the event date against the edition in force | the rule | availability of edition data per jurisdiction (measured: see below) |
+| comparing two formalisations | Vernie & Grabmair: SAT enumeration of the cases where two formalisations disagree | the method, for our own twin implementations | their finding that behavioural divergence is uncorrelated with structural similarity — it forbids "the encodings look alike" as evidence |
+| knowing how much to trust an extraction | Saka's survival certificate and its 93.2 % failure rate under one global error model | the caution, not the method | whether our per-clause claims need a statistical bound at all |
 
 ### The finding that matters more than any row
 
-The field converged in 2026 on exactly the architecture this repository has been deriving from first principles,
-and **four independent model passes missed all of it**. That is not a failure of the passes' honesty — they were
-accurate about the field as it stood when their training data ended. It is a structural limit of
-search-by-model: work published between May and September 2026 is exactly the work a model is least likely to
-recall and most likely to confabulate around. The fabricated `lawlib` row is what that limit looks like from the
-inside.
+Two things, and neither is about us.
 
-Consequence for the plan: round 01's first question is no longer "is this possible" but **"what is left"**, and
-the answer must be argued against Arxo and LegalLean specifically, not against a generic field. That question is
-now Q0 in [`docs/07`](07-ROUND-01-QUESTIONS.md).
+**The field converged in 2026 on exactly this architecture, and four independent model passes missed all of it.**
+Not through dishonesty: they were accurate about the field as it stood when their training data ended. Work
+published between May and September 2026 is precisely what a model is least likely to recall and most likely to
+confabulate around — the fabricated `lawlib` row is what that limit looks like from the inside. Any future search
+round must therefore be biased towards *primary sources with dates*, not towards a model's confident summary.
+
+**And the convergence is good news for correctness.** Everything that took us twenty hypotheses to derive was
+independently derived and built by someone else, which is the strongest available evidence that the design is
+right. The work that remains is not to invent it again but to make it hold where it has not been tried: a
+civil-law jurisdiction, terms that are themselves anchored, and a refusal vocabulary a stranger can act on.
+
+The first question of round 01 is therefore not "what is left" but **"for each open sub-problem, what is the best
+available answer and what does it fail to do"** — Q0 in [`docs/07`](07-ROUND-01-QUESTIONS.md).

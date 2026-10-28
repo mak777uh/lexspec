@@ -17,22 +17,28 @@ How to answer, in order of usefulness:
 
 ## A0. The question that now outranks the rest
 
-**Q0.** Given [Arxo Law](https://blog.arxo.io/law-as-function-law-as-data) — byte-pinned sources, a compiler that
-rejects any quoted fragment which is not an exact substring of the pinned publication, four-valued support with
-"silence is not negation", editions applied by event date, and a Lean 4 checker (91 theorems) validating the
-evaluation document against the semantics — and given [LegalLean](https://github.com/edu-ap/legal-lean) —
-`RequiresHumanDetermination` with the contested boundary, six solver-property theorems, factorial
-equivalence testing, and false-precision rate as a release gate — **what is actually left to contribute?**
+**Q0.** For each sub-problem our spec has to settle — binding a rule to its source, handling carve-outs,
+representing uncertainty, certifying a result, applying editions over time, and reporting coverage — **what is
+the best available answer, and what does that answer fail to do?**
 
-Answer in the form: a property they do not prove, a guarantee they do not make, or a domain they cannot reach.
-Do not answer "better UX" or "more jurisdictions" unless you can name the property that becomes checkable as a
-result.
+This is not "what is left for us". Authorship is not a criterion in this project
+([ADR-0004](../lab/decisions/ADR-0004-correctness-not-novelty.md)); the only question is which mechanism makes a
+verdict more checkable, and where the best available mechanism stops working.
 
-*Why we cannot answer it ourselves:* we found both of these **after** four search passes and after writing
-twenty hypotheses; our judgement about our own novelty is exactly the judgement most likely to be wrong.
-*What would change:* if nothing is left, the honest move is to stop being a research project and become an
-integration of Arxo's or LegalLean's approach into the one domain nobody has touched — civil-law jurisdictions
-and the refusal vocabulary — and to say so in the README.
+Answer in this shape, one block per sub-problem:
+
+```
+sub-problem → best available mechanism (name, version, link) → the property it establishes
+            → the case it does NOT handle, named concretely → what we would test to confirm that
+```
+
+Do not answer "yours is fine". If a published mechanism is better, say so plainly; adopting it is the preferred
+outcome and the cheaper one.
+
+*Why we cannot answer it ourselves:* we found Arxo and LegalLean **after** writing twenty hypotheses and four
+search passes, so our instinct about what is settled is exactly the instinct least likely to be right.
+*What would change:* the spec. Adoption decisions are recorded in `lab/decisions/`, one per sub-problem, each
+naming the source and the gap.
 
 ---
 

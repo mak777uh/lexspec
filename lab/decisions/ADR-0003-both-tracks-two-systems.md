@@ -1,5 +1,11 @@
 # ADR-0003 — Both tracks in parallel, and two legal systems from the start
 
+> **Amended 2026-10-28 by [ADR-0004](ADR-0004-correctness-not-novelty.md).** The "narrow track" below is framed
+> as properties *nobody else claims*. That framing is withdrawn: novelty is not a criterion, and the two
+> properties are kept because they are **required for a correct verdict** (a span that occurs twice does not
+> identify a provision; a refusal a reader cannot act on is a defect), not because they are ours. Everything else
+> in this ADR stands.
+
 - **Date:** 2026-10-28
 - **Status:** accepted (owner decision: *"оба одновременно, это как минимум параллельно две юр системы проверит"*)
 - **Context:** [`docs/12` §6](../../docs/12-LANDSCAPE-REGISTER.md) found that four of our novelty claims are
