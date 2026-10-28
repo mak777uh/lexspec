@@ -67,6 +67,15 @@
       "coverage": 0.5,
       "exit_code": 0,
       "verdict": "CHECKED"
+    },
+    "09-zozpp-26-1.lex.json": {
+      "codes": [
+        "OPEN_TERM",
+        "THIN_COVERAGE"
+      ],
+      "coverage": 0.25,
+      "exit_code": 0,
+      "verdict": "CHECKED"
     }
   }
 }
