@@ -7,8 +7,8 @@ building a *checked legal statement language* can actually use.
 The assignment is split into **twelve work packages (WP)**. One model, one WP. The output format is fixed so
 that twelve independent answers merge into one table without an editor.
 
-Written 2026-10-28. Companion files: [`docs/02-DESIGN-SPACE.md`](../docs/02-DESIGN-SPACE.md) (what we already
-surveyed), [`lab/sources.md`](../lab/sources.md) (the register these results feed).
+Written 2026-10-28. Companion files: [`docs/02-DESIGN-SPACE.md`](../../docs/02-DESIGN-SPACE.md) (what we already
+surveyed), [`lab/sources.md`](../sources.md) (the register these results feed).
 
 ---
 
@@ -227,7 +227,7 @@ true for the approach to work?
 
 ## §4 What we already have (tell the models, to avoid re-finding)
 
-These are covered by [`docs/02-DESIGN-SPACE.md`](../docs/02-DESIGN-SPACE.md) with verified sources. A model
+These are covered by [`docs/02-DESIGN-SPACE.md`](../../docs/02-DESIGN-SPACE.md) with verified sources. A model
 that returns them again is not wrong, but it is not adding rows:
 
 LegalRuleML, Akoma Ntoso, Catala, L4, Blawx, s(LAW)/Logical English, PROLEG, Hohfeld's jural relations,
@@ -271,7 +271,7 @@ policy engine as a compliance proof | verified
    source is `verified`; two dead links is `dead-link`.
 3. **Contradictions are kept, not resolved.** If two models disagree on whether something is alive in 2026,
    both statements go in the register with their evidence, and the disagreement is the finding.
-4. **Every merged row lands in [`lab/sources.md`](../lab/sources.md)** or in a new
+4. **Every merged row lands in [`lab/sources.md`](../sources.md)** or in a new
    `docs/08-LANDSCAPE-REGISTER.md`, with the date and the WP it came from.
 5. **A WP that returns nothing** is recorded as an empty WP with the reason. That is how we know a corner of
    the field has been looked at and found empty, which is worth more than an unexamined corner.
