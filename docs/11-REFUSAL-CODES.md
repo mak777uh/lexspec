@@ -37,7 +37,7 @@ hundred codes that all mean "not a statement".
 | `S2_NO_CORPUS` | `anchor.corpus` names no `CorpusRef` in the statement | add the corpus, or fix the handle |
 | `S2_HASH_MISMATCH` | sha256 of the corpus file ≠ declared `text_sha256` | re-pin the corpus: either the file changed or the declaration is wrong. Never fix by editing the hash alone |
 | `S2_SPAN_NOT_FOUND` | `span` does not occur in the pinned text | the quote is not from this revision, or it was paraphrased. Quote exactly, or mark the atom open |
-| `S2_SPAN_AMBIGUOUS` | `span` occurs more than once | widen the span until it is unique, or anchor to a larger context |
+| `S2_SPAN_AMBIGUOUS` | `span` occurs more than once, counted **by start position with overlaps included** (spec §5 rule 4) | widen the span until it is unique, or anchor to a larger context |
 
 **Why ambiguity is a refusal and not a warning.** Two identical occurrences of a phrase mean the citation
 does not identify a provision. If one occurrence is later amended, the anchor silently follows the other one.

@@ -90,13 +90,28 @@ A verdict is only reproducible if the statement has a byte form that does not de
 canonical form is:
 
 1. UTF-8, no BOM, LF line endings.
-2. The JSON object serialised with keys sorted lexicographically at every depth, no insignificant
-   whitespace (`{"a":1,"b":[2,3]}`), non-ASCII characters emitted literally (not `\uXXXX`).
-3. No floating-point numbers anywhere. Dates are strings. A number that must be fractional is a bug in the
+2. The JSON object serialised with **keys sorted at every depth by Unicode code point** (not by UTF-16 code
+   unit, not by locale, not by UTF-8 byte order — these differ above U+FFFF), with no insignificant whitespace
+   (`{"a":1,"b":[2,3]}`).
+3. **String escaping follows RFC 8785 §3.2.2**: `"` and `\` escaped; U+0008, U+0009, U+000A, U+000C, U+000D as
+   `\b \t \n \f \r`; every other character below U+0020 as `\u00xx` with **lowercase** hex; all other
+   characters, including non-ASCII and U+2028/U+2029, emitted literally. A control character that is not
+   pinned to one form is two conformant readings and therefore two hashes.
+4. No floating-point numbers anywhere. Dates are strings. A number that must be fractional is a bug in the
    statement; coverage and ratios are computed by the checker, never stored.
-4. Arrays keep their given order; ordering of `terms`, `atoms`, `corpus`, `escapes` is not canonicalised,
+5. Arrays keep their given order; ordering of `terms`, `atoms`, `corpus`, `escapes` is not canonicalised,
    so two semantically equal statements may have different hashes. That is intended: identity is over the
    bytes an author signed, not over an equivalence class.
+
+**Two deliberate deviations from RFC 8785 (JCS), and no claim of JCS compatibility:**
+
+| Deviation | Why |
+|---|---|
+| key order by Unicode code point, not UTF-16 code unit | the authors are Python, Rust and Go; a rule that only JavaScript gets right by default would make every other implementation hand-roll a surrogate-aware comparator. RFC 8785's own note says the two orders differ above U+FFFF |
+| numbers are integers only | a statement is not a computation; banning floats removes JCS's hardest part (ECMAScript `Number::toString`, the `1e+21` threshold) and removes the class of silent 2^53 lossiness |
+
+Test vectors that settle both, and that must live in `tests/`: a key above U+FFFF next to a key below it; a
+document containing `1.0` (must be refused, not normalised to `1`); a string with U+0001 and one with U+2028.
 
 `statement_sha256` in the report is sha256 of the canonical bytes. `C0_CANON` asserts that computing it
 twice gives the same value; it cannot assert that two authors wrote the same thing.
@@ -150,7 +165,11 @@ An atom is anchored when all four hold:
 1. `anchor.corpus` names a `CorpusRef` in the statement (`S2_NO_CORPUS` otherwise);
 2. the file at `CorpusRef.text` hashes to `CorpusRef.text_sha256` (`S2_HASH_MISMATCH` otherwise);
 3. `anchor.span` occurs in that file (`S2_SPAN_NOT_FOUND` otherwise);
-4. it occurs **exactly once** (`S2_SPAN_AMBIGUOUS` otherwise).
+4. it occurs **exactly once** (`S2_SPAN_AMBIGUOUS` otherwise), where occurrences are counted **by start
+   position, overlapping included**: every index `p` with `text[p:p+len(span)] == span`. The distinction is
+   not academic — in the text `"aaa"` the span `"aa"` has one non-overlapping occurrence but two possible
+   positions, and a citation that can start at two places is ambiguous regardless of how a substring count
+   function happens to be implemented.
 
 Rule 4 is the load-bearing one. A span that appears twice anchors nothing: a reader cannot tell which
 occurrence the author meant, so a later amendment to one of them silently re-points the citation. Ambiguity
