@@ -22,10 +22,16 @@ surveyed), [`lab/sources.md`](../sources.md) (the register these results feed).
 
 Rules for the human handing this out:
 
-1. One WP per message. If a model gets two WPs in one message it will merge them and lose rows.
-2. Ask for the table only. A model that writes an essay has ignored the brief; re-ask with "table only".
-3. If a model has no web access, it must say so and stop. Answers from memory are worse than no answers.
-4. Keep every model's raw reply. The register needs its `[unverified]` rows and its dead ends — those are
+1. **Name the work package in the last line** ("WORK PACKAGE: WP-06 — Solvers and rule engines applied to
+   compliance"). The prompt carries the URL of this document, so a model with working web access reads its
+   own §3 block and §4 by itself. No need to paste the block.
+2. **If the model cannot open GitHub** — some can fetch any page but not `raw.`, some cannot reach github.com
+   at all — paste the WP block from §3 after the word `WORK PACKAGE:`. The prompt already tells it to say so
+   when that happens, so you will know which answer came from the pasted block and which from the document.
+3. One WP per message. If a model gets two WPs in one message it will merge them and lose rows.
+4. Ask for the table only. A model that writes an essay has ignored the brief; re-ask with "table only".
+5. If a model has no web access, it must say so and stop. Answers from memory are worse than no answers.
+6. Keep every model's raw reply. The register needs its `[unverified]` rows and its dead ends — those are
    results, not noise.
 
 ---
@@ -38,7 +44,15 @@ You are collecting an evidence-graded register, not writing an essay.
 TOPIC: approaches to turning legal/normative language into machine-checkable form — logics, languages,
 standards, tools, proof-assistant formalisations, policy languages, and the empirical record of failures.
 
-Your scope is the WORK PACKAGE at the end of this message and nothing else. Do not summarise the whole field.
+BRIEF (open this first):
+  https://github.com/mak777uh/lexspec/blob/main/lab/assignments/SEARCH-01-landscape.md
+  raw markdown, if the page does not render for you:
+  https://raw.githubusercontent.com/mak777uh/lexspec/main/lab/assignments/SEARCH-01-landscape.md
+Read section 3 for the full block of the work package named below, and section 4 for the list of approaches
+that are ALREADY covered — do not spend rows re-reporting those. If you cannot open links at all, work from
+the WORK PACKAGE block pasted at the end of this message and say that you could not open the brief.
+
+Your scope is that one work package and nothing else. Do not summarise the whole field.
 
 For every approach you report, fill exactly one row with these fields:
   name | first year you can VERIFY | type (logic|language|standard|tool|product|paper|project)
@@ -64,8 +78,7 @@ RULES
 8. OUTPUT: one markdown table, then a short list "could not verify". No introduction, no conclusion.
 9. If you have no web access, say so and stop. Do not answer from memory.
 
-WORK PACKAGE:
-<insert WP block>
+WORK PACKAGE: <WP number and name, e.g. "WP-06 — Solvers and rule engines applied to compliance">
 ```
 
 ---
