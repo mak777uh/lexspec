@@ -23,6 +23,11 @@ Everything else in this repository is in service of that sentence or is scaffold
 | **L5 Quantity** | how much, in what unit, rounded how, over what period? | a number enters from the encoder's head, looks authoritative and is unverifiable — and this is the layer that market regulation is actually made of |
 | **L6 Compilation** | which rule in which engine enforces it? | the rule loses its reference to the position, and the boundary enforces something no one can trace |
 | **L7 Enforcement** | did the boundary permit or refuse, and can that be re-checked? | a compliant-looking system whose decisions cite nothing, or cite a rule that no longer matches the text |
+| **L8 Publication** *(optional, outward)* | where is the record published, and what does publication promise? | an immutable commitment to personal data the law later requires to be erased — or a chain treated as proof that a decision was correct |
+
+Seven layers, plus one that is optional and outward: publication adds "this existed at this time", never "this is
+right". It is separable on purpose — the verdict must be identical with or without it
+([`docs/15`](15-BLOCKCHAIN-LAYER.md), [ADR-0006](../lab/decisions/ADR-0006-chain-layer.md)).
 
 The tooling world loves to collapse L1–L3 into "AI reads the contract" and to skip L4. It then stops at L4's
 neighbours entirely: quantities are left to the code, compilation to the engineer, and enforcement to whoever

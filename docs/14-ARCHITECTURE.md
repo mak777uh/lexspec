@@ -34,6 +34,9 @@ make that boundary traceable back to the exact words that authorise it.
       │
       ▼
  evidence: decision ↔ rule ↔ atom ↔ span ↔ revision
+      │
+      ▼
+ optional: commitment → ledger     ← L8  publication only; never a source of truth (§6, docs/15)
 ```
 
 Every arrow is a place where the chain can break silently, and each break has a different owner. §7 lists them.

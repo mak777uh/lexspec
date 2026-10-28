@@ -90,6 +90,7 @@ refusals — what each code means, and what a reader should do — is
 | [docs/12-LANDSCAPE-REGISTER.md](docs/12-LANDSCAPE-REGISTER.md) | four search passes merged: 53 distinct approaches, graded by our own re-check, with the defects found — including one fabricated repository and our own schema defect |
 | [docs/13-DEFEASIBILITY-CHOICE.md](docs/13-DEFEASIBILITY-CHOICE.md) | the blocking sub-problem: carve-outs. Five requirements as tests, seven candidate mechanisms with where each stops, and the five scenarios that settle the choice |
 | [docs/14-ARCHITECTURE.md](docs/14-ARCHITECTURE.md) | **the chain**: law text → positions → quantities and flows → compiled rule → enforced decision → evidence walkable back to a span. Says what "reliably protected" can honestly mean, and what it cannot |
+| [docs/15-BLOCKCHAIN-LAYER.md](docs/15-BLOCKCHAIN-LAYER.md) | the optional outward layer: commitments only, three separable uses, chain-family adapters, and the erasure policy a chain layer must carry — worked against GDPR Art. 17, which sits in this repository's own corpus |
 | [AGENTS.md](AGENTS.md) | the twelve rules for anyone, human or agent, who changes this repository |
 | [schemas/statement-0.1.json](schemas/statement-0.1.json) | the schema, with the closed sets in one place |
 | [examples/](examples/) | three statements: one that passes, one with opposite positions, one with a broken anchor |
