@@ -120,6 +120,11 @@ CODE_ORDER = (
     "S2_NO_CORPUS",
     "S2_HASH_MISMATCH",
     "S2_CORPUS_NOT_FOUND",
+    "S2_CORPUS_UNREADABLE",
+    "S2_REVISION_MISMATCH",
+    "S2_REVISION_UNCHECKED",
+    "S2_CONTEXT_MISMATCH",
+    "S2_CONTEXT_MISSING",
     "S8_SERIES_NOT_PINNED",
     "S8_UNANCHORED_QUANTITY",
     "S8_SEGMENT_GAP",
@@ -161,6 +166,11 @@ CODE_CHECK = {
     "S2_NO_CORPUS": "S2",
     "S2_HASH_MISMATCH": "S2",
     "S2_CORPUS_NOT_FOUND": "S2",
+    "S2_CORPUS_UNREADABLE": "S2",
+    "S2_REVISION_MISMATCH": "S2",
+    "S2_REVISION_UNCHECKED": "S2",
+    "S2_CONTEXT_MISMATCH": "S2",
+    "S2_CONTEXT_MISSING": "S2",
     "S8_SERIES_NOT_PINNED": "S8",
     "S8_UNANCHORED_QUANTITY": "S8",
     "S8_SEGMENT_GAP": "S8",
@@ -195,6 +205,10 @@ NOT_CLAIMED = [
     "legal validity",
     "completeness of the encoded law",
     "correctness of the corpus outside the pinned revision",
+    "anchor.article and corpus[].revision are declared, not verified",
+    "conditions[] is prose and is not interpreted",
+    "cross-tuple correlative agreement is not checked (the spec does not define its orientation)",
+    "the normalisation policy is fixed by this tool, not declared per statement",
 ]
 
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
@@ -882,9 +896,9 @@ def load_corpora(
             raw = path.read_bytes()
         except OSError:
             findings.add(
-                "S2_HASH_MISMATCH",
+                "S2_CORPUS_UNREADABLE",
                 None,
-                f"corpus {cid!r}: file {_display_path(path, root)!r} exists but could not be read, so the declared sha256 cannot be verified",
+                f"corpus {cid!r}: file {_display_path(path, root)!r} exists but could not be read, so no hash was compared",
             )
             loaded[cid] = {"text": None, "usable": False}
             continue
@@ -901,9 +915,10 @@ def load_corpora(
             text = raw.decode("utf-8")
         except UnicodeDecodeError:
             findings.add(
-                "S2_HASH_MISMATCH",
+                "S2_CORPUS_UNREADABLE",
                 None,
-                f"corpus {cid!r}: pinned file is not valid UTF-8, so no span can be searched in it",
+                f"corpus {cid!r}: the declared sha256 MATCHES the file, but its bytes are not valid UTF-8, so no span "
+                f"can be searched in it; re-pinning would be the wrong remedy",
             )
             loaded[cid] = {"text": None, "usable": False}
             continue
@@ -976,8 +991,11 @@ def check_anchors(
         if occurrences == 0:
             raw_hit = corpus["text"].count(span)
             detail = f"span does not occur in corpus {cid!r} even after normalisation: {span[:80]!r}"
-            if raw_hit == 0 and len(needle) != len(span):
-                detail += " (the quote differs from the corpus only in whitespace, which rule 0 should have handled)"
+            detail += (
+                f"; it occurs {raw_hit} time(s) in the raw text"
+                if raw_hit
+                else "; it occurs 0 times in the raw text either"
+            )
             findings.add("S2_SPAN_NOT_FOUND", aid, detail)
             anchored[aid] = False
         elif occurrences > 1:
@@ -989,6 +1007,41 @@ def check_anchors(
             )
             anchored[aid] = False
         else:
+            # Context is part of the anchor (spec §5): if a statement supplies it, it must match; if the span is
+            # shorter than 40 normalised characters, context is required, because that is the only regime where
+            # ambiguity was ever observed (docs/29 P4: 11 of 604 short quotes, 0 of 585 long ones).
+            prefix = atom.get("anchor", {}).get("prefix")
+            suffix = atom.get("anchor", {}).get("suffix")
+            if prefix or suffix:
+                position = _find_regions(haystack, needle)[0]
+                end = position + len(needle)
+                # Context is expressed in normalised characters: the text is normalised before recording, so the
+                # window is a normalised window too.
+                pn = _normalize(prefix).strip() if prefix else ''
+                sn = _normalize(suffix).strip() if suffix else ''
+                # A normalised window may begin or end on a space, and the stored context is stripped, so both
+                # sides are trimmed before comparison: the question is whether the context matches, not whether
+                # its whitespace happens to line up.
+                ok_prefix = not pn or haystack[max(0, position - len(pn) - 4) : position].rstrip().endswith(pn)
+                ok_suffix = not sn or haystack[end : end + len(sn) + 4].lstrip().startswith(sn)
+                if not (ok_prefix and ok_suffix):
+                    findings.add(
+                        "S2_CONTEXT_MISMATCH",
+                        aid,
+                        "the declared prefix/suffix do not surround the span in the pinned text; context that is "
+                        "not checked is decoration",
+                    )
+                    anchored[aid] = False
+                    continue
+            elif len(needle) < 40:
+                findings.add(
+                    "S2_CONTEXT_MISSING",
+                    aid,
+                    f"the span is {len(needle)} characters after normalisation; below 40 a 32-character prefix and "
+                    f"suffix are required (spec §5, measured in docs/29 P4)",
+                )
+                anchored[aid] = False
+                continue
             anchored[aid] = True
     return anchored
 
@@ -1148,7 +1201,9 @@ def check_conflicts(statement: Statement, identities: dict[str, dict], findings:
 # ---------------------------------------------------------------------------
 
 
-def _series_paths(root: Path, statement: "Statement", findings: "Findings") -> dict[str, dict]:
+def _series_paths(
+    root: Path, statement: "Statement", findings: "Findings", loaded_corpora: dict
+) -> dict[str, dict]:
     """Load and verify every declared series. A series without a verifiable pin is unusable."""
     loaded: dict[str, dict] = {}
     for entry in getattr(statement, "series", []):
@@ -1157,6 +1212,13 @@ def _series_paths(root: Path, statement: "Statement", findings: "Findings") -> d
         digest = entry.get("digest")
         if not isinstance(sid, str) or not isinstance(declared, str) or not isinstance(digest, str):
             findings.add("S8_SERIES_NOT_PINNED", None, f"series {sid!r}: id, path and digest are required")
+            continue
+        if not _is_repo_relative(declared):
+            findings.add(
+                "S8_SERIES_NOT_PINNED",
+                None,
+                f"series {sid!r}: path {declared!r} escapes the repository root; a pin must be a path inside it",
+            )
             continue
         path = root / Path(declared)
         if not path.is_file():
@@ -1176,6 +1238,36 @@ def _series_paths(root: Path, statement: "Statement", findings: "Findings") -> d
         except Exception:  # noqa: BLE001 - a malformed pin is not a usable source
             findings.add("S8_SERIES_NOT_PINNED", None, f"series {sid!r}: pinned file is not a usable series")
             continue
+
+        # The basis is checked exactly as an atom's anchor is: a provenance claim that is not verified is a
+        # sentence, and the audit of 2026-10-29 found the shipped example pointing at a span that existed nowhere.
+        basis = entry.get("basis") or {}
+        b_corpus, b_span = basis.get("corpus"), basis.get("span")
+        if isinstance(b_corpus, str) and isinstance(b_span, str):
+            target = statement.corpus.get(b_corpus)
+            if target is None:
+                findings.add(
+                    "S2_NO_CORPUS", None, f"series {sid!r}: basis.corpus {b_corpus!r} names no corpus entry"
+                )
+            elif not (loaded_corpora.get(b_corpus) or {}).get("usable", False):
+                pass  # already reported at corpus level
+            else:
+                haystack = _normalize(loaded_corpora[b_corpus]["text"])
+                needle = _normalize(b_span)
+                hits = _find_regions(haystack, needle)
+                if not hits:
+                    findings.add(
+                        "S2_SPAN_NOT_FOUND",
+                        None,
+                        f"series {sid!r}: basis span does not occur in corpus {b_corpus!r} after normalisation; "
+                        f"the number's provenance is asserted, not verified",
+                    )
+                elif len(hits) > 1:
+                    findings.add(
+                        "S2_SPAN_AMBIGUOUS",
+                        None,
+                        f"series {sid!r}: basis span selects {len(hits)} regions in corpus {b_corpus!r}",
+                    )
         points.sort()
         loaded[sid] = {"points": points, "publisher": data.get("publisher")}
     return loaded
@@ -1285,9 +1377,11 @@ def _days(begin: str, stop: str) -> int:
     return _ordinal(stop) - _ordinal(begin) + 1
 
 
-def check_quantities(root: Path, statement: "Statement", findings: "Findings") -> dict[str, dict]:
+def check_quantities(
+    root: Path, statement: "Statement", findings: "Findings", loaded_corpora: dict
+) -> dict[str, dict]:
     """Evaluate every quantity. Returns {id: {"ok": bool, "segments": [...], "amount": int|None}}."""
-    series = _series_paths(root, statement, findings)
+    series = _series_paths(root, statement, findings, loaded_corpora)
     results: dict[str, dict] = {}
     for quantity in getattr(statement, "quantities", []):
         qid = quantity.get("id")
@@ -1382,6 +1476,40 @@ def check_quantities(root: Path, statement: "Statement", findings: "Findings") -
 # ---------------------------------------------------------------------------
 
 
+def check_revisions(statement: "Statement", corpora: dict[str, dict], findings: "Findings") -> None:
+    """A revision declared in a statement must agree with the revision in the corpus file's own header.
+
+    The audit of 2026-10-29 found `revision` was only shape-checked as a date: a statement could claim any edition
+    and the verdict did not change. A declaration nobody compares is a sentence, and the report's own claim is that
+    a verdict is about (statement, encoding, corpus@revision).
+    """
+    import re as _re
+
+    header_line = _re.compile(r"^#\s*REVISION:\s*(.+)$", _re.M)
+    for cid, entry in statement.corpus.items():
+        declared = entry.get("revision")
+        loaded = corpora.get(cid) or {}
+        text = loaded.get("text")
+        if not isinstance(declared, str) or not text:
+            continue
+        match = header_line.search(text[:2000])
+        if not match:
+            findings.add(
+                "S2_REVISION_UNCHECKED",
+                None,
+                f"corpus {cid!r}: revision {declared!r} is declared, but the file carries no '# REVISION:' header to "
+                f"compare it with",
+            )
+            continue
+        stated = match.group(1).strip()
+        if declared not in stated:
+            findings.add(
+                "S2_REVISION_MISMATCH",
+                None,
+                f"corpus {cid!r}: statement declares revision {declared!r}, the file's header says {stated!r}",
+            )
+
+
 def check_defeat(statement: "Statement", findings: "Findings") -> dict[str, str]:
     """Return {atom_id: established | refuted | both | neither}.
 
@@ -1438,9 +1566,6 @@ def check_defeat(statement: "Statement", findings: "Findings") -> dict[str, str]
             status[aid] = "neither"
         else:
             status[aid] = "established"
-    for aid, atom in atoms.items():
-        if atom.get("applies") is False and status.get(aid) == "neither":
-            continue
     return status
 
 
@@ -1628,8 +1753,9 @@ def analyze_file(
     identities = check_hohfeld(statement, findings)
     check_temporal(statement, findings)
     check_conflicts(statement, identities, findings)
+    check_revisions(statement, corpora, findings)
     position_status = check_defeat(statement, findings)
-    quantities = check_quantities(root, statement, findings)
+    quantities = check_quantities(root, statement, findings, corpora)
     closure = check_closure(statement, anchored, findings, quantities)
 
     # The denominator is every atom in the statement (§8), including atoms S1
@@ -1643,9 +1769,11 @@ def analyze_file(
 
     total = len(statement.atoms)
     closed = sum(1 for entry in closure if not entry["reasons"])
-    coverage = (closed / total) if total else 0.0
-    coverage = round(coverage, 3)
-    if coverage < threshold:
+    coverage_exact = (closed / total) if total else 0.0
+    coverage = round(coverage_exact, 3)
+    # The threshold must decide on the exact value: comparing a rounded number makes the boundary depend on a
+    # display convention (audit finding 16).
+    if coverage_exact < threshold:
         findings.add(
             "THIN_COVERAGE",
             None,
@@ -1679,6 +1807,17 @@ def analyze_file(
             "closed": closed,
             "anchored": sum(1 for value in anchored.values() if value),
         },
+        "corpus": [
+            {
+                "id": cid,
+                "text": _display_path(root / str(entry.get("text", "")), root),
+                "text_sha256": entry.get("text_sha256"),
+                "revision": entry.get("revision"),
+                "usable": loaded.get("usable", False) if isinstance(loaded, dict) else False,
+            }
+            for cid, entry in statement.corpus.items()
+            for loaded in [corpora.get(cid, {})]
+        ],
         "quantities": quantities,
         "position_status": position_status,
         "findings": findings.ordered(atom_order),
@@ -1755,6 +1894,34 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _force_utf8_stdio() -> None:
+    """Print UTF-8 regardless of the console code page.
+
+    On a non-UTF-8 stdout (cp1251/cp1252 on Windows, and the default for redirected stdout on an en-US host) every
+    report with Cyrillic in it died with UnicodeEncodeError, printed nothing, and exited 1 - the same code REFUSED
+    uses. A crash and a refusal must not be the same signal.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="strict")
+        except (AttributeError, ValueError):  # pragma: no cover - exotic stream
+            pass
+
+
+class OutputFailure(Exception):
+    """Raised when a report cannot be written; carries exit code 3, never 1."""
+
+
+def _emit(text: str, stream=None) -> None:
+    stream = stream or sys.stdout
+    try:
+        stream.write(text)
+        if not text.endswith("\n"):
+            stream.write("\n")
+    except UnicodeEncodeError as exc:
+        raise OutputFailure(f"cannot write UTF-8 to stdout: {exc}") from exc
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
@@ -1764,6 +1931,7 @@ def main(argv: list[str] | None = None) -> int:
     if not (0.0 <= args.coverage_threshold <= 1.0):
         print("lexcheck: error: --coverage-threshold must be between 0.0 and 1.0", file=sys.stderr)
         return 2
+    _force_utf8_stdio()
 
     paths = [Path(value) for value in args.statement]
     for path in paths:

@@ -287,12 +287,20 @@
               "minLength": 1
             },
             "span": {
-              "description": "Exact substring of the pinned text, occurring exactly once. Ambiguity is a refusal, not a warning.",
+              "description": "Occurrence in the pinned text, matched AFTER normalisation (spec §5 rule 0: LF, collapsed whitespace, decoded entities, no markup) and selecting exactly one region. The published schema said 'exact substring'; the checker has normalised since rule 0 existed, and a contract that disagrees with the tool is a defect in whichever side is wrong - the spec settled it, so the schema now says the same thing.",
               "type": "string",
               "minLength": 1
             },
             "note": {
               "type": "string"
+            },
+            "prefix": {
+              "type": "string",
+              "description": "32-character context before the span (spec §5)"
+            },
+            "suffix": {
+              "type": "string",
+              "description": "32-character context after the span (spec §5)"
             }
           }
         },
@@ -411,9 +419,14 @@
         "C0_CANON",
         "OPEN_TERM",
         "S1_SCHEMA",
+        "S2_CONTEXT_MISMATCH",
+        "S2_CONTEXT_MISSING",
         "S2_CORPUS_NOT_FOUND",
+        "S2_CORPUS_UNREADABLE",
         "S2_HASH_MISMATCH",
         "S2_NO_CORPUS",
+        "S2_REVISION_MISMATCH",
+        "S2_REVISION_UNCHECKED",
         "S2_SPAN_AMBIGUOUS",
         "S2_SPAN_NOT_FOUND",
         "S3_MISSING_COUNTERPARTY",
@@ -542,6 +555,7 @@
             "segments": {
               "enum": [
                 "rate_change",
+                "rate_change_and_payments",
                 "none",
                 "undeclared"
               ]

@@ -35,6 +35,7 @@ def _load_checker():
 
 
 def main() -> int:
+    digests_ok = True  # set below by the digest check
     lexcheck = _load_checker()
     examples = sorted((ROOT / "examples").glob("*.lex.json"))
     if not examples:

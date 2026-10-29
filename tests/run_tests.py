@@ -46,6 +46,12 @@ NOT_CLAIMED = [
     "legal validity",
     "completeness of the encoded law",
     "correctness of the corpus outside the pinned revision",
+    # Added after the audit of 2026-10-29: a reader of one JSON report must not have to read the README to learn
+    # that these four things are declared rather than checked.
+    "anchor.article and corpus[].revision are declared, not verified",
+    "conditions[] is prose and is not interpreted",
+    "cross-tuple correlative agreement is not checked (the spec does not define its orientation)",
+    "the normalisation policy is fixed by this tool, not declared per statement",
 ]
 
 

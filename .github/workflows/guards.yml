@@ -43,6 +43,15 @@ jobs:
       - name: Secrets and local absolute paths
         run: python lab/check-secrets.py
 
+
+      # The audit of 2026-10-29 found three of twelve examples violating the published schema while every
+      # gate was green: the schema was documentation and nothing validated the shipped data against it.
+      - name: Install jsonschema
+        run: python -m pip install --quiet jsonschema
+
+      - name: Examples validate against the published schema
+        run: python lab/check-examples-schema.py
+
       - name: Examples still match tests/expected.json
         run: python tools/check_examples.py
 

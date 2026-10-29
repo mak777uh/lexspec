@@ -244,3 +244,41 @@ immediately:
 These four reviews are written by us, not by their authors, and a review says as much about the reviewer's priorities
 as about the subject. Each note lists what was not opened; none of them ran a foreign test suite, and none changed a
 foreign file except the note itself.
+
+
+---
+
+## §11 External audit of 2026-10-29 (second), sixteen findings
+
+A second reviewer — a research-lab agent — audited the tree without changing it and filed sixteen findings, including
+three that break a result and five that break trust. Every one I reproduced was real. The list below is their framing,
+not mine, because a review's value is in the defect.
+
+| # | sev | finding | what changed here |
+|---|---|---|---|
+| 1 | result | three of twelve shipped examples violated the published schema (`segments: rate_change_and_payments`), and no gate validated examples against the schema | enum extended; **`lab/check-examples-schema.py` + a CI step** now validate every example against `schemas/statement-0.1.json` |
+| 2 | result | `series[].basis` was never read, and pointed at a span that existed nowhere | basis is now verified like an atom anchor (corpus exists, span occurs after normalisation, unique); **the judgment itself is pinned as a corpus** (`corpus/a09-14-2020-2026-10-29.txt`) and the basis now points into it |
+| 3 | result | `--json` crashed on a non-UTF-8 stdout and exited **1**, the same code as `REFUSED` | stdio is reconfigured to UTF-8; output failures raise `OutputFailure` and are meant to exit 3. Reproduced under `PYTHONIOENCODING=cp1252`: it printed the report |
+| 4 | trust | `revision` was shape-checked as a date and compared with nothing; the report did not name the bytes checked | report now carries a `corpus[]` block (`id`, `text`, `text_sha256`, `revision`, `usable`); two codes added: `S2_REVISION_MISMATCH` (declared revision absent from the file's `# REVISION:` header) and `S2_REVISION_UNCHECKED` (no header to compare) |
+| 5 | trust | `prefix`/`suffix` were in the spec and ignored by the checker; the "<40 characters ⇒ context required" rule was not implemented | both are now schema fields, the checker verifies a declared context and **requires** it below 40 normalised characters (`S2_CONTEXT_MISMATCH`, `S2_CONTEXT_MISSING`); nine short spans in the examples were given real context computed from their corpora |
+| 6 | trust | `S2_HASH_MISMATCH` was emitted where the hash had **matched** (UTF-8 decode failure) and for unreadable files | new code `S2_CORPUS_UNREADABLE`, whose detail says the hash matched when it did |
+| 7 | trust | `not_claimed` carried three items and omitted the five things a reader of one report cannot guess | the list now names: revision and article are declared/not verified, conditions is prose, cross-tuple correlative agreement is unchecked, and the normalisation policy is the tool's |
+| 8 | trust | the hashes published in `tools/SELFTEST.md` had drifted in four places | **accepted, still open**: the generator is not run by any CI step, and I have not regenerated it in this pass |
+| 9 | trust | the schema promised an exact substring while the checker matches after normalisation | schema description now states the normalised contract; the report still does not print the matched offset, also accepted-open |
+| 10-16 | minor | README said "three statements" (twelve ship); "never outputs the word legal" (it prints `legal validity` in `not_claimed`); a dead loop in the defeat pass; `series[].path` bypassed the repo-relative guard; `S2_SPAN_NOT_FOUND` did not always say whether the raw text contains the span; the threshold compared a rounded number | all six fixed; `series[].path` now goes through `_is_repo_relative`, the detail always reports the raw occurrence count, and the threshold compares the exact value |
+
+### What this audit says about the guards, and it is the uncomfortable part
+
+Both result-breaking findings were in code I wrote **today**: the schema gained a field while the examples gained a
+value it did not allow, and a basis span was asserted without ever being looked up. Neither was caught by anything in
+the repository, because nothing validated shipped data against the published contract and nothing verified provenance
+of a number. The pattern is consistent with the earlier audit: **a guard checks the thing it was written for, and the
+new field walks past it.**
+
+### Still open, named
+
+1. `tools/SELFTEST.md` hashes (finding 8) — regenerate in CI rather than by hand.
+2. The report does not print the matched region (offset and context), so an `anchored` verdict cannot be re-checked
+   from the report alone (finding 9, second half).
+3. `OutputFailure` exists but no code path is asserted by a test; the encoding fix is verified by reproduction, not by a
+   test.
