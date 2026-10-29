@@ -65,7 +65,14 @@ def main() -> int:
         # mutation 1: a number in prose that the tree contradicts
         doc = tmp / "docs" / "25-TRUTH-AND-BOUNDS.md"
         text = doc.read_text(encoding="utf-8")
-        doc.write_text(text.replace("→ 61 tests pass", "→ 999 tests pass"), encoding="utf-8", newline="")
+        # mutate whatever the claim currently says, not a literal from the past: a self-test that hardcodes
+        # the number it is testing silently stops testing anything the moment the prose is updated (CI caught
+        # exactly that on 2026-10-29).
+        mutated, n = re.subn(r"→ \d+ tests pass", "→ 999 tests pass", text)
+        if n != 1:
+            print(f"FAIL M1 the tests claim was not found to mutate (n={n})")
+            failures += 1
+        doc.write_text(mutated, encoding="utf-8", newline="")
         code, out = run(tmp, tests)
         if code == 1 and "999" in out:
             print("ok   M1 a wrong test count is caught")
