@@ -109,8 +109,10 @@ def spec_section(name: str) -> str:
     if name == "top":
         m3 = re.search(r"```[a-z]*\n(.*?)```", body, re.S)
         return m3.group(1) if m3 else ""
-    # a block is the first fenced listing after its label; prose after it must not be read as fields
-    m2 = re.search(rf"`{name}`:\s*\n+```[a-z]*\n(.*?)```", body, re.S)
+    # a block is the first fenced listing after its label. The label may carry a parenthetical before the
+    # colon (e.g. "`SeriesRef` (planned for v0.1.1):"), so text between the name and the colon is tolerated;
+    # prose after the closing fence must never be read as fields.
+    m2 = re.search(rf"`{name}`[^\n]*:\s*\n+```[a-z]*\n(.*?)```", body, re.S)
     return m2.group(1) if m2 else ""
 
 
@@ -131,7 +133,8 @@ def check_fields() -> None:
     for f in sorted(documented_top - set(schema.get("properties", {}))):
         add("B", f"spec §2 documents a top-level field the schema lacks: {f}")
 
-    blocks = {"CorpusRef": "corpusRef", "Term": "term", "Atom": "atom", "Escape": "escape"}
+    blocks = {"CorpusRef": "corpusRef", "Term": "term", "Atom": "atom", "Escape": "escape",
+              "SeriesRef": "seriesRef", "Quantity": "quantity"}
     defs = schema.get("$defs", {})
     for spec_name, def_name in blocks.items():
         doc = fields_in(spec_section(spec_name))

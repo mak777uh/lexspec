@@ -40,6 +40,8 @@ terms           [Term]                     — the declared vocabulary of this s
 atoms           [Atom]                     — 0 or more; coverage is 0.0 when empty, which is never a pass
 conflicts_policy {default, lex_specialis}   — how incompatible relations are to be resolved; see §7
 escapes         [Escape]                   — declared non-closure; checked against computed escapes
+series          [SeriesRef]                — pinned external value series; optional, see docs/27
+quantities      [Quantity]                 — quantities atoms refer to; optional, see docs/27
 ```
 
 `CorpusRef`:
@@ -71,6 +73,7 @@ action        {verb, object, open}
 conditions    [string]    — free-text conditions; not interpreted in v0.1, listed in the report
 temporal      {from, until}   — YYYY-MM-DD; until=null means "no declared end"
 anchor        {corpus, article, span, note}
+quantity      string      — handle into quantities[]; see docs/27
 ```
 
 `Escape`:
@@ -79,6 +82,32 @@ anchor        {corpus, article, span, note}
 atom    string    — atom id
 reason  string    — a code from §10
 detail  string    — why, in one sentence
+```
+
+`SeriesRef` (planned for v0.1.1, [docs/27](../docs/27-QUANTITY-LAYER.md)):
+
+```
+id            string      — handle used by quantity.series
+publisher     string      — who publishes the series
+basis         Anchor      — the span that names this publisher as the source
+format        string      — how it was retrieved (e.g. "soap KeyRate")
+retrieved_at  string      — YYYY-MM-DD of the retrieval
+digest        string      — sha256 of the retrieved artefact
+covers        object      — {from, to} the range the pin claims
+```
+
+`Quantity` (planned for v0.1.1):
+
+```
+id            string      — handle used by atom.quantity
+kind          "literal" | "rate_of"
+value         integer     — for a literal: the amount in `scale` units
+scale         integer     — decimal places; money is never a float
+currency      string      — ISO code, for a literal
+base          string      — for rate_of: the base the rate applies to
+series        string      — for rate_of: the SeriesRef id
+period        {from, to, segments, day_count}
+rounding      {mode, digits}
 ```
 
 Unknown fields are allowed and ignored; a checker must not fail on them. A statement containing a field this
