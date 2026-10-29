@@ -758,7 +758,7 @@ class QuantityLayer(FixtureCase):
     def test_segmentation_reproduces_the_judgment_day_count(self):
         _code, report, _out = self.check(self.load())
         q1 = report["quantities"]["q1"]
-        self.assertEqual(19, len(q1["segments"]))
+        self.assertEqual(23, len(q1["segments"]), "rate changes, payments and the leap-year cut")
         self.assertEqual(1296, sum(s["days"] for s in q1["segments"]), "the act prints 1296 days in total")
         self.assertEqual(77, q1["segments"][0]["days"], "the act prints 77 days for the first row")
         self.assertEqual("2017-03-26", q1["segments"][0]["to"], "a segment ends the day before the next rate")
@@ -776,6 +776,27 @@ class QuantityLayer(FixtureCase):
         _code, report, _out = self.check(document)
         self.assertIn("S8_UNDECLARED_ARITHMETIC", self.codes(report))
         self.assertEqual("CHECKED", report["verdict"], "an undeclared convention can never reach CHECKED_ANCHORED")
+
+    def test_the_total_reproduces_the_judgment(self):
+        """The whole point: our integer arithmetic must land on the figure the court awarded."""
+        _code, report, _out = self.check(self.load())
+        q1 = report["quantities"]["q1"]
+        self.assertEqual(23, len(q1["segments"]), "the act prints 23 rows")
+        self.assertEqual(20731362, q1["total_minor"], "207 313,62 roubles, in kopecks")
+
+    def test_a_payment_reduces_the_base_from_the_next_day(self):
+        _code, report, _out = self.check(self.load())
+        by_date = {s["from"]: s for s in report["quantities"]["q1"]["segments"]}
+        self.assertEqual(128110558, by_date["2018-03-26"]["base_minor"], "full principal before the payment")
+        self.assertEqual(78110558, by_date["2018-07-28"]["base_minor"], "reduced from the day after 27.07.2018")
+        self.assertEqual(28110558, by_date["2018-08-01"]["base_minor"], "reduced again after 31.07.2018")
+
+    def test_the_year_is_cut_only_where_its_length_changes(self):
+        _code, report, _out = self.check(self.load())
+        starts = [s["from"] for s in report["quantities"]["q1"]["segments"]]
+        self.assertIn("2020-01-01", starts, "366 begins here, and the act cuts here")
+        self.assertNotIn("2018-01-01", starts, "365 to 365 is not a cut, and the act does not cut there")
+        self.assertNotIn("2019-01-01", starts, "same reason")
 
     def test_a_period_outside_the_pin_is_a_segment_gap(self):
         document = self.load()
@@ -806,7 +827,7 @@ class QuantityLayer(FixtureCase):
     def test_segmentation_reproduces_the_judgment_day_count(self):
         _code, report, _out = self.check(self.load())
         q1 = report["quantities"]["q1"]
-        self.assertEqual(19, len(q1["segments"]))
+        self.assertEqual(23, len(q1["segments"]), "rate changes, payments and the leap-year cut")
         self.assertEqual(1296, sum(s["days"] for s in q1["segments"]), "the act prints 1296 days in total")
         self.assertEqual(77, q1["segments"][0]["days"], "the act prints 77 days for the first row")
         self.assertEqual("2017-03-26", q1["segments"][0]["to"], "a segment ends the day before the next rate")

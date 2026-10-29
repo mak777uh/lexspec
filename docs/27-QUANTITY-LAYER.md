@@ -220,3 +220,34 @@ payments, so for a debtor who paid in part the base would be wrong. Recorded as 
 `segments: rate_change_and_payments`, with payments as first-class events carrying their own date and amount.
 Until it exists, a statement that relies on partial payments must declare an escape — which is what the escape
 mechanism is for.
+
+
+---
+
+## Addendum 2, 2026-10-29 — the total is reproduced, and the last W1 caveat is closed
+
+The layer now models **partial payments**: a payment reduces the base from the day after it was made, exactly as the
+judgment prints it (a 27.07.2018 payment produces a reduced base starting 28.07.2018, and a 31.07.2018 payment the
+final base from 01.08.2018). Segments are cut at rate changes, at payments, and at 1 January **only where the
+length of the year changes** — 2018 and 2019 are both 365 days, and the act does not cut there either; it cuts only
+at 01.01.2020, where 366 begins.
+
+| Measured | Value | Act |
+|---|---|---|
+| segments | **23** | 23 rows |
+| total | **207 313,62 ₽** | «Итого: … 207 313,62» |
+| first row | 77 days, 27 026,06 ₽ | same |
+| last row | 1 day, 32,64 ₽ | same |
+
+Every row we could parse matches, and the total matches exactly. This closes the caveat recorded two sections above
+("the printed total has not been reproduced") and with it the last `[unverified]` piece of W1: the convention
+(actual/actual, per-row half-up to kopecks) and the **arithmetic result** are now both checked by our own computation
+against the act, not quoted from it.
+
+**What remains true:** two of the act's rows still defeat a plain-text parser (adjacent numbers glued by PDF
+extraction), so the verification covers 21 of 23 rows individually plus the total; and one row — the one that the
+parser glued — is covered only through the total. `cases` 603 recorded exactly this class of defect, and the count
+of discarded rows is now part of the acceptance test rather than a footnote.
+
+**Boundary:** this is one first-instance judgment. It settles what practitioners do with this provision; it does not
+make the convention binding law, and the report says so.

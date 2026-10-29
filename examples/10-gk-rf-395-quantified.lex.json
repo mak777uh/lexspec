@@ -234,7 +234,7 @@
       },
       "format": "json points (date, value_bp)",
       "path": "lab/series/key-rate-a09-14.json",
-      "digest": "edb0f82b026d2561ec63d45710408366716e66f20c0241395760bbf1d7885f69",
+      "digest": "fb9b15ce401e655b1d1242907ce01f10745a3883ae98cf16ab7e9679fd699d67",
       "retrieved_at": "2026-10-29",
       "covers": {
         "from": "2017-01-09",
@@ -251,13 +251,30 @@
       "period": {
         "from": "2017-01-09",
         "to": "2020-07-27",
-        "segments": "rate_change",
+        "segments": "rate_change_and_payments",
         "day_count": "actual/actual"
       },
       "rounding": {
         "mode": "half_up",
         "digits": 2
-      }
+      },
+      "base_amount": {
+        "value": 128110558,
+        "scale": 2,
+        "currency": "RUB"
+      },
+      "payments": [
+        {
+          "date": "2018-07-27",
+          "value": 50000000,
+          "scale": 2
+        },
+        {
+          "date": "2018-07-31",
+          "value": 50000000,
+          "scale": 2
+        }
+      ]
     }
   ]
 }

@@ -1155,12 +1155,18 @@ def _rate_at(points: list[tuple[str, int]], day: str) -> int | None:
     return value
 
 
-def _segments(points: list[tuple[str, int]], start: str, end: str) -> list[dict]:
-    """Cut [start, end] at every date the series changes value.
+def _segments(
+    points: list[tuple[str, int]],
+    start: str,
+    end: str,
+    payments: list[dict] | None = None,
+    cut_years: bool = False,
+) -> list[dict]:
+    """Cut [start, end] at every rate change and, when asked, at every payment.
 
-    Boundaries are inclusive on both ends, because that is how a court writes a period (the judgment prints
-    "09.01.2017 | 26.03.2017 | 77" for a span whose two endpoints are both counted). A segment therefore ends the
-    day *before* the next rate takes effect, and `days` counts both endpoints.
+    A payment reduces the base from the day after it was made: the judgment prints a 27.07.2018 payment and a
+    reduced base starting 28.07.2018, and a second payment on 31.07.2018 with the final base from 01.08.2018.
+    Boundaries are inclusive on both ends, because that is how a court writes a period.
     """
     import datetime as _dt
 
@@ -1169,25 +1175,68 @@ def _segments(points: list[tuple[str, int]], start: str, end: str) -> list[dict]
         return (_dt.date(y, m, d) + _dt.timedelta(days=days)).isoformat()
 
     boundaries = [start]
+    if cut_years:
+        # actual/actual changes the denominator on 1 January, so a period must be cut there even when the
+        # rate does not change. The judgment prints exactly that: 16.12-31.12.2019 at 365, 01.01-09.02.2020
+        # at 366, both at 6.25 %.
+        def leap(y: int) -> bool:
+            return (y % 4 == 0 and y % 100 != 0) or y % 400 == 0
+
+        year = int(start[:4])
+        while f"{year + 1}-01-01" <= end:
+            # only when the length of the year actually changes: 2018 and 2019 are both 365 days, and the
+            # judgment does not cut there either - it cuts only at 01.01.2020, where 366 begins.
+            if leap(year) != leap(year + 1):
+                boundaries.append(f"{year + 1}-01-01")
+            year += 1
     for date, _bp in points:
         if start < date <= end and date not in boundaries:
             boundaries.append(date)
+    for payment in payments or []:
+        day = payment.get("date")
+        if isinstance(day, str) and start < day <= end:
+            effective = shift(day, 1)
+            if effective <= end and effective not in boundaries:
+                boundaries.append(effective)
     boundaries.sort()
+
     out = []
     for i, begin in enumerate(boundaries):
-        if i + 1 < len(boundaries):
-            stop = shift(boundaries[i + 1], -1)
-        else:
-            stop = end
-        out.append(
-            {
-                "from": begin,
-                "to": stop,
-                "days": _days(begin, stop),
-                "value_bp": _rate_at(points, begin),
-            }
-        )
+        stop = shift(boundaries[i + 1], -1) if i + 1 < len(boundaries) else end
+        out.append({"from": begin, "to": stop, "days": _days(begin, stop), "value_bp": _rate_at(points, begin)})
     return out
+
+
+def _money_minor(spec: dict) -> int | None:
+    """A literal amount in minor units: {value, scale}. Integer only - a float never enters this path."""
+    value, scale = spec.get("value"), spec.get("scale")
+    if not isinstance(value, int) or not isinstance(scale, int) or not 0 <= scale <= 6:
+        return None
+    return value
+
+
+def _apply_payments(base_minor: int, payments: list[dict], begin: str) -> int:
+    """The base in force on `begin`: every payment dated strictly before it has reduced the principal."""
+    out = base_minor
+    for payment in payments:
+        day, amount = payment.get("date"), payment.get("value")
+        if isinstance(day, str) and isinstance(amount, int) and day < begin:
+            out -= amount
+    return out
+
+
+def _interest_minor(base_minor: int, days: int, value_bp: int, days_in_year: int, digits: int):
+    """base * days * (value_bp / 10000 %) / days_in_year, rounded half-up to `digits` places.
+
+    Decimal from integers, never float: the canonical form forbids floats and so does this arithmetic.
+    """
+    from decimal import Decimal, ROUND_HALF_UP
+
+    rate = Decimal(value_bp) / Decimal(10000) / Decimal(100)
+    value = Decimal(base_minor) * Decimal(days) * rate / Decimal(days_in_year)
+    # money is integer kopecks: the rounding is to the nearest kopeck, not to a fraction of one.
+    quantum = Decimal(1)
+    return value.quantize(quantum, rounding=ROUND_HALF_UP)
 
 
 def _ordinal(date: str) -> int:
@@ -1235,7 +1284,11 @@ def check_quantities(root: Path, statement: "Statement", findings: "Findings") -
             findings.add("S8_SEGMENT_GAP", None, f"quantity {qid!r}: period.from and period.to are required")
             results[qid] = {"ok": False}
             continue
-        segments = _segments(source["points"], begin, stop)
+        payments = [p for p in (quantity.get("payments") or []) if isinstance(p, dict)]
+        segments = _segments(
+            source["points"], begin, stop, payments,
+            cut_years=(period.get("day_count") == "actual/actual"),
+        )
         gap = [s for s in segments if s["value_bp"] is None]
         if gap:
             findings.add(
@@ -1254,6 +1307,27 @@ def check_quantities(root: Path, statement: "Statement", findings: "Findings") -
                 f"quantity {qid!r}: day_count={day_count!r}, rounding={rounding!r}; the verdict is capped at CHECKED "
                 f"(docs/27 §3). Declare both with a basis and the cap lifts without touching code",
             )
+        base_spec = quantity.get("base_amount")
+        base_minor = _money_minor(base_spec) if isinstance(base_spec, dict) else None
+        digits = int((quantity.get("rounding") or {}).get("digits", 2))
+        amount = None
+        total = None
+        if base_minor is not None and day_count == "actual/actual" and rounding == "half_up":
+            amount = []
+            total = 0
+            for segment in segments:
+                today = segment["from"]
+                base_today = _apply_payments(base_minor, payments, today)
+                year = int(today[:4])
+                leap = (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
+                days_in_year = 366 if leap else 365
+                interest = _interest_minor(base_today, segment["days"], segment["value_bp"], days_in_year, digits)
+                segment["base_minor"] = base_today
+                segment["days_in_year"] = days_in_year
+                segment["interest"] = str(interest)
+                amount.append(str(interest))
+                total += int(interest)
+            segments = segments
         results[qid] = {
             "ok": True,
             "kind": "rate_of",
@@ -1261,6 +1335,7 @@ def check_quantities(root: Path, statement: "Statement", findings: "Findings") -
             "day_count": day_count,
             "rounding": rounding,
             "base": quantity.get("base"),
+            "total_minor": total,
         }
     return results
 
