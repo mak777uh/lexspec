@@ -112,3 +112,19 @@ therefore not a blocker but a filter:
 3. ГК 395 remains the **anchoring** test, not the correctness test, until a judgment printing its full
    arithmetic is opened by us. One answer claims such a judgment (А09-14/2020, 23-row table, per-period rounding
    to kopecks, sum of rounded rows) — `[unverified]` here, and it is the next thing to open.
+
+
+## Addendum 4, 2026-10-29 — ГК 395 has an oracle, with one caveat that is ours
+
+Judgment А09-14/2020 (Bryansk, 10.08.2020) prints the full arithmetic: principal, per-period days, rate, the
+denominator used, and the interest per row. Recomputation in `Decimal` reproduces **20 of 22** extracted rows
+exactly, and the two failures are PDF text-extraction artefacts (adjacent numbers glued), not arithmetic
+disagreements.
+
+Therefore ГК 395 becomes the first provision with a **correctness** fixture as well as an anchoring test — the
+condition in Addendum 2 is met by a document on disk, quoted in [`docs/27`](../../docs/27-QUANTITY-LAYER.md).
+
+**The caveat, stated so it is not forgotten:** the printed total (`207 313,62`) has not been reproduced from the
+rows, because the extraction loses table layout. Until a layout-aware extraction confirms whether the total is the
+sum of rounded rows or the rounded sum, we may claim the *convention* (actual/actual, per-row half-up) but not the
+*total check*. That distinction is exactly the one this project exists to keep.

@@ -161,3 +161,18 @@ licensing, not authority. The corpus headers now say exactly that.
 
 This moves the blame for the earlier 6-of-14 failures from the anchoring rule to our procedure — which is where
 the standard said it belonged ([`docs/26`](26-ROUND-03-MERGED.md) §W6).
+
+
+---
+
+## §10 Verified addition, 2026-10-29 — the 395 arithmetic, read from the act itself
+
+| Claim | Verified by | Boundary |
+|---|---|---|
+| The day count for post-2016 interest is actual/actual, switching at the calendar year | judgment А09-14/2020 (10.08.2020), fetched and saved; wording quoted in [`docs/27`](27-QUANTITY-LAYER.md); the table uses 365 for 16.12.2019–31.12.2019 and **366 at the same rate** for 01.01.2020–09.02.2020 | one first-instance act; not a binding clarification |
+| Rounding is per row, half-up, to kopecks | 20 of the 22 rows my extractor produced recompute to the printed figure in `Decimal` with `ROUND_HALF_UP` | two rows were unusable because the PDF text glued adjacent numbers; the **total** is therefore not independently reproduced |
+| The rate series' authority is named by the Plenum | Пленум № 7 п. 39, read at source earlier the same day | names the Bank of Russia site and the Vestnik; does not pin a format |
+
+Two incidental facts worth keeping: the Bryansk court's **TLS certificate has expired** (which is why every earlier
+attempt died with `UNEXPECTED_EOF`), and **keyless search is available** through `api.anysearch.com`, so discovery
+works again without any credential.

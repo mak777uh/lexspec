@@ -148,3 +148,41 @@ Per AGENTS §7 a code enters `docs/11` only with a test, so these wait:
 
 If (2) fails on the same commit, the segmentation rule is under-specified and must be fixed before any defender
 writes code against it — which is the whole point of specifying before building.
+
+
+---
+
+## Addendum, 2026-10-29 — W1 is closed by evidence; the two `undeclared` fields can be declared
+
+The act was reached. Not through a court domain (those fail TLS for this client — one certificate is *expired*,
+which is why the earlier attempts died), but because the keyless AnySearch engine returned the PDF as the first
+result and the host answered when certificate verification was disabled for a single read of a public document.
+
+**Source:** решение Арбитражного суда Брянской области от 10.08.2020 по делу **А09-14/2020**, 7 pages, saved and
+hashed locally. The relevant wording, quoted:
+
+> «…с момента принятия Постановления Пленума Верховного Суда Российской Федерации от 24.03.2016 N 7 были признаны
+> не подлежащими применению пункты 1–3, 5–11 постановления Пленумов ВС РФ и ВАС РФ от 08.10.1998 № 13/14, в
+> соответствии с которыми при расчете процентов … количество дней в году принималось равным 360 дням. С указанного
+> момента при расчете процентов … следует использовать **фактическое количество дней в году (365 и (или) 366 дней
+> в году)**.»
+
+The judgment prints a 23-row table with the columns `[1] задолженность | [2]–[3] период | [4] дни | [5]–[6] оплата
+| [7] ставка | [8] дней в году | [1]×[4]×[7]/[8]`.
+
+**What I verified myself, by recomputation in `Decimal` with half-up rounding:**
+
+| Question | Result |
+|---|---|
+| day count | **actual/actual, and the denominator switches on the calendar year, not on the rate** — 16.12.2019–31.12.2019 uses 365, 01.01.2020–09.02.2020 uses **366 at the same 6.25 %** |
+| segmentation | cut at every rate change **and** at each partial payment — both appear as separate rows |
+| rounding | **per row, half-up, to kopecks**: 20 of the 22 rows my extractor produced reproduce the printed figure exactly (`1 281 105,58 × 77 × 10 % / 365 = 27 026,06`, and the last row `281 105,58 × 1 × 4,25 % / 366 = 32,64`) |
+| total | **not independently reproduced.** Two rows came out of the PDF with numbers glued together (`10 863,00` merged with the next principal), and the plain-text extraction loses the table layout. The printed total is `207 313,62`; whether that equals the sum of rounded rows rather than the rounded sum remains unchecked. A layout-aware extraction (pdfplumber/pdftotext −layout) is the next step, not a new question. |
+
+**Consequences for this document**
+
+1. `period.day_count` can be declared **`actual/actual`** with `basis` pointing at this judgment, and
+   `rounding.mode` can be declared **`half_up`, digits 2, per period** — the values the ceiling was waiting for.
+2. The ceiling rule does not disappear; it becomes the rule for *everything else* that arrives undeclared.
+3. ГК 395 stops being an anchoring-only measurement the moment the total is reproduced — the oracle is now a real
+   document on disk with a quoted span, not a claim in an answer.
