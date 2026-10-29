@@ -198,3 +198,49 @@ Two things worth naming, because both are structural rather than clerical:
 instrument cannot see that, and neither can any number instrument — it is a translation-maintenance debt. The options
 are to regenerate the mirror from the canonical file or to declare it a summary rather than a mirror; until one is
 chosen, the sentence "where they disagree, this one wins" is true and unenforced.
+
+
+---
+
+## §10 Cross-audit exchange, 2026-10-29 — four reviews out
+
+The owner asked for an exchange: each project audits the others and leaves a note in `cross-audit/`. Four notes went
+out today, each with reproducing commands, each stating what was not checked, and none of them changing anything in
+the host repository except that one file.
+
+| repository | commit | headline finding |
+|---|---|---|
+| `harness` | `dca2e9b` | gates exist and are green (9/9, plus `selftest`), but **no workflow runs them on push**; `CLAIMS.md`'s header declares six columns while 34 of 38 rows carry seven, and `gate_claims` never compares shape, so the gate is green on a table it does not describe |
+| `VecDHT` | `61a9767` | its 16 guards all have self-tests and all are wired — the strongest contour in the family — but the **test counts in the `verify.yml` header have drifted by 40** (claimed 764, tree 804: orders 16→24, index 117→118, node 203→208, net 102→105, cli 79→102) |
+| `flowguard-spec` | `64e9008` | `lab/check-interop.py` is tracked and **never called** by `guards.yml` (eight steps, not one of them interop) |
+| `-` (morphogenesis) | `0b3afb1` | eight test modules and **no executor**; `pytest` prescribed in the README, `torch` imported in 24 places, no pinned environment; two root files both declare v5.5-EXP FINAL Rev.7 at 211 KB and 362 KB with suffixes that name nothing |
+
+### What the exchange already gave us
+
+Writing someone else's audit is a better test of your own discipline than reading it. Three things came back
+immediately:
+
+1. **`harness`'s gate list is better shaped than ours.** Nine named gates, each returning a list of problems, and
+   `selftest` plants defects to prove the gates can fail. We have the same idea spread across four scripts; theirs is
+   one command with one exit code.
+2. **`VecDHT`'s meta-guard is the thing we were missing this morning.** `check-guard-selftests.py` takes the guard
+   list **from the directory by prefix**, not from a list inside itself, and separates "no selftest" from "selftest
+   not wired". Our audit this morning found exactly the failure it prevents: a self-test that names its own cases
+   tests only those cases. Their device is the general form.
+3. **A number with a command is still not checked.** `VecDHT` prints the grep commands next to 764 — and the number
+   drifted anyway. That is the strongest argument yet for the rule we adopted today: a count in prose needs a
+   resolver, not a citation.
+
+### What we owe back, in the same currency
+
+- `harness`: name the seventh column or drop it, and add the arity check to `gate_claims`; give the gates an executor.
+- `VecDHT`: either drop the exact counts from the CI header or add `check-ci-numbers.py`; and state the counting rule
+  so that a stranger's count and theirs cannot differ by definition.
+- `flowguard-spec`: wire `check-interop.py` or say in `AGENTS.md` why it is manual; add the two-README number check.
+- `-`: one workflow, one current-spec pointer.
+
+### Boundary
+
+These four reviews are written by us, not by their authors, and a review says as much about the reviewer's priorities
+as about the subject. Each note lists what was not opened; none of them ran a foreign test suite, and none changed a
+foreign file except the note itself.
