@@ -251,3 +251,21 @@ of discarded rows is now part of the acceptance test rather than a footnote.
 
 **Boundary:** this is one first-instance judgment. It settles what practitioners do with this provision; it does not
 make the convention binding law, and the report says so.
+
+
+---
+
+## Addendum 3, 2026-10-29 — the checker did not implement rule 0, and the guard could not see it
+
+While building the doctrinal example, three spans that `tools/span_hint.py` resolved were refused by
+`tools/lexcheck.py` with `S2_SPAN_NOT_FOUND`. The cause: the spec has required normalisation before matching since
+round 03 (§5 rule 0), `span_hint` implements it, and **the checker did not** — it matched raw bytes.
+
+That is the exact class of drift the consistency guard cannot catch: prose and tool are each internally consistent,
+and the guard compares codes, fields, relations and examples, not algorithms. The repair is now in the checker:
+both corpus and span are normalised with the declared policy, occurrences are counted on the normalised text, and
+`S2_SPAN_NOT_FOUND` says when a quote differs from the corpus only in whitespace.
+
+What remains unchecked, and is worth naming: **no test asserts that `span_hint` and `lexcheck` normalise the same
+way.** They agree today by construction; a future edit to one would break it silently. The fix is a shared function
+in one module, which is the next small slice rather than a new idea.

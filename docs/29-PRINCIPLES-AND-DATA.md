@@ -146,3 +146,20 @@ one normative unit? That is not machine-checkable, and P6 is therefore restated 
 
 The measurement is a count over our 30 atoms: how many needed a second span during encoding. Current answer: none
 recorded, which is weak evidence and is marked as such.
+
+
+### P7 — added 2026-10-29, from the doctrinal read
+
+**Coverage measured over our own atom set overstates completeness, and the overstatement is invisible in the number.**
+
+Evidence: ГК 395 reported **0.833** while encoding roughly two thirds of the normative content. Reading the statute
+paragraph by paragraph against our atoms (`lab/legal-read-gk-395.md`) found three missing atoms and one collapsed
+distinction: the general "different rate" carve-out (п. 1 sentence 3), the endpoint rule (п. 3), the debtor's
+application (п. 6), and the entrepreneurial nuance of п. 5.
+
+*Metric:* `norm_recall` = atoms / normative sentences, where the denominator is counted **from the text** before any
+encoding happens. `coverage` stays what it is — a property of the statement.
+*Refuted by:* a provision where atoms derived from the text and atoms derived by intuition coincide, and where a
+reader confirms nothing normative was lost.
+*What it changes:* every statement is now written by walking the text sentence by sentence, and a sentence without
+an atom needs a declared reason. `examples/12` was built that way: ten atoms for ten normative sentences.

@@ -911,6 +911,31 @@ def load_corpora(
     return loaded
 
 
+def _normalize(text: str) -> str:
+    """Spec §5 rule 0: LF, collapsed whitespace, decoded entities, no markup.
+
+    The W3C TextQuoteSelector requires the text to be normalised before recording, and a quote that fails only
+    because the source wraps is our defect, not the author's. The same policy is implemented in
+    tools/span_hint.py; they must agree, which is why both are stated as the same rule.
+    """
+    import html as _html
+
+    text = _html.unescape(text)
+    text = re.sub(r"<[^>]+>", "", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _find_regions(haystack: str, needle: str) -> list[int]:
+    out: list[int] = []
+    start = 0
+    while True:
+        hit = haystack.find(needle, start)
+        if hit == -1:
+            return out
+        out.append(hit)
+        start = hit + 1
+
+
 def check_anchors(
     statement: Statement, corpora: dict[str, dict], findings: Findings
 ) -> dict[str, bool]:
@@ -943,19 +968,24 @@ def check_anchors(
             # Already reported at statement level; the atom is simply not anchored.
             anchored[aid] = False
             continue
-        occurrences = corpus["text"].count(span)
+        # Spec §5 rule 0: normalise before matching. A quote that is correct after collapsing a line break must
+        # anchor; refusing it was our defect, and the detail says so instead of blaming the text.
+        haystack = _normalize(corpus["text"])
+        needle = _normalize(span)
+        occurrences = len(_find_regions(haystack, needle))
         if occurrences == 0:
-            findings.add(
-                "S2_SPAN_NOT_FOUND",
-                aid,
-                f"span does not occur in corpus {cid!r}: {span[:80]!r}{'…' if len(span) > 80 else ''}",
-            )
+            raw_hit = corpus["text"].count(span)
+            detail = f"span does not occur in corpus {cid!r} even after normalisation: {span[:80]!r}"
+            if raw_hit == 0 and len(needle) != len(span):
+                detail += " (the quote differs from the corpus only in whitespace, which rule 0 should have handled)"
+            findings.add("S2_SPAN_NOT_FOUND", aid, detail)
             anchored[aid] = False
         elif occurrences > 1:
             findings.add(
                 "S2_SPAN_AMBIGUOUS",
                 aid,
-                f"span occurs {occurrences} times in corpus {cid!r}; a citation that can re-point is not evidence",
+                f"span selects {occurrences} regions in corpus {cid!r} after normalisation; a citation that can "
+                f"re-point is not evidence (spec §5 rule 4)",
             )
             anchored[aid] = False
         else:

@@ -93,6 +93,14 @@
       "coverage": 0.833,
       "exit_code": 0,
       "verdict": "CHECKED"
+    },
+    "12-gk-rf-395-doctrinal.lex.json": {
+      "codes": [
+        "OPEN_TERM"
+      ],
+      "coverage": 0.9,
+      "exit_code": 0,
+      "verdict": "CHECKED"
     }
   }
 }
