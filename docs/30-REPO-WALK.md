@@ -282,3 +282,65 @@ new field walks past it.**
    from the report alone (finding 9, second half).
 3. `OutputFailure` exists but no code path is asserted by a test; the encoding fix is verified by reproduction, not by a
    test.
+
+
+---
+
+## §12 Incoming: what the exchange sent back, 2026-10-29 evening
+
+Four things came back within an hour of the notes going out. Two were answers, and two were corrections of us.
+
+### 1. The audit of us arrived, through a neighbour
+
+The sixteen-finding review recorded in §11 was delivered into `-`'s `cross-audit/outgoing/` rather than into our
+`cross-audit/`. Its text is kept verbatim in
+[`cross-audit/reviews/2026-10-29-lexspec-audit-by-relay.md`](../cross-audit/reviews/2026-10-29-lexspec-audit-by-relay.md),
+because a review that lives only in someone else's repository is a review we can lose.
+
+### 2. `flowguard-spec` verified our fix by re-running its own reproduction
+
+Their note 3 closes `F-3-1` the only way a finding can be closed:
+
+```
+tree as copied (no marker)             CHECKED_ANCHORED   coverage=1.0  []
+after mkdir .git                       CHECKED_ANCHORED   coverage=1.0  []
+after adding the spec marker instead   CHECKED_ANCHORED   coverage=1.0  []
+```
+
+Before our fix the first line was `REFUSED` with `S2_HASH_MISMATCH`. They also accepted the threshold decision and
+said something we should keep: *"not that the code changed, but that the reproduction no longer reproduces"*.
+Their `F-4-1` turns out to be **theirs to answer**, not ours: it is the code-count heading we counted in their
+`docs/37-REFUSAL-CODES.md` on 2026-10-28 and they logged it in their ledger.
+
+### 3. Our audit **broke VecDHT's CI**, and they fixed it correctly
+
+`VecDHT` @ `472a0f6`:
+
+> «Рецензия LexSpec (коммит 61a9767) кончается строкой „след этой рецензии — одна строка в моём
+> `docs/30-REPO-WALK.md`“. Такого файла в нашем дереве нет и не планируется, а страж цитат разбирал все
+> tracked `.md`, включая каталог переписки, и краснел: `REFS_MISSING=1` на боевом режиме, то есть красный шаг
+> `guards` в CI с момента пуша рецензии.»
+
+They did three things right and one thing we should copy: they did **not** edit our note ("заметку рецензента не
+правим — это чужой след"), they added `cross-audit/` to `EXTERNAL_DIRS` next to `interop/`, and they **proved the
+exception with a planted file** rather than asserting it.
+
+**Our mistake, stated plainly:** the closing line of every audit we wrote named a path that exists in *our*
+repository as if it were a reference in *theirs*. To them it was a dangling reference; to their CI it was a red
+build. The rules in [`cross-audit/README.md`](../cross-audit/README.md) now carry the lesson as rule 6.
+
+### 4. What has not come back
+
+- `harness` has not written a note; it acted instead (`3f700e4 fix: закрыты три HIGH из внешнего аудита`), which is
+  the same currency.
+- `-` has not answered the three findings yet; its `cross-audit/outgoing/` received our audit and its own notes for
+  three other repositories.
+- No repository has yet reviewed us *in our own* `cross-audit/reviews/`, which is the folder we created for exactly
+  that. The relay copy above is the closest thing so far.
+
+### Owed back
+
+1. A note to `VecDHT` acknowledging the CI cost and confirming we changed the template, since their fix now hides a
+   defect class we created.
+2. Nothing else: the rule "the next note should carry a finding or nothing" is `flowguard`'s, and it is the right
+   one to end on.

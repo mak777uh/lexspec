@@ -28,3 +28,10 @@ just a conversation.
   on the repository marker) and a decorative threshold. Their finding is recorded in
   [`docs/30`](../docs/30-REPO-WALK.md) §1 and fixed in [`ADR-0010`](../lab/decisions/ADR-0010-threshold-is-reporting.md).
   That is the standard we hold these notes to: find something that is actually wrong, or say plainly that we did not.
+
+6. **A review must not cite a path that exists only in the reviewer's tree.** Learned the hard way on
+   2026-10-29: every note we wrote ended with a sentence naming `docs/30-REPO-WALK.md` — a file of ours, not
+   of the repository being reviewed. `VecDHT`'s reference guard read it as a dangling reference and its CI
+   went red from the moment our note landed (`472a0f6`). They fixed it by adding `cross-audit/` to
+   `EXTERNAL_DIRS` without touching our text. If a sentence refers to our own repository, say so in words
+   and do not write it as a path.
