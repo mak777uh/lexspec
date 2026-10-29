@@ -9,6 +9,14 @@ did.
 
 This script is that check, on our side, before anyone else runs it.
 
+**Scope, stated because a reviewer asked (harness, 2026-10-29).** Three claims are registered by hand and
+checked against their resolvers; a reverse scan covers count-adjacent numbers in the living documents
+(`README.md`, `README.ru.md`, `docs/25`, `cross-audit/README.md`) and flags any number that is neither
+registered nor whitelisted with a reason. Numbers outside that set — inside `docs/1x`, `lab/`, review texts —
+are not checked and are not claims: they are history or quotation. The alternative ("every number must have
+a resolver") produces a scanner that cannot tell a count from a date and gets ignored, which is worse than a
+stated limit.
+
 Design, deliberately narrow: a claim is a (file, pattern, resolver) triple written down by hand. Only a claim we have
 recorded is checked, because a general "find the numbers" pass cannot tell a count from a date or an article number,
 and a checker that guesses produces noise that teaches people to ignore it. Adding a claim is a one-line act.
@@ -203,7 +211,7 @@ def check() -> tuple[list[dict], list[dict]]:
 
 # Living documents: the ones a reader treats as current. A historical lab note may quote an old number on purpose,
 # so it is out of scope by declaration rather than by accident.
-LIVING = ["README.md", "README.ru.md", "docs/25-TRUTH-AND-BOUNDS.md"]
+LIVING = ["README.md", "README.ru.md", "docs/25-TRUTH-AND-BOUNDS.md", "cross-audit/README.md"]
 
 # Count-adjacent numbers allowed to differ from the tree, each with the reason it is allowed. A whitelist without
 # reasons is how a guard becomes decoration, so every entry states why.

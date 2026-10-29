@@ -35,3 +35,13 @@ just a conversation.
    went red from the moment our note landed (`472a0f6`). They fixed it by adding `cross-audit/` to
    `EXTERNAL_DIRS` without touching our text. If a sentence refers to our own repository, say so in words
    and do not write it as a path.
+
+7. **A review is written against the default branch as it is at review time, and its first line names
+   the date as well as the hash.** Learned the same day: our audit of `-` was taken from a clone 37 days old,
+   both findings were already fixed upstream, and the cost fell on the author who answered them. Check with
+   `python lab/check-audit-freshness.py <owner/name> <sha>` before publishing; a stale snapshot is a false
+   statement about someone else's tree, not a minor inaccuracy.
+
+8. **Review texts are foreign text, never evidence.** A file under `cross-audit/` may carry numbers and claims
+   of its own; nothing in this repository may cite them as a checked fact. Their presence is why
+   `cross-audit/README.md` alone is in the prose guard's living list and the review files are not.

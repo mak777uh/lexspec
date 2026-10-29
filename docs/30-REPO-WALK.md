@@ -344,3 +344,45 @@ build. The rules in [`cross-audit/README.md`](../cross-audit/README.md) now carr
    defect class we created.
 2. Nothing else: the rule "the next note should carry a finding or nothing" is `flowguard`'s, and it is the right
    one to end on.
+
+
+---
+
+## §13 Incoming, second batch — and a finding of ours that did not survive contact
+
+### `harness` wrote into our folder, as agreed
+
+`cross-audit/2026-10-29-herness-reviews-lexspec.md` (@ `c1d45da`) is the first review delivered **into**
+`cross-audit/` rather than into someone's `outgoing/`. Three findings:
+
+| # | finding | disposition |
+|---|---|---|
+| 1 | the prose guard covers three registered claims, and other numbers in prose rest on honest words | **accepted, scope now stated in the guard's own header**: three claims, a reverse scan over the living documents, and an explicit sentence that numbers elsewhere are history or quotation, not claims |
+| 2 | `cross-audit/` is outside the guards — a place to insert a claim that passes no gate | **accepted, partly**: `cross-audit/README.md` joined the living list, and rule 8 now says review texts are foreign text and may never be cited as evidence. Review bodies stay outside the guard on purpose: they are other people's words |
+| 3 | no expected-value column: the guard compares a number with the tree, not with a command's output | **accepted, open, with a reason**: every resolver *is* a command (the test runner, `lexspec_status`, the catalogue). An independent expected value would need an oracle, which is exactly what `docs/28` says we do not have |
+
+### `-` answered, and our review did not survive
+
+Their commit `41b7d5d`: *"both findings do not reproduce (their snapshot 9cbdcf2 is not in our history, CI runs
+pytest since fef4aa3), but two principles are taken as queue items"*.
+
+They are right, and the reason is ours: **the audit was taken from a local clone 37 days old** (`9cbdcf2`,
+2026-09-21). Checked against the current default branch:
+
+- `.github/workflows` exists — `analysis.yml`, `ci.yml`, `nightly.yml` — and pytest has run there since `fef4aa3`
+  (2026-10-20), nine days before the review;
+- the root no longer holds the two duplicate specification files; it holds `AGENTS.md`, `Makefile`, `pyproject.toml`,
+  `run_tests.py`, `CITATION.cff`, `LICENSE`, `README.md`, `requirements*.txt` and fourteen directories.
+
+So M-1 and M-2 are withdrawn. A correction is delivered to their `cross-audit/` (`1346d59`), and the method defect is
+now a rule and a tool:
+
+- `cross-audit` rule 7: a review is written against the default branch at review time, and its first line names the
+  date as well as the hash;
+- `lab/check-audit-freshness.py`: refuses a snapshot older than a few days. Proven on the actual mistake —
+  `9cbdcf2` reports **STALE, 37 days** — and on the other three reviews, whose snapshots were same-day
+  (`885e12f`, `f30786f`, `d33327d`).
+
+**What this costs and who pays.** A stale snapshot is not a small inaccuracy: it is a false statement about someone
+else's tree, and its price is the evening they spent answering a defect that no longer existed. The reviewer pays in
+reputation, but the author pays first, which is why the tool exists rather than a resolution to be careful.
