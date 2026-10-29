@@ -53,12 +53,38 @@ def test_count() -> int:
     return _run_test_suite()
 
 
+class ProseProblem(Exception):
+    """A resolver found a defect that is not a number mismatch; it becomes a finding, not a crash."""
+
+    def __init__(self, kind: str, detail: str) -> None:
+        super().__init__(detail)
+        self.kind = kind
+        self.detail = detail
+
+
+def suite_is_green(returncode: int, output: str) -> tuple[bool, str]:
+    """A test count only means "pass" if the run also passed. Separated so it can be unit-tested."""
+    if returncode != 0:
+        return False, f"the test suite exited {returncode}"
+    if not re.search(r"^OK\b", output, re.M):
+        return False, "the test suite did not print OK"
+    return True, ""
+
+
 def _run_test_suite() -> int:
-    """Run the suite and read the real number, because a test count is whatever runs."""
+    """Run the suite and read the real number — and refuse to lend it to a claim when the run failed.
+
+    The first version of this resolver read `Ran N tests` and returned N regardless of the exit code, so a red
+    suite still satisfied the sentence "N tests pass". The claim is about passing, so the resolver has to prove it.
+    """
     proc = subprocess.run([PY, str(ROOT / "tests" / "run_tests.py")], capture_output=True, text=True, encoding="utf-8")
-    match = re.search(r"Ran (\d+) tests?", proc.stderr + proc.stdout)
+    output = proc.stderr + proc.stdout
+    green, why = suite_is_green(proc.returncode, output)
+    if not green:
+        raise ProseProblem("suite-red", why)
+    match = re.search(r"Ran (\d+) tests?", output)
     if not match:
-        raise SystemExit("check-prose-numbers: could not read the test count from the runner")
+        raise ProseProblem("suite-red", "the runner printed OK but no test count")
     return int(match.group(1))
 
 
@@ -98,12 +124,12 @@ CLAIMS = [
     },
     {
         "file": "docs/30-REPO-WALK.md",
-        "pattern": r"\((\d+) tests, (\d+) examples, (\d+) atoms\)",
+        "pattern": r"\((\d+) tests, (\d+) examples, (\d+) atoms, (\d+) closed\)",
         "resolve": lambda ctx: {"tests": test_count(), **status_numbers()},
         "label": "status triple quoted in the walk",
         "command": "python tests/run_tests.py && python tools/lexspec_status.py",
         "multi": True,
-        "keys": ["tests", "examples", "atoms"],
+        "keys": ["tests", "examples", "atoms", "closed"],
     },
 ]
 
@@ -113,7 +139,7 @@ FORBIDDEN = [
     {
         "pattern": r"coverage is below threshold",
         "why": "ADR-0010: the threshold is a reporting metric; CHECKED is caused by a declared escape, not by coverage",
-        "files": ["README.md", "docs/10-SPEC-v0.1.md"],
+        "files": ["README.md", "docs/10-SPEC-v0.1.md", ".github/workflows/guards.yml"],
     },
 ]
 
@@ -147,7 +173,12 @@ def check() -> tuple[list[dict], list[dict]]:
             continue
         key = claim["label"]
         if key not in cache:
-            cache[key] = claim["resolve"](None)
+            try:
+                cache[key] = claim["resolve"](None)
+            except ProseProblem as problem:
+                problems.append({"kind": problem.kind, "file": claim["file"], "label": claim["label"],
+                                 "detail": problem.detail})
+                continue
         actual = cache[key]
         if claim.get("multi"):
             claimed = [int(g) for g in match.groups()]
@@ -168,6 +199,99 @@ def check() -> tuple[list[dict], list[dict]]:
         else:
             ok.append({"file": claim["file"], "label": claim["label"], "value": measured_n})
     return ok, problems
+
+
+# Living documents: the ones a reader treats as current. A historical lab note may quote an old number on purpose,
+# so it is out of scope by declaration rather than by accident.
+LIVING = ["README.md", "README.ru.md", "docs/25-TRUTH-AND-BOUNDS.md"]
+
+# Count-adjacent numbers allowed to differ from the tree, each with the reason it is allowed. A whitelist without
+# reasons is how a guard becomes decoration, so every entry states why.
+WHITELIST = {
+    ("docs/25-TRUTH-AND-BOUNDS.md", "60 tests"): "quotes the *earlier* count inside the correction block, on purpose",
+    ("docs/25-TRUTH-AND-BOUNDS.md", "61 tests"): "same block, the value it was corrected to at that time",
+    ("docs/25-TRUTH-AND-BOUNDS.md", "17 codes"): "the code count before the S8/S9 groups existed",
+    ("docs/25-TRUTH-AND-BOUNDS.md", "22 codes"): "the code count after S8, before S9",
+    ("docs/25-TRUTH-AND-BOUNDS.md", "4 atoms"): "GDPR Art. 17 has four atoms — a per-provision count, not a tree total",
+}
+
+COUNTING = re.compile(r"\b(\d+)\s+(tests?|examples?|atoms?|codes?|refusals?)\b", re.I)
+
+
+def unregistered_numbers() -> list[dict]:
+    """Every count-adjacent number in a living document must be either registered in CLAIMS or explained here."""
+    registered: set[tuple[str, str]] = set()
+    for claim in CLAIMS:
+        registered.add((claim["file"], claim["label"]))
+    resolved: dict[str, str] = {}
+    if "test_count" not in resolved:
+        try:
+            resolved["tests"] = str(test_count())
+        except ProseProblem:
+            resolved["tests"] = "?"
+    try:
+        numbers = status_numbers()
+        for key in ("examples", "atoms", "closed"):
+            resolved[key] = str(numbers[key])
+    except Exception:  # noqa: BLE001 - a missing status is reported elsewhere
+        pass
+    try:
+        resolved["codes"] = str(refusal_codes())
+    except Exception:  # noqa: BLE001
+        pass
+
+    problems: list[dict] = []
+    for rel in LIVING:
+        path = DOCS_ROOT / rel
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for match in COUNTING.finditer(text):
+            number, unit = match.group(1), match.group(2).lower()
+            phrase = f"{number} {unit}"
+            if (rel, phrase) in WHITELIST:
+                continue
+            key = {"tests": "tests", "test": "tests", "examples": "examples", "example": "examples",
+                   "atoms": "atoms", "atom": "atoms", "codes": "codes", "code": "codes",
+                   "refusals": "codes", "refusal": "codes"}[unit.lower()]
+            expected = resolved.get(key)
+            if expected is None:
+                continue
+            if number == expected:
+                continue
+            line = text[: match.start()].count("\n") + 1
+            problems.append(
+                {
+                    "kind": "unregistered",
+                    "file": rel,
+                    "line": line,
+                    "detail": f"{phrase!r} is not the tree's {expected!r} and is not whitelisted with a reason",
+                }
+            )
+    return problems
+
+
+def mirror_numbers() -> list[dict]:
+    """README.md is canonical and README.ru.md mirrors it; numbers must not diverge even where words may.
+
+    This is spec §5 rule 0 applied to two files instead of a quote and a corpus: extract the numeric tokens, compare
+    the sets, report the difference. Words are allowed to differ in translation; a count is not.
+    """
+    en, ru = DOCS_ROOT / "README.md", DOCS_ROOT / "README.ru.md"
+    if not (en.is_file() and ru.is_file()):
+        return []
+    # Counts only. An identifier such as 19-PORTFOLIO is not a count, and comparing identifiers would flag a
+    # document list that legitimately differs while the mirror catches up — noise that teaches people to ignore
+    # this check. Measured counts are what "the mirror may differ in words, never in numbers" was about.
+    token = re.compile(r"(\d+)\s+(?:tests?|examples?|atoms?|codes?|files?|refusals?)\b", re.I)
+    a = {m.group(1) for m in token.finditer(en.read_text(encoding="utf-8"))}
+    b = {m.group(1) for m in token.finditer(ru.read_text(encoding="utf-8"))}
+    problems: list[dict] = []
+    for missing in sorted(a - b, key=int):
+        problems.append({"kind": "mirror", "file": "README.ru.md", "detail": f"{missing} is in README.md but not in the mirror"})
+    for extra in sorted(b - a, key=int):
+        problems.append({"kind": "mirror", "file": "README.ru.md", "detail": f"{extra} is in the mirror but not in README.md"})
+    return problems
 
 
 def main(argv: list[str]) -> int:
@@ -193,6 +317,8 @@ def main(argv: list[str]) -> int:
 
     ok, problems = check()
     problems += scan_forbidden()
+    problems += unregistered_numbers()
+    problems += mirror_numbers()
 
     if args.json:
         print(json.dumps({"checked": ok, "problems": problems}, ensure_ascii=False, indent=2))
@@ -203,6 +329,8 @@ def main(argv: list[str]) -> int:
             if item["kind"] == "mismatch":
                 print(f"DRIFT {item['file']:<32} {item['label']:<40} claimed {item['claimed']}, measured {item['measured']}")
                 print(f"      reproduce with: {item['command']}")
+            elif item["kind"] in {"suite-red", "unregistered", "mirror"}:
+                print(f"{item['kind'].upper():<5} {item['file']}:{item.get('line', '-')}  {item['detail']}")
             elif item["kind"] == "forbidden-phrase":
                 print(f"STALE {item['file']}:{item['line']}  {item['text']}")
                 print(f"      why: {item['why']}")

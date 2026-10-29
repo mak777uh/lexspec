@@ -44,7 +44,7 @@ it edits nothing; it leaves one note per repository.
 
 This matters for us in one specific way: `xcheck` checks *"числа в прозе против дерева"* — precisely the rule
 `AGENTS.md` §1 imposes on us ("a number without a command is not a result"). We should expect a machine check of
-that rule, and we should be ready for it to find drift: our own status output carries numbers (74 tests, 12 examples, 52 atoms) that are recomputed by `tools/lexspec_status.py` but not automatically compared to the prose.
+that rule, and we should be ready for it to find drift: our own status output carries numbers (74 tests, 12 examples, 52 atoms, 38 closed) that are recomputed by `tools/lexspec_status.py` but not automatically compared to the prose.
 
 **Action queued:** add a probe to our own suite that compares the numbers in `README.md` with
 `lexspec_status.py`, so `xcheck` finds nothing when it arrives. That is cheaper than answering a note about it.
@@ -164,3 +164,37 @@ code diverging from spec), 4 of 4 including the unmutated control.
 **Boundary, stated so it is not overclaimed:** this checks that our table is an instance of the *standard reading*
 of Hohfeld's algebra. It does not check that the algebra is the right model of any particular legal system, and it
 says nothing about whether the atoms written with these positions are correct.
+
+
+---
+
+## §9 External audit of 2026-10-29, and what it changed here
+
+A neighbouring agent audited this repository by reading the tree, without running anything, and filed five findings.
+All five were correct. This section records them in their own words, because an audit's value is in the defect, not
+in the reply.
+
+| sev | finding | what was wrong | what was done |
+|---|---|---|---|
+| **HIGH** | `lab/check-prose-numbers.py` `_run_test_suite()` | the resolver read `Ran N tests` and returned N **regardless of the exit code**, so a red suite still satisfied the sentence "N tests pass". The claim is about passing; the resolver only measured volume | the resolver now requires exit 0 **and** `OK`; a red run becomes a `suite-red` finding naming the failure instead of a number. The rule is a pure function and is unit-tested with synthetic output (three cases) |
+| **MEDIUM** | `CLAIMS` coverage | three registered claims over ~40 documents, and no reverse direction: a new number in the prose was invisible. The status triple also omitted `closed`, which the resolver already computed | added `closed` to the triple; added `unregistered_numbers()`, which scans living documents for count-adjacent numbers and reports those with neither a claim nor a whitelisted reason; extended `FORBIDDEN.files` to the workflow itself |
+| **MEDIUM** | `lab/selftest-prose.py` | three checks in a file whose docstring says a checker that only prints "ok" is decoration — two of three claims and one resolver had never been seen red | the self-test now derives one mutation per registered claim from the guard's own `CLAIMS`, plus the three suite-green cases, the stale phrase, the unregistered count and the mirror. **10 checks, count computed** |
+| **LOW** | `guards.yml` header | "Why these four steps" over eleven invocations — the comment had outlived its count, which is exactly the class `FORBIDDEN` exists for | header rewritten without a number, and `guards.yml` added to `FORBIDDEN.files` so the mechanism now guards the contour it describes |
+| **LOW** | `README.ru.md` | the mirror rule was declared and had no instrument | added `mirror_numbers()`: the same normalise-then-compare idea as spec §5 rule 0, applied to two files. **First run found the real problem: only counts are comparable, and the mirror carries none of them — it has drifted by content, not by digits.** Recorded below as an open item |
+
+### What the audit found that we had not
+
+Two things worth naming, because both are structural rather than clerical:
+
+1. **A guard can measure the wrong quantity and still be green.** "74 tests pass" was checked against "the suite
+   printed 74", and the difference between those sentences is the difference between a measurement and a ritual.
+2. **A self-test that names its own cases tests only those cases.** The previous version hard-coded one mutation; the
+   audit's phrase for it — two of three claims never seen red — is now the shape of the fix: the cases are derived
+   from the guard, so adding a claim adds a check.
+
+### Open, and honestly not fixed here
+
+`README.ru.md` has drifted by content: the English README gained documents 23–30 and the mirror did not. The number
+instrument cannot see that, and neither can any number instrument — it is a translation-maintenance debt. The options
+are to regenerate the mirror from the canonical file or to declare it a summary rather than a mirror; until one is
+chosen, the sentence "where they disagree, this one wins" is true and unenforced.
