@@ -131,3 +131,15 @@ group: a number must be traceable, and an arithmetic convention must be declared
 `S8_UNDECLARED_ARITHMETIC` is the only code in the catalogue that is deliberately a ceiling rather than a stoppage:
 the encoding can be right while the arithmetic convention rests on nothing, and the verdict should say so instead of
 pretending either certainty or failure.
+
+## S9 — defeat
+
+The layer that lets one position defeat another ([`docs/13`](../docs/13-DEFEASIBILITY-CHOICE.md) §3). It records the
+relation and the declared applicability; it never computes which exception *should* apply, because that is a legal
+judgement and this project does not make those.
+
+| Code | Raised when | Remedy |
+|---|---|---|
+| `S9_DEFEAT_UNDEFINED` | `atom.excepts` names something that is not an atom in this statement | fix the id, or encode the defeater as an atom |
+| `S9_DEFEAT_CYCLE` | an atom excepts itself, or two atoms except each other | a cycle is not a priority question; break it in the encoding |
+| `S9_APPLICABILITY_UNSTATED` | a position is defeated by an atom whose `applies` is not asserted | set `applies: true` or `false` **with a citation**. Silence is not negation (D4): the report says `neither`, and the refusal says why |

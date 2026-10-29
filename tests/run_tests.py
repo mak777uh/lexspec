@@ -804,6 +804,52 @@ class QuantityLayer(FixtureCase):
         _code, report, _out = self.check(document)
         self.assertIn("S8_SEGMENT_GAP", self.codes(report))
 
+# --- L2b defeat (docs/13) ---------------------------------------------------
+
+
+class DefeatLayer(FixtureCase):
+    """Defeat records a relation and a declared applicability; it never computes which exception applies."""
+
+    def load(self) -> dict:
+        return json.loads((ROOT / "examples" / "11-gk-rf-395-defeat.lex.json").read_text(encoding="utf-8"))
+
+    def test_the_defeated_position_is_refuted_and_the_defeater_stands(self):
+        _code, report, _out = self.check(self.load())
+        self.assertEqual("refuted", report["position_status"]["a1"], "a4 excepts a1, and a4 applies")
+        self.assertEqual("established", report["position_status"]["a4"])
+        self.assertEqual(0.833, report["coverage"], "both a1 and a4 are encoded now; only a6 stays open")
+
+    def test_an_open_atom_can_never_be_reported_as_established(self):
+        _code, report, _out = self.check(self.load())
+        self.assertEqual("neither", report["position_status"]["a6"], "a6 is open, so the report cannot say it holds")
+
+    def test_an_undefined_defeater_is_refused(self):
+        document = self.load()
+        for atom in document["atoms"]:
+            if atom["id"] == "a4":
+                atom["excepts"] = ["a99"]
+        _code, report, _out = self.check(document)
+        self.assertIn("S9_DEFEAT_UNDEFINED", self.codes(report))
+
+    def test_a_cycle_between_two_atoms_is_refused(self):
+        document = self.load()
+        for atom in document["atoms"]:
+            if atom["id"] == "a1":
+                atom["excepts"] = ["a4"]
+                atom["applies"] = True
+        _code, report, _out = self.check(document)
+        self.assertIn("S9_DEFEAT_CYCLE", self.codes(report))
+
+    def test_silence_is_not_negation(self):
+        """D4: if the defeater's applicability is not asserted, the report says neither and the checker refuses."""
+        document = self.load()
+        for atom in document["atoms"]:
+            if atom["id"] == "a4":
+                atom.pop("applies", None)
+        _code, report, _out = self.check(document)
+        self.assertIn("S9_APPLICABILITY_UNSTATED", self.codes(report))
+        self.assertEqual("neither", report["position_status"]["a1"])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

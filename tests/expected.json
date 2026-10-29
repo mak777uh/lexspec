@@ -85,6 +85,14 @@
       "coverage": 0.667,
       "exit_code": 0,
       "verdict": "CHECKED"
+    },
+    "11-gk-rf-395-defeat.lex.json": {
+      "codes": [
+        "OPEN_TERM"
+      ],
+      "coverage": 0.833,
+      "exit_code": 0,
+      "verdict": "CHECKED"
     }
   }
 }

@@ -95,3 +95,26 @@ The construct is accepted if and only if it reproduces GDPR Art. 17 without hand
 
 If the construct cannot produce this table, it is not adequate, whatever its provenance. If it can, it is adopted
 regardless of whose it is — and `docs/10` gains a section, not a claim.
+
+
+---
+
+## Implemented, 2026-10-29 — the construct exists and one provision now uses it
+
+The §3 proposal is in the checker. Three optional atom fields (`excepts`, `priority`, `applies`), a four-valued
+`position_status` in every report, and three refusals (S9 group): an undefined defeater, a cycle, and an
+**unstated applicability** — the last one deliberately a refusal rather than a silent `neither`, because D4 says
+silence is not negation.
+
+**Measured on ГК 395** (`examples/11-gk-rf-395-defeat.lex.json`): paragraph 4 is now an atom that excepts paragraph
+1, with its applicability asserted and its basis cited. Result: `a1` **refuted**, `a4` established, coverage
+**0.500 → 0.833**, verdict `CHECKED`. `a6` — the court's bounded power — still reports `neither`, correctly: it is
+open.
+
+**What this does not do**, and the report says so: nothing computes *whether* the penalty was agreed. The fact is
+asserted with a basis, and an asserted fact is a statement by the author, not a finding of the tool.
+
+**Two design details worth keeping.** First, an atom that is not closed can never be reported as `established` —
+closure decides applicability of the report, defeat decides only what defeats what. Second, `priority` is stored but
+current v0.1 does not resolve competing defeats with it; that is the next slice, and until then two defeaters of the
+same position are both recorded rather than silently ordered.

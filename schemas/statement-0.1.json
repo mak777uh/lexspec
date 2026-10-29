@@ -298,6 +298,21 @@
         },
         "quantity": {
           "type": "string"
+        },
+        "excepts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "atom ids this position defeats"
+        },
+        "priority": {
+          "type": "integer",
+          "description": "declared priority; never inferred"
+        },
+        "applies": {
+          "type": "boolean",
+          "description": "whether this position's conditions are asserted to hold"
         }
       },
       "allOf": [
@@ -414,6 +429,9 @@
         "S8_SERIES_NOT_PINNED",
         "S8_UNANCHORED_QUANTITY",
         "S8_UNDECLARED_ARITHMETIC",
+        "S9_APPLICABILITY_UNSTATED",
+        "S9_DEFEAT_CYCLE",
+        "S9_DEFEAT_UNDEFINED",
         "THIN_COVERAGE"
       ]
     },
@@ -557,6 +575,15 @@
           }
         }
       }
+    },
+    "positionStatus": {
+      "enum": [
+        "established",
+        "refuted",
+        "both",
+        "neither"
+      ],
+      "description": "the report's four-valued result (Arxo)"
     }
   }
 }

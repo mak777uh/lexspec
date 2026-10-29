@@ -74,6 +74,9 @@ conditions    [string]    — free-text conditions; not interpreted in v0.1, lis
 temporal      {from, until}   — YYYY-MM-DD; until=null means "no declared end"
 anchor        {corpus, article, span, note}
 quantity      string      — handle into quantities[]; see docs/27
+excepts       [string]    — atom ids this position defeats, when its conditions hold (docs/13)
+priority      integer     — declared, never inferred; the source must be a citation
+applies       boolean     — whether this position's conditions are asserted to hold; unstated = unknown
 ```
 
 `Escape`:
@@ -388,6 +391,8 @@ Closed vocabulary, one meaning each. The full catalogue with causes and remedies
 - `S7_COVERAGE` / `THIN_COVERAGE` — the encoding is too thin for the strength of the verdict requested.
 - `S8_*` — a quantity cannot be traced, or its arithmetic convention is undeclared. The last one is a
   ceiling, not a refusal: it caps the verdict at `CHECKED` and lifts by itself when both parameters are declared
+- `S9_*` — a defeat relation is malformed, or the applicability fact needed to decide is unstated. The
+  last one is a refusal on purpose: **silence is not negation** ([docs/13](13-DEFEASIBILITY-CHOICE.md) D4).
   with a basis ([docs/27](27-QUANTITY-LAYER.md) §3).
 
 A new code requires: a defect that no existing code names, a test that produces it, and an entry in the

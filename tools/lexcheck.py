@@ -109,7 +109,7 @@ REQUIRED_TOP = (
 # Group ids are the spec's check numbers, not code names: the report's `checks`
 # map says which layer failed, and inventing a code-shaped name for a group
 # (like "S7_COVERAGE") would put a string in every report that is not a code.
-CHECK_ORDER = ("C0", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8")
+CHECK_ORDER = ("C0", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9")
 
 # Codes in the order docs/11-REFUSAL-CODES.md lists them. This order is also the
 # order findings are reported in, and the order the code-coverage table in
@@ -124,6 +124,9 @@ CODE_ORDER = (
     "S8_UNANCHORED_QUANTITY",
     "S8_SEGMENT_GAP",
     "S8_UNDECLARED_ARITHMETIC",
+    "S9_DEFEAT_UNDEFINED",
+    "S9_DEFEAT_CYCLE",
+    "S9_APPLICABILITY_UNSTATED",
     "S2_SPAN_NOT_FOUND",
     "S2_SPAN_AMBIGUOUS",
     "S3_UNKNOWN_RELATION",
@@ -162,6 +165,9 @@ CODE_CHECK = {
     "S8_UNANCHORED_QUANTITY": "S8",
     "S8_SEGMENT_GAP": "S8",
     "S8_UNDECLARED_ARITHMETIC": "S8",
+    "S9_DEFEAT_UNDEFINED": "S9",
+    "S9_DEFEAT_CYCLE": "S9",
+    "S9_APPLICABILITY_UNSTATED": "S9",
     "S2_SPAN_NOT_FOUND": "S2",
     "S2_SPAN_AMBIGUOUS": "S2",
     "S3_UNKNOWN_RELATION": "S3",
@@ -1340,6 +1346,74 @@ def check_quantities(root: Path, statement: "Statement", findings: "Findings") -
     return results
 
 
+# ---------------------------------------------------------------------------
+# L2b — defeat (docs/13 §3). Records which position defeats which, and refuses
+# when the applicability fact needed to decide is absent.
+# ---------------------------------------------------------------------------
+
+
+def check_defeat(statement: "Statement", findings: "Findings") -> dict[str, str]:
+    """Return {atom_id: established | refuted | both | neither}.
+
+    The four values are the report's, not the atom's (Arxo's result model): an atom states a position, the report
+    states what came of it given the asserted applicability. Nothing here decides whether an exception *should*
+    apply — that remains an asserted fact with a citation, and D4 says an unasserted fact is a refusal rather
+    than a silent negation.
+    """
+    atoms = {a.get("id"): a for a in statement.atoms if isinstance(a.get("id"), str)}
+    defeated_by: dict[str, list[str]] = {}
+    for aid, atom in atoms.items():
+        excepts = atom.get("excepts")
+        if excepts is None:
+            continue
+        if not isinstance(excepts, list):
+            findings.add("S9_DEFEAT_UNDEFINED", aid, "excepts: expected an array of atom ids")
+            continue
+        for target in excepts:
+            if not isinstance(target, str) or target not in atoms:
+                findings.add("S9_DEFEAT_UNDEFINED", aid, f"excepts names {target!r}, which is not an atom here")
+                continue
+            if target == aid:
+                findings.add("S9_DEFEAT_CYCLE", aid, "an atom cannot except itself")
+                continue
+            defeated_by.setdefault(target, []).append(aid)
+
+    # cycles over the defeat relation: a defeats b, b defeats a
+    for target, defeaters in defeated_by.items():
+        for defeater in defeaters:
+            if target in defeated_by.get(defeater, []):
+                findings.add(
+                    "S9_DEFEAT_CYCLE",
+                    defeater,
+                    f"{defeater!r} excepts {target!r} while {target!r} excepts {defeater!r}; priority is not a way "
+                    f"out of a cycle, it is a way to choose inside one",
+                )
+
+    status: dict[str, str] = {}
+    for aid, atom in atoms.items():
+        holders = defeated_by.get(aid, [])
+        asserted = [d for d in holders if atoms.get(d, {}).get("applies") is True]
+        unknown = [d for d in holders if atoms.get(d, {}).get("applies") is None]
+        if unknown:
+            findings.add(
+                "S9_APPLICABILITY_UNSTATED",
+                aid,
+                f"{aid!r} is defeated by {unknown[0]!r}, whose applicability is not asserted; silence is not "
+                f"negation (D4) - set applies: true or false with a citation",
+            )
+            status[aid] = "neither"
+        elif asserted:
+            status[aid] = "refuted"
+        elif atom.get("applies") is False:
+            status[aid] = "neither"
+        else:
+            status[aid] = "established"
+    for aid, atom in atoms.items():
+        if atom.get("applies") is False and status.get(aid) == "neither":
+            continue
+    return status
+
+
 def check_closure(
     statement: Statement,
     anchored: dict[str, bool],
@@ -1524,12 +1598,19 @@ def analyze_file(
     identities = check_hohfeld(statement, findings)
     check_temporal(statement, findings)
     check_conflicts(statement, identities, findings)
+    position_status = check_defeat(statement, findings)
     quantities = check_quantities(root, statement, findings)
     closure = check_closure(statement, anchored, findings, quantities)
 
     # The denominator is every atom in the statement (§8), including atoms S1
     # refused: a malformed atom cannot be closed, so it must not vanish from the
     # arithmetic. `closure` has one entry per atom, so len() and len(atoms) agree.
+    # An atom that is not closed cannot be reported as established: closure is about the encoding, and an
+    # open atom is exactly the case where the encoding does not yet say what the position is.
+    for entry in closure:
+        if entry['reasons'] and entry.get('id') in position_status:
+            position_status[entry['id']] = 'neither'
+
     total = len(statement.atoms)
     closed = sum(1 for entry in closure if not entry["reasons"])
     coverage = (closed / total) if total else 0.0
@@ -1569,6 +1650,7 @@ def analyze_file(
             "anchored": sum(1 for value in anchored.values() if value),
         },
         "quantities": quantities,
+        "position_status": position_status,
         "findings": findings.ordered(atom_order),
         "checks": _check_statuses(findings),
         "not_claimed": list(NOT_CLAIMED),
