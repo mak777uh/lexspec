@@ -204,6 +204,12 @@ An atom is anchored when all of the following hold:
 the rule reads in one place. A statement that supplies no context is asserting that its quote is unique on its
 own — a checkable assertion, and the one that fails most often on real wrapped legal text.
 
+**Measured rule for context (2026-10-29).** A 32-character `prefix`/`suffix` is the default context, and it is
+**required** when the normalised span is shorter than 40 characters. The measurement behind it: 585 random long
+quotes from the four corpora were each unique on their own, while 11 of 604 short quotes were not — and the
+32-character window resolved all 11 ([`docs/29`](29-PRINCIPLES-AND-DATA.md), P4). Two thirds of realistic quotes
+cross a line break in the raw file, which is why rule 0 (normalise first) is not optional.
+
 **Why uniqueness is still required when the standard permits multi-match.** W3C says that if several matches
 remain after `prefix`/`exact`/`suffix`, the selection "SHOULD be treated as matching all of the matches" — so an
 ambiguous reference satisfies the standard. It does not satisfy this product: a citation selecting three places

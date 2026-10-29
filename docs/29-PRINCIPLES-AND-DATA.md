@@ -68,6 +68,35 @@ re-cross 0.75.
 *This one is already settled for wrapped text;* the open half is whether *genuine* ambiguity occurs in real corpora
 and at what rate — a sample of 200 random spans would answer it.
 
+### P4 measured, 2026-10-29 — formatting dominates, ambiguity is rare
+
+Experiment: `python lab/p4-span-sample.py --n 200` (and again with `--min-len 20 --max-len 40`), random spans from
+all four corpora, normalised matching with the spec's policy, a 32-character context window.
+
+| Sample | spans | unique alone | unique with 32-char context | **cross a line break in the raw file** |
+|---|---|---|---|---|
+| long quotes (40–120 chars) | 585 | **100 %** | 100 % | **387 = 66 %** |
+| short quotes (20–40 chars) | 604 | **98.2 %** (11 ambiguous) | **100 %** | 150 = 25 % |
+
+**Both halves of P4 are now settled:**
+
+1. **Formatting, not ambiguity, is the dominant failure.** Two thirds of realistic quotes cross a line break in the
+   raw file. Our own 43 % failure rate was therefore an *underestimate* of the phenomenon, because we had been
+   quoting word-aligned fragments that happened to straddle fewer wraps. Any pipeline that matches raw bytes without
+   normalisation loses two thirds of its quotes.
+2. **Genuine ambiguity is rare and context removes it completely.** Zero of 585 long quotes were ambiguous alone;
+   11 of 604 short ones were, and a 32-character window resolved **all** of them. So `S2_SPAN_AMBIGUOUS` is
+   reachable only for short quotes, and when it fires it is a genuine signal rather than a formatting artefact.
+
+**The rule this changes** (now in spec §5): a 32-character `prefix`/`suffix` is the default context, and it becomes
+**required** when the normalised span is shorter than 40 characters, because that is the only regime where ambiguity
+was observed at all. The exact-uniqueness requirement stays — but it is now cheap to satisfy, which was the
+complaint that started this.
+
+**What this did not test:** whether ambiguity becomes material in corpora with heavier repetition (statutes with
+templated paragraphs, forms, tables). The next sample should run on such a text before anyone claims the rule is
+universal.
+
 **P5 — A provision whose numbers come from an external pinned series cannot exceed `CHECKED` before the quantity
 layer, and reaches `CHECKED_ANCHORED` by declaration alone after it.**
 *Metric:* coverage and verdict before/after L5 on the same provision.
