@@ -61,5 +61,14 @@ jobs:
       - name: Span hint (normalise, then report byte-exact spans)
         run: python tests/run_span_tests.py
 
+      # AGENTS §1: a number without a command is not a result. Until now that rule was asserted and
+      # not checked — lexical drift between prose and tree was possible and already present. xcheck
+      # (docs/30 §2) checks exactly this across the family, so we check it first, ourselves.
+      - name: Numbers in prose agree with the tree
+        run: python lab/check-prose-numbers.py
+
+      - name: The prose guard actually catches drift
+        run: python lab/selftest-prose.py
+
       - name: Status block
         run: python tools/lexspec_status.py

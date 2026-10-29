@@ -58,7 +58,7 @@ Exactly three, in ascending strength. The wording is part of the contract:
 | Verdict | Means |
 |---|---|
 | `REFUSED` | the statement does not survive checking; every reason carries a code from a closed vocabulary |
-| `CHECKED` | what is encoded is coherent and anchored where anchored, but at least one atom is open or coverage is below threshold |
+| `CHECKED` | what is encoded is coherent and anchored where anchored, but at least one atom is open and declared as an escape; the threshold is a reporting metric, not a cause ([ADR-0010](lab/decisions/ADR-0010-threshold-is-reporting.md)) |
 | `CHECKED_ANCHORED` | every atom is closed and anchored; this is still **not** a statement about law |
 
 Every report carries, verbatim:
