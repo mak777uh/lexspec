@@ -111,3 +111,20 @@ Practical consequences recorded here so they are not re-learned:
 2. Round answers that supply URLs are far more valuable than answers that supply names, for exactly this reason.
 3. Russian court acts are unreachable from here; the day-count/rounding convention (W1) therefore cannot be
    verified on this machine even though it is one URL away.
+
+
+### Addendum, 2026-10-29 — model weights cannot be downloaded from this network
+
+Probed while evaluating whether a small classifier is feasible ([`docs/28`](28-CLASSIFIER-LADDER.md)):
+
+| Endpoint | Status |
+|---|---|
+| `huggingface.co` and its API | 200 |
+| `huggingface.co/…/resolve/main/pytorch_model.bin` | 302 → `cdn-lfs.huggingface.co` |
+| `cdn-lfs.huggingface.co` | **unreachable (000)** |
+| `cas-bridge.xethub.hf.co` (xet) | 403 |
+| `pypi.org` | 200 — so `pip install` works |
+
+Conclusion: **libraries install, model weights do not.** Anything depending on a HuggingFace checkpoint is blocked
+today, independently of the missing `torch`. This is why the classifier ladder starts with rules and a
+scikit-learn baseline rather than a fine-tune.
