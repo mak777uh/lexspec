@@ -35,6 +35,7 @@ hundred codes that all mean "not a statement".
 | Code | Raised when | Remedy |
 |---|---|---|
 | `S2_NO_CORPUS` | `anchor.corpus` names no `CorpusRef` in the statement | add the corpus, or fix the handle |
+| `S2_CORPUS_NOT_FOUND` | no file exists at `corpus[].text`, searched from the repository root and upward from the statement | the path is wrong, or the tree was moved without the corpus. The declared sha256 was never compared — this is **not** a hash mismatch. Deliberately separate: blaming the corpus for a resolution problem was finding F-3-1 in flowguard's review |
 | `S2_HASH_MISMATCH` | sha256 of the corpus file ≠ declared `text_sha256` | re-pin the corpus: either the file changed or the declaration is wrong. Never fix by editing the hash alone |
 | `S2_SPAN_NOT_FOUND` | `span` does not occur in the pinned text **after normalization** (spec §5) | the quote is not from this revision, or it was paraphrased, or it was copied from a rendered page so a line break or a character entity sits inside it. The detail must say whether the span occurs in the *raw* text: if it does, the defect is normalization, not absence |
 | `S2_SPAN_AMBIGUOUS` | `span` **with its context** (`prefix`/`suffix`) still selects more than one region, counted by start position with overlaps included (spec §5 rule 4) | widen the context window until one region remains, or anchor to a structural identifier. Note: the W3C convention permits multiple matches and selects all of them; our single-target requirement is stricter **by declaration**, not by standard |

@@ -54,3 +54,4 @@ never rewritten. It mirrors the index in `flowguard-spec/interop/README.md` and 
 |---|---|---|---|
 | 2026-10-28 | LexSpec | flowguard-spec | first note: who we are and what we do not have; three asks (byte-level binding of the verifier, what happens when one of two external anchors is unavailable, whether a normative constraint has a seam); two offers; one boundary statement |
 | 2026-10-28 | LexSpec | VecDHT | first note: the anchor rule and the relative verdict; three questions (what an intent can carry, how a stranger verifies a served record, whether a slot exists for an external certificate); two offers; one boundary |
+| 2026-10-29 | lexspec → flowguard-spec | [ответ на рецензию](2026-10-29-lexspec-to-flowguard-02.md) | F-3-1 принята и исправлена; порог признан декоративным (ADR-0010) |

@@ -364,6 +364,14 @@ Every report — including `CHECKED_ANCHORED` — carries:
 This is not decoration. A reader who quotes the verdict without the `not_claimed` list is quoting a different
 statement than the one the tool made.
 
+**The coverage threshold is a reporting metric (ADR-0010, 2026-10-29).** The verdict does not consult
+\--coverage-threshold\. \CHECKED_ANCHORED\ requires: no refusals, no escapes, every atom closed and anchored. The
+threshold emits \THIN_COVERAGE\ and appears in the report as \coverage_threshold\ with
+\coverage_threshold_role: "reporting-only"\. It was decoration before: coverage below 1.0 already implies a declared
+escape, and an escape already caps the verdict. flowguard's review asked for a statement where the threshold decides
+and escapes do not; there is none, and [ADR-0010](../lab/decisions/ADR-0010-threshold-is-reporting.md) records the
+verification.
+
 ## §10 Refusal codes
 
 Closed vocabulary, one meaning each. The full catalogue with causes and remedies is

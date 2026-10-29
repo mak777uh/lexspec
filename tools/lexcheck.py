@@ -119,6 +119,7 @@ CODE_ORDER = (
     "S1_SCHEMA",
     "S2_NO_CORPUS",
     "S2_HASH_MISMATCH",
+    "S2_CORPUS_NOT_FOUND",
     "S2_SPAN_NOT_FOUND",
     "S2_SPAN_AMBIGUOUS",
     "S3_UNKNOWN_RELATION",
@@ -149,6 +150,7 @@ CODE_CHECK = {
     "S1_SCHEMA": "S1",
     "S2_NO_CORPUS": "S2",
     "S2_HASH_MISMATCH": "S2",
+    "S2_CORPUS_NOT_FOUND": "S2",
     "S2_SPAN_NOT_FOUND": "S2",
     "S2_SPAN_AMBIGUOUS": "S2",
     "S3_UNKNOWN_RELATION": "S3",
@@ -312,18 +314,21 @@ def canonical_sha256(document: object) -> str:
     return hashlib.sha256(canonical_text(document).encode("utf-8")).hexdigest()
 
 
-def find_repo_root(start: Path) -> Path:
-    """Walk up until a repository marker is found (Lead's contract, item 4).
+def find_repo_root(start: Path) -> tuple[Path, str]:
+    """Walk up until a repository marker is found; say which marker decided.
 
     Markers: `.git` or `docs/10-SPEC-v0.1.md`. If neither exists we stop at the
-    statement's own directory and let S2 report honestly, rather than inventing
-    a root that happens to exist on one machine.
+    statement's own directory — but we now say so in the report (`root_source`),
+    because finding F-3-1 in flowguard's review showed that a silent fallback
+    turns a resolution problem into a false accusation against the corpus.
     """
     current = start.resolve()
     for candidate in (current, *current.parents):
-        if (candidate / ".git").exists() or (candidate / "docs" / "10-SPEC-v0.1.md").is_file():
-            return candidate
-    return current
+        if (candidate / ".git").exists():
+            return candidate, "marker:.git"
+        if (candidate / "docs" / "10-SPEC-v0.1.md").is_file():
+            return candidate, "marker:docs/10-SPEC-v0.1.md"
+    return current, "statement"
 
 
 def _display_path(path: Path, root: Path) -> str:
@@ -348,11 +353,28 @@ def _is_repo_relative(declared: str) -> bool:
     return all(part != ".." for part in candidate.parts)
 
 
-def _resolve_corpus_path(root: Path, declared: str) -> Path | None:
-    """Resolve `corpus[].text`, refusing anything that escapes the repository."""
+def _resolve_corpus_path(root: Path, declared: str, statement_dir: Path | None = None) -> tuple[Path | None, str]:
+    """Resolve `corpus[].text` by searching upward, and say which base won.
+
+    Finding F-3-1: a copy of the tree without a repository marker used to fail,
+    because the only base tried was the fallback root. A portable tree is the
+    normal way a stranger checks their own document, so the search order is:
+    the root, then the statement's directory and every parent of it. The first
+    existing path wins; nothing is invented.
+    """
     if not _is_repo_relative(declared):
-        return None
-    return root / Path(declared)
+        return None, "escapes-root"
+    candidates: list[Path] = [root / Path(declared)]
+    if statement_dir is not None:
+        base = statement_dir.resolve()
+        for candidate in (base, *base.parents):
+            path = candidate / Path(declared)
+            if path not in candidates:
+                candidates.append(path)
+    for path in candidates:
+        if path.is_file():
+            return path, "found"
+    return None, "not-found"
 
 
 # ---------------------------------------------------------------------------
@@ -799,7 +821,9 @@ def _tuple_label(identity: dict) -> str:
 # ---------------------------------------------------------------------------
 
 
-def load_corpora(root: Path, statement: Statement, findings: Findings) -> dict[str, dict]:
+def load_corpora(
+    root: Path, statement: Statement, findings: Findings, statement_dir: Path | None = None
+) -> dict[str, dict]:
     """Hash and decode every declared corpus. Returns {id: {"text", "usable"}}.
 
     The pin is by content, never by URL (spec §5), so this is the only place
@@ -814,20 +838,30 @@ def load_corpora(root: Path, statement: Statement, findings: Findings) -> dict[s
         if not isinstance(declared, str) or not isinstance(digest, str):
             loaded[cid] = {"text": None, "usable": False}
             continue
-        path = _resolve_corpus_path(root, declared)
-        if path is None:
+        path, resolved = _resolve_corpus_path(root, declared, statement_dir)
+        if resolved == "escapes-root":
             findings.add("S2_NO_CORPUS", None, f"corpus {cid!r}: text path {declared!r} escapes the repository root")
+            loaded[cid] = {"text": None, "usable": False}
+            continue
+        if path is None:
+            # A missing file is not a wrong hash. Saying "hash mismatch" here told
+            # the reader their corpus had been substituted when in fact the path
+            # never resolved — see finding F-3-1.
+            findings.add(
+                "S2_CORPUS_NOT_FOUND",
+                None,
+                f"corpus {cid!r}: no file at {declared!r}, searched from the repository root and upward from the statement; "
+                f"the declared sha256 was never compared",
+            )
             loaded[cid] = {"text": None, "usable": False}
             continue
         try:
             raw = path.read_bytes()
         except OSError:
-            # No bytes means the pin cannot be verified; that is the same defect
-            # as a wrong hash, and the same remedy: re-pin the corpus.
             findings.add(
                 "S2_HASH_MISMATCH",
                 None,
-                f"corpus {cid!r}: file {_display_path(path, root)!r} not found, so the declared sha256 cannot be verified",
+                f"corpus {cid!r}: file {_display_path(path, root)!r} exists but could not be read, so the declared sha256 cannot be verified",
             )
             loaded[cid] = {"text": None, "usable": False}
             continue
@@ -1208,7 +1242,10 @@ def analyze_file(
         canonical_ok = False
         findings.add("C0_CANON", None, str(exc))
 
-    root = root or find_repo_root(path.parent)
+    if root is None:
+        root, root_source = find_repo_root(path.parent)
+    else:
+        root_source = "explicit"
     statement = Statement(document, findings)
     atom_order = {}
     for index, atom in enumerate(statement.atoms):
@@ -1216,7 +1253,7 @@ def analyze_file(
         if isinstance(aid, str) and aid not in atom_order:
             atom_order[aid] = index
 
-    corpora = load_corpora(root, statement, findings)
+    corpora = load_corpora(root, statement, findings, path.parent)
     anchored = check_anchors(statement, corpora, findings)
     identities = check_hohfeld(statement, findings)
     check_temporal(statement, findings)
@@ -1238,9 +1275,12 @@ def analyze_file(
             f"THIN_COVERAGE is not a defect in the law; it says the encoding is too thin for the verdict requested",
         )
 
+    # The threshold is a reporting metric, not a verdict rule (ADR-0010). Coverage below 1.0 already
+    # implies a declared escape, and an escape already caps the verdict at CHECKED, so the threshold
+    # term could never decide anything. flowguard's review asked for a case where it does; there is none.
     if findings.refusals():
         verdict = "REFUSED"
-    elif findings.escapes() or coverage < threshold:
+    elif findings.escapes():
         verdict = "CHECKED"
     else:
         verdict = "CHECKED_ANCHORED"
@@ -1253,6 +1293,8 @@ def analyze_file(
         "verdict": verdict,
         "coverage": coverage,
         "coverage_threshold": threshold,
+        "coverage_threshold_role": "reporting-only (ADR-0010)",
+        "root_source": root_source,
         "atoms": {
             "total": total,
             "closed": closed,

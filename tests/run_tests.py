@@ -464,13 +464,37 @@ class RefusalCodes(FixtureCase):
         _code, report, _out = self.check(document, threshold=0.0)
         self.assertIn("S1_SCHEMA", self.codes(report))
 
-    def test_corpus_file_missing_is_a_hash_mismatch(self):
-        """No bytes means the pin cannot be verified, and the remedy is re-pinning."""
+    def test_corpus_file_missing_is_its_own_code_not_a_hash_mismatch(self):
+        """F-3-1: blaming the corpus for a resolution failure was a misdiagnosis."""
         document = base_statement()
         document["corpus"][0]["text"] = "corpus/does-not-exist.txt"
-        document["escapes"] = [{"atom": "a1", "reason": "S2_HASH_MISMATCH", "detail": "declared"}]
+        document["escapes"] = [{"atom": "a1", "reason": "S2_CORPUS_NOT_FOUND", "detail": "declared"}]
         _code, report, _out = self.check(document, threshold=0.0)
-        self.assert_codes(report, {"S2_HASH_MISMATCH", "OPEN_TERM"})
+        self.assert_codes(report, {"S2_CORPUS_NOT_FOUND", "OPEN_TERM"})
+        self.assertNotIn("S2_HASH_MISMATCH", self.codes(report))
+        detail = next(f["detail"] for f in report["findings"] if f["code"] == "S2_CORPUS_NOT_FOUND")
+        self.assertIn("never compared", detail)
+
+    def test_a_portable_tree_without_a_repository_marker_still_checks(self):
+        """F-3-1 regression: the same bytes must yield the same verdict outside a repository."""
+        statement = json.loads((ROOT / "examples" / "01-delivery-ok.lex.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            (tmp_path / "corpus").mkdir()
+            for entry in statement["corpus"]:
+                src = ROOT / entry["text"]
+                (tmp_path / entry["text"]).write_bytes(src.read_bytes())
+            (tmp_path / "examples").mkdir()
+            target = tmp_path / "examples" / "portable.lex.json"
+            target.write_text(json.dumps(statement, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="")
+            # deliberately no --root: the point is the fallback, not an imposed base
+            proc = subprocess.run([sys.executable, str(TOOL), str(target), "--json"], capture_output=True, text=True, encoding="utf-8")
+            report = json.loads(proc.stdout)
+            code = proc.returncode
+        self.assertEqual(0, code, report)
+        self.assertEqual("CHECKED_ANCHORED", report["verdict"], report)
+        self.assertEqual(1.0, report["coverage"])
+        self.assertEqual("statement", report["root_source"], "the fallback must be named in the report")
 
     def test_truncated_corpus_copy_triggers_hash_mismatch(self):
         """The pin is by content: a copy that was edited must not anchor anything."""
