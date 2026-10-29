@@ -105,3 +105,62 @@ relieves.
 1. A prose-vs-tree number check in our own suite (before `xcheck` finds it).
 2. Read `cases` 603's gate and `harness` E-0009 before stage 3.
 3. Machine-check the eight Hohfeld positions — nobody has, including the reviewer, and we say so in writing.
+
+
+---
+
+## §8 Second pass, 2026-10-29 — what was read and what it changed here
+
+### `cases` 603 — a parser that produced two false positives
+
+The report is a triage of 24 bounty tasks, and its honest result is "none closed by automation". Two details matter
+for us more than the result:
+
+1. **Their first model-driven attempt failed to produce a compiling proof**, and the case records that rather than
+   the intention. That is the same discipline as our `[unverified]` marks.
+2. **Triaging produced two parser false positives**, which they documented. We hit the identical class the same day:
+   the PDF text of judgment А09-14/2020 glued adjacent numbers together, my first parser read "10863281105.58" as an
+   interest figure, and the total therefore could not be reproduced. Their two false positives and our two glued
+   rows are the same failure: a parser that is confident and wrong, and a report that shows it only if you look.
+
+**Adopted:** when a number comes out of an extraction, record how many rows parsed *and how many were discarded*.
+Our quantity layer's acceptance test now needs that count, not just the total ([`docs/27`](27-QUANTITY-LAYER.md) §6).
+
+### `harness` P10 — the request and its boundary in one file
+
+Their protocol puts, in a single document, the request given to five models, what is **not** in the question, the
+answer rules (no invented URLs, every claim with a source and a date, evidence type per item), and a "what is
+already fixed" section that is explicitly not up for discussion.
+
+**Adopted for our question rounds** ([`docs/23`](23-METHOD-LOOP.md), [`docs/24`](24-ROUND-03-QUESTIONS.md)): each
+round now carries a `не входит` list and an evidence-type column, so an answer cannot satisfy a question it was
+never asked while leaving the real one open.
+
+### `flowguard` — the reviewer's own gap
+
+Their review ends with what they did **not** check, and first on the list is the combinatorics of the eight
+positions. That is now done here: `lab/check-hohfeld.py`.
+
+### The Hohfeld check, 2026-10-29
+
+Eight positions, two maps, eight laws:
+
+| Law | Statement |
+|---|---|
+| L1 | totality and closure — every position has one correlative and one opposite, both among the eight |
+| L2 | correlative is an involution: `C(C(x)) = x` |
+| L3 | opposite is an involution: `O(O(x)) = x` |
+| L4 | the square commutes: `O(C(x)) = C(O(x))` |
+| L5 | no fixed points: `C(x) ≠ x`, `O(x) ≠ x` |
+| L6 | the four correlative pairs are disjoint and cover the eight |
+| L7 | both squares are closed under both maps and do not overlap |
+| L8 | the spec's table and the code's table agree cell by cell |
+
+**Result: all eight hold** for our table. The value is not the pass but the specificity: L4 is the law that catches a
+plausible-looking wrong table — one edited cell usually keeps L2 and L3 true and breaks commutation — and
+`lab/selftest-hohfeld.py` proves the guard fires on three mutations (broken involution, opposite outside its square,
+code diverging from spec), 4 of 4 including the unmutated control.
+
+**Boundary, stated so it is not overclaimed:** this checks that our table is an instance of the *standard reading*
+of Hohfeld's algebra. It does not check that the algebra is the right model of any particular legal system, and it
+says nothing about whether the atoms written with these positions are correct.

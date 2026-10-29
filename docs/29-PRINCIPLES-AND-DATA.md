@@ -132,3 +132,17 @@ provisions**, and every such claim must name the rows it rests on.
    misjudged.
 4. **P6's cheap test** on the 14 existing atoms.
 5. Only after ~20 provisions: look for the correlation P1 and P2 claim, and write down whichever way it comes out.
+
+
+### P6 tested, 2026-10-29 — the anchor count per atom, from the tree
+
+The register asked whether an atom ever needs more than one span. The tree answers it directly: every atom carries
+exactly one `anchor`, so "several anchors per atom" cannot occur by construction — which makes the interesting
+question a different one: **is the split right**, i.e. does each atom map to a passage that a reader would accept as
+one normative unit? That is not machine-checkable, and P6 is therefore restated honestly:
+
+> P6 — an atom that cannot be expressed without conjoining two spans in the same sentence is a signal of a wrong
+> split.
+
+The measurement is a count over our 30 atoms: how many needed a second span during encoding. Current answer: none
+recorded, which is weak evidence and is marked as such.

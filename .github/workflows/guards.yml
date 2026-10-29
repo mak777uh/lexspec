@@ -70,5 +70,13 @@ jobs:
       - name: The prose guard actually catches drift
         run: python lab/selftest-prose.py
 
+      # Nobody in the family had machine-checked the Hohfeld table: flowguard's review says so
+      # explicitly. Our own guard compared cells, not the algebra they claim to satisfy.
+      - name: The eight Hohfeld positions satisfy the algebra
+        run: python lab/check-hohfeld.py
+
+      - name: The Hohfeld guard actually catches a wrong table
+        run: python lab/selftest-hohfeld.py
+
       - name: Status block
         run: python tools/lexspec_status.py
