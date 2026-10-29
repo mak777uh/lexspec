@@ -76,6 +76,15 @@
       "coverage": 0.25,
       "exit_code": 0,
       "verdict": "CHECKED"
+    },
+    "10-gk-rf-395-quantified.lex.json": {
+      "codes": [
+        "OPEN_TERM",
+        "THIN_COVERAGE"
+      ],
+      "coverage": 0.667,
+      "exit_code": 0,
+      "verdict": "CHECKED"
     }
   }
 }

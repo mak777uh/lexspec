@@ -115,3 +115,19 @@ strength of verdict that its author wants. Those are different sentences and the
   split, not explained in prose.
 - **Not permanent.** Codes are versioned with the spec. A statement refused under v0.1 may pass under v0.2
   if the vocabulary grows; the report always names the spec version it was checked against.
+
+## S8 — quantities
+
+The layer that lets an atom carry a number ([`docs/27`](../docs/27-QUANTITY-LAYER.md)). Two rules shape the whole
+group: a number must be traceable, and an arithmetic convention must be declared rather than assumed.
+
+| Code | Raised when | Remedy |
+|---|---|---|
+| `S8_SERIES_NOT_PINNED` | a quantity references a series with no `path`, no `digest`, a missing file, a digest mismatch, or a file that is not a usable series | pin the artifact: save the retrieved values, hash the file, declare both |
+| `S8_UNANCHORED_QUANTITY` | a quantity is malformed, or a literal has no integer `value` | a number nobody can trace is not a number here |
+| `S8_SEGMENT_GAP` | the series has no value for part of the declared period | the period is outside the pin's coverage; narrow it or pin a wider series |
+| `S8_UNDECLARED_ARITHMETIC` | `period.day_count` or `rounding.mode` is `undeclared` | a **caution, not a refusal**: it caps the verdict at `CHECKED` and lifts by itself once both are declared with a basis |
+
+`S8_UNDECLARED_ARITHMETIC` is the only code in the catalogue that is deliberately a ceiling rather than a stoppage:
+the encoding can be right while the arithmetic convention rests on nothing, and the verdict should say so instead of
+pretending either certainty or failure.

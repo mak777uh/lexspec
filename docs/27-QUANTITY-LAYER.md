@@ -186,3 +186,37 @@ The judgment prints a 23-row table with the columns `[1] задолженнос�
 2. The ceiling rule does not disappear; it becomes the rule for *everything else* that arrives undeclared.
 3. ГК 395 stops being an anchoring-only measurement the moment the total is reproduced — the oracle is now a real
    document on disk with a quoted span, not a claim in an answer.
+
+
+---
+
+## Addendum, 2026-10-29 — implemented, and the prediction in §4 was wrong
+
+The layer is in the checker: `series[]` is pinned by `path` + `digest`, quantities are evaluated, a period is cut
+at every rate change, segment boundaries are inclusive with a day count, rates are integers in ten-thousandths of a
+percent, and the ceiling works — `S8_UNDECLARED_ARITHMETIC` is one of three non-refusal codes, so it caps the
+verdict at `CHECKED` instead of turning it into a refusal.
+
+`examples/10-gk-rf-395-quantified.lex.json` uses a series built from the judgment's own table
+(`lab/series/key-rate-a09-14.json`, 19 points, pinned by digest). What it produced:
+
+| Measured | Value |
+|---|---|
+| segments | **19** |
+| total days | **1296** — exactly the «Итого: 1296» printed by the act |
+| first segment | 2017-01-09 … 2017-03-26, **77 days** — exactly the act's first row |
+| coverage | **0.667** (4 of 6 atoms), not the 0.833 predicted below |
+| verdict | `CHECKED` |
+
+**The prediction in §4 was wrong, and the reason is worth keeping.** I expected `a2` and `a6` both to close. `a2`
+did close. `a6` — the court's power to reduce interest with a floor — did not, and correctly: the floor is now a
+quantity, but the *rule by which a court applies it* is judicial discretion, not a computation. Encoding that rule
+would be inventing law. So the honest ceiling for this provision is 0.667, and the earlier 0.833 was a number I
+wanted rather than a number the model supports.
+
+**A real gap the act exposed.** The judgment cuts the period not only at rate changes but at **partial payments**
+(500 000 paid 27.07.2018 and 31.07.2018 appear as their own rows). Our `segments: rate_change` does not model
+payments, so for a debtor who paid in part the base would be wrong. Recorded as the next field:
+`segments: rate_change_and_payments`, with payments as first-class events carrying their own date and amount.
+Until it exists, a statement that relies on partial payments must declare an escape — which is what the escape
+mechanism is for.

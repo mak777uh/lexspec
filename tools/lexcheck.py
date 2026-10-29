@@ -109,7 +109,7 @@ REQUIRED_TOP = (
 # Group ids are the spec's check numbers, not code names: the report's `checks`
 # map says which layer failed, and inventing a code-shaped name for a group
 # (like "S7_COVERAGE") would put a string in every report that is not a code.
-CHECK_ORDER = ("C0", "S1", "S2", "S3", "S4", "S5", "S6", "S7")
+CHECK_ORDER = ("C0", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8")
 
 # Codes in the order docs/11-REFUSAL-CODES.md lists them. This order is also the
 # order findings are reported in, and the order the code-coverage table in
@@ -120,6 +120,10 @@ CODE_ORDER = (
     "S2_NO_CORPUS",
     "S2_HASH_MISMATCH",
     "S2_CORPUS_NOT_FOUND",
+    "S8_SERIES_NOT_PINNED",
+    "S8_UNANCHORED_QUANTITY",
+    "S8_SEGMENT_GAP",
+    "S8_UNDECLARED_ARITHMETIC",
     "S2_SPAN_NOT_FOUND",
     "S2_SPAN_AMBIGUOUS",
     "S3_UNKNOWN_RELATION",
@@ -139,7 +143,10 @@ ALL_CODES = frozenset(CODE_ORDER)
 
 # Codes that lower the verdict to CHECKED but do not refuse the statement: they
 # say "the encoding is incomplete", not "the document is wrong".
-ESCAPE_CODES = frozenset({"OPEN_TERM", "THIN_COVERAGE"})
+# S8_UNDECLARED_ARITHMETIC is a ceiling, not a stoppage (docs/27 §3): it caps the verdict at CHECKED and
+# must never turn into a refusal, or a statement with a declared encoding but an undeclared convention
+# would read as broken.
+ESCAPE_CODES = frozenset({"OPEN_TERM", "THIN_COVERAGE", "S8_UNDECLARED_ARITHMETIC"})
 
 # Everything else refuses. Derived rather than listed twice, so a new code cannot
 # be added to the catalogue and forgotten in one of the two sets.
@@ -151,6 +158,10 @@ CODE_CHECK = {
     "S2_NO_CORPUS": "S2",
     "S2_HASH_MISMATCH": "S2",
     "S2_CORPUS_NOT_FOUND": "S2",
+    "S8_SERIES_NOT_PINNED": "S8",
+    "S8_UNANCHORED_QUANTITY": "S8",
+    "S8_SEGMENT_GAP": "S8",
+    "S8_UNDECLARED_ARITHMETIC": "S8",
     "S2_SPAN_NOT_FOUND": "S2",
     "S2_SPAN_AMBIGUOUS": "S2",
     "S3_UNKNOWN_RELATION": "S3",
@@ -453,6 +464,12 @@ class Statement:
         self.policy: str | None = None
         self.lex_specialis: list[dict] = []
         self.escapes: list[dict] = []
+        # L5 collections (docs/27). Carried verbatim; the quantity pass validates them, because
+        # a malformed quantity is a defect of the number, not of the document's shape.
+        self.series: list[dict] = [x for x in doc.get("series", []) if isinstance(x, dict)] \
+            if isinstance(doc.get("series"), list) else []
+        self.quantities: list[dict] = [x for x in doc.get("quantities", []) if isinstance(x, dict)] \
+            if isinstance(doc.get("quantities"), list) else []
         self.declared_escape_ids: set[str] = set()
 
         if not self.is_object:
@@ -1089,8 +1106,170 @@ def check_conflicts(statement: Statement, identities: dict[str, dict], findings:
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# L5 — quantities (docs/27). Integer arithmetic only: rates in ten-thousandths of
+# a percent, money in minor units, dates as ordinals.
+# ---------------------------------------------------------------------------
+
+
+def _series_paths(root: Path, statement: "Statement", findings: "Findings") -> dict[str, dict]:
+    """Load and verify every declared series. A series without a verifiable pin is unusable."""
+    loaded: dict[str, dict] = {}
+    for entry in getattr(statement, "series", []):
+        sid = entry.get("id")
+        declared = entry.get("path")
+        digest = entry.get("digest")
+        if not isinstance(sid, str) or not isinstance(declared, str) or not isinstance(digest, str):
+            findings.add("S8_SERIES_NOT_PINNED", None, f"series {sid!r}: id, path and digest are required")
+            continue
+        path = root / Path(declared)
+        if not path.is_file():
+            findings.add("S8_SERIES_NOT_PINNED", None, f"series {sid!r}: pinned file {declared!r} is missing")
+            continue
+        actual = hashlib.sha256(path.read_bytes()).hexdigest()
+        if actual != digest:
+            findings.add(
+                "S8_SERIES_NOT_PINNED",
+                None,
+                f"series {sid!r}: declared digest {digest} but file hashes to {actual}",
+            )
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            points = [(p["date"], int(p["value_bp"])) for p in data["points"]]
+        except Exception:  # noqa: BLE001 - a malformed pin is not a usable source
+            findings.add("S8_SERIES_NOT_PINNED", None, f"series {sid!r}: pinned file is not a usable series")
+            continue
+        points.sort()
+        loaded[sid] = {"points": points, "publisher": data.get("publisher")}
+    return loaded
+
+
+def _rate_at(points: list[tuple[str, int]], day: str) -> int | None:
+    value = None
+    for date, bp in points:
+        if date <= day:
+            value = bp
+        else:
+            break
+    return value
+
+
+def _segments(points: list[tuple[str, int]], start: str, end: str) -> list[dict]:
+    """Cut [start, end] at every date the series changes value.
+
+    Boundaries are inclusive on both ends, because that is how a court writes a period (the judgment prints
+    "09.01.2017 | 26.03.2017 | 77" for a span whose two endpoints are both counted). A segment therefore ends the
+    day *before* the next rate takes effect, and `days` counts both endpoints.
+    """
+    import datetime as _dt
+
+    def shift(date: str, days: int) -> str:
+        y, m, d = (int(x) for x in date.split("-"))
+        return (_dt.date(y, m, d) + _dt.timedelta(days=days)).isoformat()
+
+    boundaries = [start]
+    for date, _bp in points:
+        if start < date <= end and date not in boundaries:
+            boundaries.append(date)
+    boundaries.sort()
+    out = []
+    for i, begin in enumerate(boundaries):
+        if i + 1 < len(boundaries):
+            stop = shift(boundaries[i + 1], -1)
+        else:
+            stop = end
+        out.append(
+            {
+                "from": begin,
+                "to": stop,
+                "days": _days(begin, stop),
+                "value_bp": _rate_at(points, begin),
+            }
+        )
+    return out
+
+
+def _ordinal(date: str) -> int:
+    import datetime as _dt
+    y, m, d = (int(x) for x in date.split("-"))
+    return _dt.date(y, m, d).toordinal()
+
+
+def _days(begin: str, stop: str) -> int:
+    return _ordinal(stop) - _ordinal(begin) + 1
+
+
+def check_quantities(root: Path, statement: "Statement", findings: "Findings") -> dict[str, dict]:
+    """Evaluate every quantity. Returns {id: {"ok": bool, "segments": [...], "amount": int|None}}."""
+    series = _series_paths(root, statement, findings)
+    results: dict[str, dict] = {}
+    for quantity in getattr(statement, "quantities", []):
+        qid = quantity.get("id")
+        kind = quantity.get("kind")
+        if not isinstance(qid, str) or kind not in ("literal", "rate_of"):
+            findings.add("S8_UNANCHORED_QUANTITY", None, f"quantity {qid!r}: id and a known kind are required")
+            results[str(qid)] = {"ok": False}
+            continue
+        if kind == "literal":
+            if not isinstance(quantity.get("value"), int):
+                findings.add("S8_UNANCHORED_QUANTITY", None, f"quantity {qid!r}: a literal needs an integer value")
+                results[qid] = {"ok": False}
+                continue
+            results[qid] = {"ok": True, "kind": "literal", "amount": quantity["value"], "segments": []}
+            continue
+
+        sid = quantity.get("series")
+        period = quantity.get("period") or {}
+        source = series.get(sid)
+        if source is None:
+            findings.add(
+                "S8_SERIES_NOT_PINNED",
+                None,
+                f"quantity {qid!r}: series {sid!r} is not a verifiable pinned series",
+            )
+            results[qid] = {"ok": False}
+            continue
+        begin, stop = period.get("from"), period.get("to")
+        if not (isinstance(begin, str) and isinstance(stop, str)):
+            findings.add("S8_SEGMENT_GAP", None, f"quantity {qid!r}: period.from and period.to are required")
+            results[qid] = {"ok": False}
+            continue
+        segments = _segments(source["points"], begin, stop)
+        gap = [s for s in segments if s["value_bp"] is None]
+        if gap:
+            findings.add(
+                "S8_SEGMENT_GAP",
+                None,
+                f"quantity {qid!r}: the series has no value for {gap[0]['from']}..{gap[0]['to']}",
+            )
+            results[qid] = {"ok": False, "segments": segments}
+            continue
+        day_count = (period.get("day_count") or "undeclared")
+        rounding = (quantity.get("rounding") or {}).get("mode") or "undeclared"
+        if day_count == "undeclared" or rounding == "undeclared":
+            findings.add(
+                "S8_UNDECLARED_ARITHMETIC",
+                None,
+                f"quantity {qid!r}: day_count={day_count!r}, rounding={rounding!r}; the verdict is capped at CHECKED "
+                f"(docs/27 §3). Declare both with a basis and the cap lifts without touching code",
+            )
+        results[qid] = {
+            "ok": True,
+            "kind": "rate_of",
+            "segments": segments,
+            "day_count": day_count,
+            "rounding": rounding,
+            "base": quantity.get("base"),
+        }
+    return results
+
+
 def check_closure(
-    statement: Statement, anchored: dict[str, bool], findings: Findings
+    statement: Statement,
+    anchored: dict[str, bool],
+    findings: Findings,
+    quantities: dict[str, dict] | None = None,
 ) -> list[dict]:
     """S4. Returns one entry per atom: {"id", "index", "reasons"}.
 
@@ -1110,6 +1289,18 @@ def check_closure(
     for index, atom in enumerate(statement.atoms):
         aid = atom.get("id") if isinstance(atom.get("id"), str) else None
         reasons: list[str] = []
+
+        quantity_id = atom.get("quantity")
+        if isinstance(quantity_id, str) and quantities is not None:
+            outcome = quantities.get(quantity_id, {"ok": False})
+            if not outcome.get("ok", False):
+                findings.add(
+                    "S8_UNANCHORED_QUANTITY",
+                    aid,
+                    f"atom cites quantity {quantity_id!r}, which did not evaluate; a number that cannot be traced "
+                    f"leaves the atom open",
+                )
+                reasons.append(f"quantity {quantity_id!r} did not evaluate")
 
         def term_problem(field: str, value: object, *, required: bool) -> None:
             if value is None and not required:
@@ -1258,7 +1449,8 @@ def analyze_file(
     identities = check_hohfeld(statement, findings)
     check_temporal(statement, findings)
     check_conflicts(statement, identities, findings)
-    closure = check_closure(statement, anchored, findings)
+    quantities = check_quantities(root, statement, findings)
+    closure = check_closure(statement, anchored, findings, quantities)
 
     # The denominator is every atom in the statement (§8), including atoms S1
     # refused: a malformed atom cannot be closed, so it must not vanish from the
@@ -1278,9 +1470,10 @@ def analyze_file(
     # The threshold is a reporting metric, not a verdict rule (ADR-0010). Coverage below 1.0 already
     # implies a declared escape, and an escape already caps the verdict at CHECKED, so the threshold
     # term could never decide anything. flowguard's review asked for a case where it does; there is none.
+    undeclared_arithmetic = any(f["code"] == "S8_UNDECLARED_ARITHMETIC" for f in findings.items())
     if findings.refusals():
         verdict = "REFUSED"
-    elif findings.escapes():
+    elif findings.escapes() or undeclared_arithmetic:
         verdict = "CHECKED"
     else:
         verdict = "CHECKED_ANCHORED"
@@ -1300,6 +1493,7 @@ def analyze_file(
             "closed": closed,
             "anchored": sum(1 for value in anchored.values() if value),
         },
+        "quantities": quantities,
         "findings": findings.ordered(atom_order),
         "checks": _check_statuses(findings),
         "not_claimed": list(NOT_CLAIMED),

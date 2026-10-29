@@ -410,6 +410,10 @@
         "S5_EMPTY_INTERVAL",
         "S6_CONFLICT",
         "S6_UNRESOLVED_CONFLICT",
+        "S8_SEGMENT_GAP",
+        "S8_SERIES_NOT_PINNED",
+        "S8_UNANCHORED_QUANTITY",
+        "S8_UNDECLARED_ARITHMETIC",
         "THIN_COVERAGE"
       ]
     },
@@ -466,6 +470,9 @@
         },
         "covers": {
           "type": "object"
+        },
+        "path": {
+          "type": "string"
         }
       }
     },

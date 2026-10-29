@@ -72,7 +72,7 @@ def catalogue_codes() -> set[str]:
     tokens = set(re.findall(r"`([A-Z0-9][A-Z0-9_]*)`", read(CODES)))
     return {
         c for c in tokens
-        if re.fullmatch(r"(?:C0|S[1-7])_[A-Z0-9_]+", c) or c in {"OPEN_TERM", "THIN_COVERAGE"}
+        if re.fullmatch(r"(?:C0|S[1-8])_[A-Z0-9_]+", c) or c in {"OPEN_TERM", "THIN_COVERAGE"}
     }
 
 

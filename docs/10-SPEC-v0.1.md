@@ -92,7 +92,8 @@ publisher     string      — who publishes the series
 basis         Anchor      — the span that names this publisher as the source
 format        string      — how it was retrieved (e.g. "soap KeyRate")
 retrieved_at  string      — YYYY-MM-DD of the retrieval
-digest        string      — sha256 of the retrieved artefact
+path          string      — path to the pinned values file (JSON: {publisher, points:[{date, value_bp}]})
+digest        string      — sha256 of that file
 covers        object      — {from, to} the range the pin claims
 ```
 
@@ -385,6 +386,9 @@ Closed vocabulary, one meaning each. The full catalogue with causes and remedies
 - `S5_*` — time is malformed.
 - `S6_*` — incompatible positions, unresolved.
 - `S7_COVERAGE` / `THIN_COVERAGE` — the encoding is too thin for the strength of the verdict requested.
+- `S8_*` — a quantity cannot be traced, or its arithmetic convention is undeclared. The last one is a
+  ceiling, not a refusal: it caps the verdict at `CHECKED` and lifts by itself when both parameters are declared
+  with a basis ([docs/27](27-QUANTITY-LAYER.md) §3).
 
 A new code requires: a defect that no existing code names, a test that produces it, and an entry in the
 catalogue. Codes are never renumbered and never reused.

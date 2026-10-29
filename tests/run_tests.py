@@ -648,7 +648,9 @@ class SchemaAlignment(FixtureCase):
         self.assertEqual(set(self.checker.CODE_ORDER), self.checker.ALL_CODES)
         self.assertEqual(set(self.checker.CODE_CHECK), self.checker.ALL_CODES)
         self.assertEqual(self.checker.ALL_CODES - self.checker.ESCAPE_CODES, self.checker.REFUSAL_CODES)
-        self.assertEqual(2, len(self.checker.ESCAPE_CODES))
+        # two escapes plus one ceiling: S8_UNDECLARED_ARITHMETIC caps the verdict instead of refusing
+        self.assertEqual(3, len(self.checker.ESCAPE_CODES))
+        self.assertIn("S8_UNDECLARED_ARITHMETIC", self.checker.ESCAPE_CODES)
 
     def test_atom_keys_required_by_the_schema_are_required_by_the_checker(self):
         atom_required = self.schema["$defs"]["atom"]["required"]
@@ -738,5 +740,93 @@ class Guards(FixtureCase):
         self.assertIn("python tools/lexcheck.py", stripped)
 
 
+# --- L5 quantities (docs/27) ------------------------------------------------
+
+
+class QuantityLayer(FixtureCase):
+    """The number layer: pinning, segmentation, and the ceiling that keeps an undeclared convention honest."""
+
+    def load(self) -> dict:
+        return json.loads((ROOT / "examples" / "10-gk-rf-395-quantified.lex.json").read_text(encoding="utf-8"))
+
+    def test_the_quantified_statement_closes_the_rate_atom(self):
+        code, report, _out = self.check(self.load())
+        self.assertEqual(0.667, report["coverage"], "the rate atom closes; the defeat and the bounded power stay open")
+        self.assertEqual("CHECKED", report["verdict"])
+        self.assertEqual(["OPEN_TERM", "THIN_COVERAGE"], self.codes(report))
+
+    def test_segmentation_reproduces_the_judgment_day_count(self):
+        _code, report, _out = self.check(self.load())
+        q1 = report["quantities"]["q1"]
+        self.assertEqual(19, len(q1["segments"]))
+        self.assertEqual(1296, sum(s["days"] for s in q1["segments"]), "the act prints 1296 days in total")
+        self.assertEqual(77, q1["segments"][0]["days"], "the act prints 77 days for the first row")
+        self.assertEqual("2017-03-26", q1["segments"][0]["to"], "a segment ends the day before the next rate")
+
+    def test_an_unpinned_series_is_refused(self):
+        document = self.load()
+        document["series"][0]["digest"] = "0" * 64
+        _code, report, _out = self.check(document)
+        self.assertIn("S8_SERIES_NOT_PINNED", self.codes(report))
+        self.assertIn("S8_UNANCHORED_QUANTITY", self.codes(report))
+
+    def test_undeclared_arithmetic_caps_the_verdict(self):
+        document = self.load()
+        document["quantities"][0]["period"]["day_count"] = "undeclared"
+        _code, report, _out = self.check(document)
+        self.assertIn("S8_UNDECLARED_ARITHMETIC", self.codes(report))
+        self.assertEqual("CHECKED", report["verdict"], "an undeclared convention can never reach CHECKED_ANCHORED")
+
+    def test_a_period_outside_the_pin_is_a_segment_gap(self):
+        document = self.load()
+        document["quantities"][0]["period"]["from"] = "2016-01-01"
+        _code, report, _out = self.check(document)
+        self.assertIn("S8_SEGMENT_GAP", self.codes(report))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+# --- L5 quantities (docs/27) ------------------------------------------------
+
+
+class QuantityLayer(FixtureCase):
+    """The number layer: pinning, segmentation, and the ceiling that keeps an undeclared convention honest."""
+
+    def load(self) -> dict:
+        return json.loads((ROOT / "examples" / "10-gk-rf-395-quantified.lex.json").read_text(encoding="utf-8"))
+
+    def test_the_quantified_statement_closes_the_rate_atom(self):
+        code, report, _out = self.check(self.load())
+        self.assertEqual(0.667, report["coverage"], "the rate atom closes; the defeat and the bounded power stay open")
+        self.assertEqual("CHECKED", report["verdict"])
+        self.assertEqual(["OPEN_TERM", "THIN_COVERAGE"], self.codes(report))
+
+    def test_segmentation_reproduces_the_judgment_day_count(self):
+        _code, report, _out = self.check(self.load())
+        q1 = report["quantities"]["q1"]
+        self.assertEqual(19, len(q1["segments"]))
+        self.assertEqual(1296, sum(s["days"] for s in q1["segments"]), "the act prints 1296 days in total")
+        self.assertEqual(77, q1["segments"][0]["days"], "the act prints 77 days for the first row")
+        self.assertEqual("2017-03-26", q1["segments"][0]["to"], "a segment ends the day before the next rate")
+
+    def test_an_unpinned_series_is_refused(self):
+        document = self.load()
+        document["series"][0]["digest"] = "0" * 64
+        _code, report, _out = self.check(document)
+        self.assertIn("S8_SERIES_NOT_PINNED", self.codes(report))
+        self.assertIn("S8_UNANCHORED_QUANTITY", self.codes(report))
+
+    def test_undeclared_arithmetic_caps_the_verdict(self):
+        document = self.load()
+        document["quantities"][0]["period"]["day_count"] = "undeclared"
+        _code, report, _out = self.check(document)
+        self.assertIn("S8_UNDECLARED_ARITHMETIC", self.codes(report))
+        self.assertEqual("CHECKED", report["verdict"], "an undeclared convention can never reach CHECKED_ANCHORED")
+
+    def test_a_period_outside_the_pin_is_a_segment_gap(self):
+        document = self.load()
+        document["quantities"][0]["period"]["from"] = "2016-01-01"
+        _code, report, _out = self.check(document)
+        self.assertIn("S8_SEGMENT_GAP", self.codes(report))
