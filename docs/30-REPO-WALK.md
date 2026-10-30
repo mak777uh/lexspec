@@ -44,7 +44,7 @@ it edits nothing; it leaves one note per repository.
 
 This matters for us in one specific way: `xcheck` checks *"числа в прозе против дерева"* — precisely the rule
 `AGENTS.md` §1 imposes on us ("a number without a command is not a result"). We should expect a machine check of
-that rule, and we should be ready for it to find drift: our own status output carries numbers (78 tests, 12 examples, 52 atoms, 38 closed) that are recomputed by `tools/lexspec_status.py` but not automatically compared to the prose.
+that rule, and we should be ready for it to find drift: our own status output carries numbers (80 tests, 12 examples, 52 atoms, 38 closed) that are recomputed by `tools/lexspec_status.py` but not automatically compared to the prose.
 
 **Action queued:** add a probe to our own suite that compares the numbers in `README.md` with
 `lexspec_status.py`, so `xcheck` finds nothing when it arrives. That is cheaper than answering a note about it.

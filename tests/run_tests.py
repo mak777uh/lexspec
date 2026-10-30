@@ -900,5 +900,27 @@ class OutputContract(FixtureCase):
         self.assertRegex(source, r"return 3")
 
 
+class TwinAgreement(FixtureCase):
+    """Two implementations of the same arithmetic, written to disagree if either drifts (ADR-0002, docs/31 §3)."""
+
+    def test_the_twin_agrees_with_the_checker_on_the_judgment(self):
+        twin = ROOT / "tools" / "lexcheck_twin.py"
+        proc = subprocess.run(
+            [sys.executable, str(twin), str(ROOT / "examples" / "10-gk-rf-395-quantified.lex.json")],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        self.assertEqual(0, proc.returncode, proc.stdout + proc.stderr)
+        self.assertIn("20731362", proc.stdout, "the twin must land on the figure the court awarded")
+
+    def test_the_twin_uses_a_different_arithmetic_path(self):
+        source = (ROOT / "tools" / "lexcheck_twin.py").read_text(encoding="utf-8")
+        checker = (ROOT / "tools" / "lexcheck.py").read_text(encoding="utf-8")
+        self.assertIn("divmod", source, "the twin rounds with integer division")
+        self.assertIn("Decimal", checker, "the checker rounds with Decimal")
+        self.assertNotIn("from decimal", source.lower(), "if the twin imported Decimal it would not be a second opinion")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -68,3 +68,5 @@ A source that moved nothing is still recorded: a shelf of refused sources is the
 re-reading the same dead end, which is the same discipline as
 [`docs/eliminations.md`](https://github.com/mak777uh/flowguard-spec/blob/main/docs/eliminations.md) in the
 owner's other project.
+
+| 2026-10-30 | [LongTails](https://github.com/k3nfalt/longtails) — Lean 4 framework for automated research in optimisation; Setup as a formal contract, Comparator as an independent audit, novelty left to judgement | **adopted**: an independent second implementation (tools/lexcheck_twin.py), escapes must name the layer that closes them, novelty verdicts carry a search date | the contract is a type, not prose; our atom set still cannot be re-derived from the text (P7) |
