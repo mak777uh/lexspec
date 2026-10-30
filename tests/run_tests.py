@@ -923,5 +923,35 @@ class TwinAgreement(FixtureCase):
         self.assertNotIn("from decimal", source.lower(), "if the twin imported Decimal it would not be a second opinion")
 
 
+class ReportPage(FixtureCase):
+    """A reader-facing artefact that adds no dependency surface: one HTML file, no JavaScript, no CDN."""
+
+    def test_the_page_carries_the_verdict_and_the_boundary(self):
+        out = self.tmp / "report.html"
+        proc = subprocess.run(
+            [sys.executable, str(ROOT / "tools" / "report_html.py"),
+             str(ROOT / "examples" / "01-delivery-ok.lex.json"), "--out", str(out)],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(0, proc.returncode, proc.stderr)
+        page = out.read_text(encoding="utf-8")
+        self.assertIn("CHECKED_ANCHORED", page)
+        self.assertIn("legal validity", page, "the not_claimed block must travel with the verdict")
+        self.assertIn("usefulness", page)
+
+    def test_the_page_loads_nothing_from_the_network(self):
+        out = self.tmp / "report.html"
+        subprocess.run(
+            [sys.executable, str(ROOT / "tools" / "report_html.py"),
+             str(ROOT / "examples" / "10-gk-rf-395-quantified.lex.json"), "--out", str(out)],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        page = out.read_text(encoding="utf-8")
+        self.assertNotIn("http://", page, "no external resource may be required to read a verdict")
+        self.assertNotIn("https://", page)
+        self.assertLess(len(page), 60_000, "a report page must stay small enough to email")
+        self.assertIn("20731362", page, "the quantity total is part of the evidence, not a footnote")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
