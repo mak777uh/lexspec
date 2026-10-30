@@ -53,6 +53,7 @@ NOT_CLAIMED = [
     "conditions[] is prose and is not interpreted",
     "cross-tuple correlative agreement is not checked (the spec does not define its orientation)",
     "the normalisation policy is fixed by this tool, not declared per statement",
+    "usefulness - no person or organisation outside this repository has used a verdict in a decision",
 ]
 
 

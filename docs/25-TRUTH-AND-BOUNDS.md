@@ -176,3 +176,16 @@ the standard said it belonged ([`docs/26`](26-ROUND-03-MERGED.md) §W6).
 Two incidental facts worth keeping: the Bryansk court's **TLS certificate has expired** (which is why every earlier
 attempt died with `UNEXPECTED_EOF`), and **keyless search is available** through `api.anysearch.com`, so discovery
 works again without any credential.
+
+---
+
+## §7 Usefulness is not claimed, and now it is said in every report
+
+[`docs/33`](33-PROOF-OF-USEFULNESS.md) measures this repository against a public rubric for "proof of usefulness"
+(four dimensions: adoption, revenue, technical stability, problem-solving). Result: three of the four are empty, one is
+our strongest evidence, and the asymmetry is stated rather than smoothed — the dimension we can prove is the one that
+market weights least.
+
+`not_claimed` in every report now carries a sixth line: **usefulness — no person or organisation outside this
+repository has used a verdict in a decision.** A limitation that travels with the artefact is worth more than a
+paragraph in a design note.
