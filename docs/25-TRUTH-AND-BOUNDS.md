@@ -189,3 +189,6 @@ market weights least.
 `not_claimed` in every report now carries a sixth line: **usefulness — no person or organisation outside this
 repository has used a verdict in a decision.** A limitation that travels with the artefact is worth more than a
 paragraph in a design note.
+
+The longer form of that line is [`lab/usefulness.md`](../lab/usefulness.md): the five questions of a public usefulness
+questionnaire, answered with "none" where the answer is none, and the exact rows that would change each answer.

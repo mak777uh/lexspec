@@ -77,3 +77,10 @@ that correctness is usefulness. `docs/25` says the system has never been used; �
 *Sources opened 2026-10-30: the rubric page (`hackernoon.com/everything-you-need-to-know-about-hackernoons-proof-of-usefulness-hackathon`),
 the Visby report (`…/visby-earns-a-76-proof-of-usefulness-score-…`), the FoxPlug score line, and the announcement text
 the owner sent. Not opened: the other ~30 winner reports; no claim here rests on them.*
+
+---
+
+**Follow-up:** the winners' reports themselves are interviews against a fixed questionnaire, and the questionnaire is
+the part worth taking. [`docs/34`](34-USEFULNESS-REPORTS.md) records the five questions verbatim, what each winner
+offered as its one checkable data point, and this repository's own answers in [`lab/usefulness.md`](../lab/usefulness.md)
+— which are, in four cases out of five, "none".
