@@ -1,0 +1,135 @@
+{
+  "Visby": {
+    "hint": "tracking brand visibility across AI search",
+    "url": "https://hackernoon.com/visby-earns-a-76-proof-of-usefulness-score-for-tracking-brand-visibility-across-ai-search",
+    "score": 76.0,
+    "data_point": "",
+    "numbers": [
+      "2,500 users",
+      "240%",
+      "2,500 users"
+    ]
+  },
+  "FoxPlug": {
+    "hint": "white-label launch kit generator",
+    "url": "https://hackernoon.com/foxplug-earns-a-6719-proof-of-usefulness-score-by-building-an-automated-white-label-launch-kit-generator",
+    "score": 67.19,
+    "data_point": "",
+    "numbers": [
+      "100%",
+      "100%"
+    ]
+  },
+  "Siiqo": {
+    "hint": "unknown category",
+    "url": null,
+    "note": "no report found by search"
+  },
+  "Cofoundr": {
+    "hint": "unknown category",
+    "url": null,
+    "note": "no report found by search"
+  },
+  "HOL Guard": {
+    "hint": "unknown category (Algolia prize)",
+    "url": null,
+    "note": "no report found by search"
+  },
+  "Visual MCP Gateway": {
+    "hint": "unknown category",
+    "url": null,
+    "note": "no report found by search"
+  },
+  "HostLens AI": {
+    "hint": "unknown category (Neo4j prize)",
+    "url": "https://hackernoon.com/hostlens-ai-earns-a-5535-proof-of-usefulness-score-by-building-an-agentic-graphrag-ai-assistant-for-rental-market-insights",
+    "score": 55.35,
+    "data_point": "",
+    "numbers": []
+  },
+  "FlowMind": {
+    "hint": "AI project manager that auto-assigns tasks",
+    "url": "https://hackernoon.com/flowmind-earns-a-47-proof-of-usefulness-score-by-building-an-ai-project-manager-that-auto-assigns-tasks",
+    "score": 47.0,
+    "data_point": "",
+    "numbers": []
+  },
+  "PMB": {
+    "hint": "local memory for AI coding agents",
+    "url": "https://hackernoon.com/pmb-personal-memory-brain-earns-a-115-proof-of-usefulness-score-by-building-local-first-persistent",
+    "score": 115.0,
+    "data_point": "",
+    "numbers": []
+  },
+  "tenv": {
+    "hint": "unknown category",
+    "url": null,
+    "note": "no report found by search"
+  },
+  "Claude Code Organizer": {
+    "hint": "dashboard for Claude Code memories, configs and MCP servers",
+    "url": "https://hackernoon.com/claude-code-organizer-earns-a-8794-proof-of-usefulness-score-by-building-a-dashboard-to-manage-claude-code-memories-configs-and-mcp-servers",
+    "score": 87.94,
+    "data_point": "one data point that proves people genuinely need what you've built? The npm download curve tells the story. Week 1: 1,200 downloads. Week 2: 8,135 downloads. That 6x growth happened with zero paid promotion, just developers finding CCO through word of mouth and discovering they actually needed it. People don't repeatedly download a tool they don't use. How do you measure genuine user adoption versus \"tourists\" who sign up but never return? What's your retention story? npm downloads are repeat in",
+    "numbers": [
+      "8,135 downloads",
+      "209 stars",
+      "1,200 downloads",
+      "8,135 downloads",
+      "8,135 downloads"
+    ]
+  },
+  "Snatch Guard": {
+    "hint": "unknown category",
+    "url": "https://hackernoon.com/snatch-guard-earns-a-94-proof-of-usefulness-score-by-building-an-accelerometer-based-iphone-theft-detection-lock",
+    "score": 94.0,
+    "data_point": "one data point that proves people genuinely need what you've built? 117,000 phones were stolen in London in 2024. Every victim had their banking apps, messages, and photos sitting open on an unlocked phone. Apple's Stolen Device Protection delays password changes but does nothing if the phone is already unlocked when grabbed. Android shipped Theft Detection Lock two years ago. iPhone users still have zero equivalent. That gap is the evidence – I didn't invent a problem, I found one that over a h",
+    "numbers": []
+  },
+  "Autonomous Company Deep Research Agent": {
+    "hint": "unknown category",
+    "url": null,
+    "note": "no report found by search"
+  },
+  "Ella's AI Agent": {
+    "hint": "unknown category",
+    "url": "https://hackernoon.com/ellas-ai-agent-earns-a-4606-proof-of-usefulness-score-by-building-an-autonomous-e-commerce-ai-support-agent",
+    "score": 46.06,
+    "data_point": "",
+    "numbers": []
+  },
+  "TransactionLink": {
+    "hint": "unknown category",
+    "url": "https://hackernoon.com/transactionlink-earns-a-6613-proof-of-usefulness-score-by-building-automated-kyb-and-kyc-onboarding-workflows",
+    "score": 66.13,
+    "data_point": "",
+    "numbers": []
+  },
+  "hello.cv": {
+    "hint": "unknown category",
+    "url": null,
+    "note": "no report found by search"
+  },
+  "Developer Farm": {
+    "hint": "unknown category",
+    "url": null,
+    "note": "no report found by search"
+  },
+  "theCloaq": {
+    "hint": "unknown category",
+    "url": null,
+    "note": "no report found by search"
+  },
+  "Tinky Town": {
+    "hint": "unknown category",
+    "url": null,
+    "note": "no report found by search"
+  },
+  "AIOProductOS": {
+    "hint": "unknown category",
+    "url": "https://hackernoon.com/aioproductos-earns-a-94-proof-of-usefulness-score-by-building-a-product-operating-system-that-connects-feedback-revenue-work-and-code",
+    "score": 94.0,
+    "data_point": "one data point that proves people genuinely need what you've built? Customer Insights Connected The design partners didn't just sign — they wired up their real production sources: live revenue, their actual tracker, their real support inbox. That's the data point. Nobody connects production billing and their live support tool to something they're casually kicking the tires on. Signups are cheap and prove nothing; connecting the systems that run your business to a new spine is a real act of trust",
+    "numbers": []
+  }
+}

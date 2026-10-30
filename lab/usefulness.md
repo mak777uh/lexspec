@@ -57,3 +57,25 @@ A dated row, one per event, with a link:
 
 Until the first row exists, every report this checker emits carries the line *"usefulness — no person or organisation
 outside this repository has used a verdict in a decision"*, and this page is the longer version of that line.
+
+
+---
+
+## Correction and sharpening, 2026-10-30 (after reading ten reports)
+
+The questionnaire's question 2 does **not** ask "what is your traction". Reading the reports
+([`docs/35`](../docs/35-REPORTS-INVENTORY.md)) showed a project scoring 94 with **14 installs** because its evidence
+was an external fact about the problem, and a project scoring 76 with 2 500 users. The genre rewards three different
+things and collapses them into one number. We separate them:
+
+| class | what it is | who can verify | our instance |
+|---|---|---|---|
+| **problem evidence** | an external fact showing the problem is real, independent of our product | anyone, from a public source | **yes, four**: 6 of 14 quotes failed on real corpora; the schema allowed less than the shipped examples used; `S2_HASH_MISMATCH` fired where the hash had matched; a documented exit code 3 did not exist. Each is a measured fact about the problem class, each found by an outsider or by our own instrument |
+| **costly commitment** | someone spends their own effort wiring to us, re-running us, or publishing a result | the person who spent it | **one**: `flowguard-spec` wrote `lab/xrepo-canonical.py`, which imports our `tools/lexcheck.py` and diffs our canonical form against theirs byte for byte, and re-ran its own reproduction to close `F-3-1` |
+| **adoption volume** | downloads, installs, weekly actives | anyone, from a counter | **none** |
+
+So the honest answer to question 2 is no longer "none". It is: **we have problem evidence and one costly commitment,
+and no adoption.** A claim of usefulness must say which class it stands on, and the three are not interchangeable —
+the first two survive a skeptic, the third survives a counter.
+
+The rest of this page stands: no score, no projections, and the six-line `not_claimed` in every report.
