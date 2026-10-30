@@ -103,6 +103,11 @@ jobs:
       - name: Every guard can fail, and something runs it
         run: python lab/check-guard-catalog.py
 
+      # The bench discipline: a result names its pre-registration, a frozen prediction cannot be
+      # re-pointed at an edited file, and an open forecast expires. From the family's bench practice.
+      - name: Pre-registered hypotheses, frozen snapshots, expiring forecasts
+        run: python lab/check-experiments.py
+
       - name: Status block
         run: python tools/lexspec_status.py
 
