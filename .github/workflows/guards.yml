@@ -92,7 +92,7 @@ jobs:
       - name: The twin and the checker agree on the quantified examples
         run: |
           for f in examples/*.lex.json; do
-            python tools/lexcheck_twin.py "\" --allow-empty || exit 1
+            python tools/lexcheck_twin.py "$f" --allow-empty || exit 1
           done
 
       - name: Status block
