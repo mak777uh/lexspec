@@ -148,11 +148,18 @@ def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Recompute the quantity layer independently and compare.")
     ap.add_argument("statement", help="path to a .lex.json statement")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument(
+        "--allow-empty",
+        action="store_true",
+        help="exit 0 when the statement carries no quantities (for a loop over all examples)",
+    )
     args = ap.parse_args(argv)
 
     path = Path(args.statement).resolve()
     document = json.loads(path.read_text(encoding="utf-8"))
     if not document.get("quantities"):
+        if args.allow_empty:
+            return 0
         print("twin: this statement has no quantities", file=sys.stderr)
         return 2
 

@@ -92,10 +92,7 @@ jobs:
       - name: The twin and the checker agree on the quantified examples
         run: |
           for f in examples/*.lex.json; do
-            python tools/lexcheck_twin.py "$f"
-            rc=$?
-            # 2 means the statement carries no quantities, which is not a failure
-            if [ $rc -ne 0 ] && [ $rc -ne 2 ]; then exit 1; fi
+            python tools/lexcheck_twin.py "\" --allow-empty || exit 1
           done
 
       - name: Status block
