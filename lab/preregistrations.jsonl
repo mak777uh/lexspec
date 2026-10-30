@@ -4,3 +4,5 @@
 {"id": "PR-0002", "superseded_by": "PR-0003", "note": "the file it froze changed; replaced by PR-0003 against the current version"}
 {"id": "PR-0004", "hypothesis": "H-0003", "prediction": "the catalogue's own output at 2026-10-30: 10 guards, 0 findings, 7 excused - the five excused guards without planted-defect modes are the class an external reader named twice", "registered": "2026-10-30", "snapshot": {"file": "lab/catalogue-report.json", "sha256": "5ca42a148fccc23b4dfcdc4326616e8f2ac58e167d13908c76e16c991a2b74ee"}}
 {"id": "PR-0003", "superseded_by": "PR-0004", "note": "the file it froze changed; replaced by PR-0004 against the current version"}
+{"id": "PR-0005", "hypothesis": "H-0003", "prediction": "the catalogue's output on 2026-10-30: 10 guards, 0 findings, 7 excused - the excused five are the class an external reader named twice", "registered": "2026-10-30", "snapshot": {"file": "lab/catalogue-report.json", "sha256": "96ee8c18688779867d63af9001ad0798c7ad545d841717a7f0394b9b443fdca4"}}
+{"id": "PR-0004", "superseded_by": "PR-0005", "note": "the file it froze changed; replaced by PR-0005 against the current version"}
