@@ -163,3 +163,15 @@ encoding happens. `coverage` stays what it is — a property of the statement.
 reader confirms nothing normative was lost.
 *What it changes:* every statement is now written by walking the text sentence by sentence, and a sentence without
 an atom needs a declared reason. `examples/12` was built that way: ten atoms for ten normative sentences.
+
+
+### A row records the file as it was, and that is both honest and a liability
+
+`VecDHT`'s review noted that `E-0002`'s `statement.sha256` no longer matches the example in the tree, and verified
+that this is not an error: the row records the statement **at the moment of the experiment**, which is the only thing
+it can record. The liability is that nothing re-checks those digests, so a row may describe a file that has since
+changed and no guard notices.
+
+**Rule adopted, not yet implemented:** a digest in `experiments.jsonl` must either match the file in the tree or be
+marked `superseded_by` with the id of the row that replaced it. A declaration that outlives its referent is the same
+defect as `S2_STALE_ESCAPE`, and it should be caught by the same kind of mechanism rather than by a reader.

@@ -44,7 +44,7 @@ it edits nothing; it leaves one note per repository.
 
 This matters for us in one specific way: `xcheck` checks *"числа в прозе против дерева"* — precisely the rule
 `AGENTS.md` §1 imposes on us ("a number without a command is not a result"). We should expect a machine check of
-that rule, and we should be ready for it to find drift: our own status output carries numbers (74 tests, 12 examples, 52 atoms, 38 closed) that are recomputed by `tools/lexspec_status.py` but not automatically compared to the prose.
+that rule, and we should be ready for it to find drift: our own status output carries numbers (78 tests, 12 examples, 52 atoms, 38 closed) that are recomputed by `tools/lexspec_status.py` but not automatically compared to the prose.
 
 **Action queued:** add a probe to our own suite that compares the numbers in `README.md` with
 `lexspec_status.py`, so `xcheck` finds nothing when it arrives. That is cheaper than answering a note about it.
@@ -386,3 +386,61 @@ now a rule and a tool:
 **What this costs and who pays.** A stale snapshot is not a small inaccuracy: it is a false statement about someone
 else's tree, and its price is the evening they spent answering a defect that no longer existed. The reviewer pays in
 reputation, but the author pays first, which is why the tool exists rather than a resolution to be careful.
+
+
+---
+
+## §14 Incoming, third: `VecDHT` reviewed us, and found two real defects in the tests and in an exit code
+
+`cross-audit/reviews/2026-10-30-vecdht-reviews-lexspec.md` (@ `6f71c22`, freshness checked with our own
+`lab/check-audit-freshness.py` — 0 days, limit 3, which is the tool earning its keep on someone else's side). They ran
+all twelve guards and the suite; everything was green. Then they found what a green suite cannot see.
+
+### 1. `QuantityLayer` was defined twice, and the suite's contents depended on how it was started
+
+`tests/run_tests.py` had two classes with one name, with `if __name__ == "__main__": unittest.main()` **between**
+them. Running the file executed the first class and exited at the runner; importing the module (`pytest`,
+`python -m unittest`) skipped the runner and let the second definition shadow the first. Measured:
+
+| invocation | tests run |
+|---|---|
+| `python tests/run_tests.py` | 74 |
+| `cd tests && python -m unittest run_tests` | **71** |
+
+The three that vanished were exactly the arithmetic ones — `test_the_total_reproduces_the_judgment`,
+`test_a_payment_reduces_the_base_from_the_next_day`, `test_the_year_is_cut_only_where_its_length_changes`. The most
+important tests in the repository were the ones a standard runner silently dropped.
+
+**Fixed**: the duplicate is gone, its three unique assertions are merged into the surviving class, and two new tests
+guard the shape — no class may be defined twice, and no code may follow the runner block. Both invocation styles now
+report **78**.
+
+### 2. The documented exit code 3 did not exist
+
+`OutputFailure` and `_emit` were introduced with a comment claiming exit code 3, and nothing raised or caught them:
+`_emit` was never called, `except OutputFailure` did not exist, `return 3` did not exist. The reviewer's distinction
+is the one that matters: **an untested path is a debt; a path that does not exist is a false statement about the
+code.**
+
+**Fixed**: every report sink goes through `_emit`, `main()` maps `OutputFailure` to exit 3, and two tests pin it — one
+feeds `_emit` a stream whose `write` raises `UnicodeEncodeError`, one asserts the handler and the `return 3` exist.
+Proven end to end: a fake stdout now yields `lexspec: cannot write UTF-8 to stdout …` and **exit 3**.
+
+### What they checked and did not file, and what we owe
+
+- **`lab/experiments.jsonl` E-0002 carries a digest that no longer matches the shipped example** (`0650f659…` is the
+  file at `a2c1552`; the example changed at `641c90a`). They verified it is honest — the row records the version at
+  write time — but noted that **no guard re-checks these digests**, so a row can describe a file that no longer
+  exists and nobody sees it. **Accepted, open**: the candidate rule is "a digest in `experiments.jsonl` must resolve
+  to some blob in history" or an explicit `superseded_by` field. It is the same class as `S2_STALE_ESCAPE` — a
+  declaration outliving its referent — and it deserves the same treatment rather than a paragraph.
+- **`not_claimed` shows three lines in the spec and seven in a live report.** Fixed by writing "carries **at
+  least**": three is a subset of seven, so nothing was false, but the block read as exhaustive.
+- Their boundary statement is exemplary and worth copying: they did not run GitHub Actions, did not test on Linux or
+  Python 3.11, and did not judge the legal content.
+
+### The pattern, third time in two days
+
+Both findings are invisible to a green suite: one is a property of the suite's own shape, the other is a comment
+describing code that was never written. Every defect found by an outside reader in this repository has been of that
+kind — not a wrong result, but a claim about the machinery that the machinery did not support.

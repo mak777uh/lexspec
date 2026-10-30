@@ -1923,6 +1923,22 @@ def _emit(text: str, stream=None) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Exit codes: 0 passed, 1 refused, 2 usage, **3 could not write the report**.
+
+    Code 3 exists because a crash and a refusal must never be the same signal: a pipeline that treats 1
+    as "the statement was refused" would read a broken pipe as a legal finding.
+    """
+    try:
+        return _main_body(argv)
+    except OutputFailure as failure:
+        try:
+            sys.stderr.write(f"lexcheck: {failure}\n")
+        except Exception:  # noqa: BLE001 - nothing left to report with
+            pass
+        return 3
+
+
+def _main_body(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     if args.as_json and args.canonical:
@@ -1960,8 +1976,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"lexcheck: error: {exc}", file=sys.stderr)
             return 1
         digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
-        print(text)
-        print(f"sha256 {digest}")
+        _emit(text)
+        _emit(f"sha256 {digest}")
         for flag in _canonical_flags(raw):
             print(f"lexcheck: warning: {flag}", file=sys.stderr)
         return 0
@@ -1973,7 +1989,7 @@ def main(argv: list[str] | None = None) -> int:
         except ParseError as exc:
             print(f"lexcheck: error: {exc}", file=sys.stderr)
             if args.as_json:
-                print(json.dumps({"error": str(exc)}, ensure_ascii=False, indent=2))
+                _emit(json.dumps({"error": str(exc)}, ensure_ascii=False, indent=2))
             return 2
         except OSError as exc:
             print(f"lexcheck: error: {exc}", file=sys.stderr)
@@ -1983,7 +1999,7 @@ def main(argv: list[str] | None = None) -> int:
         # One file keeps the documented single-object report; several files are
         # printed as an array so that examples/*.lex.json works as one command.
         payload = reports[0] if len(reports) == 1 else reports
-        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        _emit(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
         print("\n\n".join(_render_human(report) for report in reports))
 
