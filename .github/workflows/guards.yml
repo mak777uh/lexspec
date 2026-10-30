@@ -13,6 +13,8 @@
 name: guards
 
 on:
+  schedule:
+    - cron: "17 5 * * 1"
   push:
   pull_request:
 
@@ -95,5 +97,25 @@ jobs:
             python tools/lexcheck_twin.py "$f" --allow-empty || exit 1
           done
 
+      # Taken from VecDHT/​lab/check-guard-selftests.py: a guard whose zero is indistinguishable
+      # from "did not look" protects as well as a disabled one. The catalogue is discovered
+      # from the directory, and a baseline entry that stops applying is itself a finding.
+      - name: Every guard can fail, and something runs it
+        run: python lab/check-guard-catalog.py
+
       - name: Status block
         run: python tools/lexspec_status.py
+
+  # The network is not the repository's business, so provenance liveness is not on the push path. It runs weekly and
+  # on demand: a cited address that stops answering does not change a verdict (the bytes are pinned), but it does
+  # change whether our provenance claim can be checked at all.
+  citations:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Cited sources still answer
+        run: python lab/check-citations.py --timeout 20

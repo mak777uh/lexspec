@@ -215,11 +215,10 @@ LIVING = ["README.md", "README.ru.md", "docs/25-TRUTH-AND-BOUNDS.md", "cross-aud
 
 # Count-adjacent numbers allowed to differ from the tree, each with the reason it is allowed. A whitelist without
 # reasons is how a guard becomes decoration, so every entry states why.
+# An entry here is an excuse with a reason, and it expires: the guard reports an entry that stops matching
+# (imported rule, see docs/32 §3). Four entries were deleted on 2026-10-30 because their numbers had been
+# rewritten and the excuses had been quietly excusing nothing.
 WHITELIST = {
-    ("docs/25-TRUTH-AND-BOUNDS.md", "60 tests"): "quotes the *earlier* count inside the correction block, on purpose",
-    ("docs/25-TRUTH-AND-BOUNDS.md", "61 tests"): "same block, the value it was corrected to at that time",
-    ("docs/25-TRUTH-AND-BOUNDS.md", "17 codes"): "the code count before the S8/S9 groups existed",
-    ("docs/25-TRUTH-AND-BOUNDS.md", "22 codes"): "the code count after S8, before S9",
     ("docs/25-TRUTH-AND-BOUNDS.md", "4 atoms"): "GDPR Art. 17 has four atoms — a per-provision count, not a tree total",
 }
 
@@ -249,6 +248,7 @@ def unregistered_numbers() -> list[dict]:
         pass
 
     problems: list[dict] = []
+    seen: set[tuple[str, str]] = set()
     for rel in LIVING:
         path = DOCS_ROOT / rel
         if not path.is_file():
@@ -258,6 +258,7 @@ def unregistered_numbers() -> list[dict]:
             number, unit = match.group(1), match.group(2).lower()
             phrase = f"{number} {unit}"
             if (rel, phrase) in WHITELIST:
+                seen.add((rel, phrase))
                 continue
             key = {"tests": "tests", "test": "tests", "examples": "examples", "example": "examples",
                    "atoms": "atoms", "atom": "atoms", "codes": "codes", "code": "codes",
@@ -274,6 +275,17 @@ def unregistered_numbers() -> list[dict]:
                     "file": rel,
                     "line": line,
                     "detail": f"{phrase!r} is not the tree's {expected!r} and is not whitelisted with a reason",
+                }
+            )
+    # An excuse that no longer matches anything is a hole that stays open while looking closed.
+    for file_rel, phrase in WHITELIST:
+        if file_rel in LIVING and (file_rel, phrase) not in seen:
+            problems.append(
+                {
+                    "kind": "stale-excuse",
+                    "file": file_rel,
+                    "detail": f"whitelist entry {phrase!r} never matched; the number it excused is gone, "
+                    f"so the excuse must be deleted rather than inherited by whatever takes its place",
                 }
             )
     return problems
@@ -337,7 +349,7 @@ def main(argv: list[str]) -> int:
             if item["kind"] == "mismatch":
                 print(f"DRIFT {item['file']:<32} {item['label']:<40} claimed {item['claimed']}, measured {item['measured']}")
                 print(f"      reproduce with: {item['command']}")
-            elif item["kind"] in {"suite-red", "unregistered", "mirror"}:
+            elif item["kind"] in {"suite-red", "unregistered", "mirror", "stale-excuse"}:
                 print(f"{item['kind'].upper():<5} {item['file']}:{item.get('line', '-')}  {item['detail']}")
             elif item["kind"] == "forbidden-phrase":
                 print(f"STALE {item['file']}:{item['line']}  {item['text']}")
