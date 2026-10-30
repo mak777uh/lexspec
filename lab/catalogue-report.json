@@ -1,0 +1,15 @@
+{
+  "checked": [
+    "check-audit-freshness.py",
+    "check-citations.py",
+    "check-examples-schema.py",
+    "check-experiments.py",
+    "check-guard-catalog.py",
+    "check-hohfeld.py",
+    "check-orphans.py",
+    "check-prose-numbers.py",
+    "check-secrets.py",
+    "check-spec.py"
+  ],
+  "findings": []
+}

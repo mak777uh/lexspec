@@ -108,6 +108,10 @@ jobs:
       - name: Pre-registered hypotheses, frozen snapshots, expiring forecasts
         run: python lab/check-experiments.py
 
+      # A document nothing links to is not read, and a file that is not read drifts. Cheapest guard here.
+      - name: Every document is reachable by a link
+        run: python lab/check-orphans.py
+
       - name: Status block
         run: python tools/lexspec_status.py
 

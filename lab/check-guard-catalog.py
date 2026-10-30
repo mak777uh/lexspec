@@ -45,6 +45,7 @@ BASELINE: dict[str, str] = {
     "mode of its own; the planted-secret check lives in lab/selftest-checkspec.py's shadow tree",
     "check-examples-schema.py": "validates data against the published schema; its failure mode is demonstrated by the "
     "schema's own enum (a value outside it), which the checker tests already cover",
+    "check-orphans.py": "a link graph, not a mutation target: its red path is a document with no inbound link, which is exactly what it found five of on its first run (docs/39)",
     "check-experiments.py": "its red path is demonstrated by changing one byte of the frozen file (SNAPSHOT_DRIFT) and by --grace-days -1 (PREREG_STALE); both recorded in docs/36 section 1",
     "check-guard-catalog.py": "bootstraps the catalogue: its own red path is a guard without a selftest or a baseline "
     "entry that stopped applying, both exercised by hand in docs/32 section 3",

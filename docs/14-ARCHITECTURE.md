@@ -192,3 +192,7 @@ correctly — that is the human link, and it stays visible.
 Nothing in this table is claimed as ours. The contribution, if any, is the **chain**: each link exists
 somewhere; the requirement that a decision be walkable back to a span, and that an unanchored number never
 enters the chain, is what this architecture insists on.
+
+---
+
+**Decision record:** [`ADR-0005`](../lab/decisions/ADR-0005-chain-to-the-boundary.md) — why the chain stops where it does.
