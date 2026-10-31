@@ -1,0 +1,15 @@
+[package]
+name = "lexspec"
+version = "0.1.0"
+edition = "2021"
+description = "LexSpec reference checker: legal statements anchored to pinned corpora. No dependencies, on purpose."
+license = "MIT OR Apache-2.0"
+publish = false
+
+[[bin]]
+name = "lexspec"
+path = "src/main.rs"
+
+[dependencies]
+# Intentionally empty. A chain-of-custody tool should not begin with a supply chain: everything below is std,
+# and the SHA-256 implementation is in src/sha256.rs with known-answer tests.

@@ -33,7 +33,11 @@ import sys
 from pathlib import Path
 
 # Directories that never contain hand-written text worth scanning.
-PRUNE_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules", ".mypy_cache", ".pytest_cache"}
+# Rust build output is pruned like Python bytecode: it is generated, untracked and full of absolute paths
+# pointing at the machine that built it.
+PRUNE_DIRS = {
+    ".git", "__pycache__", ".venv", "venv", "node_modules", ".mypy_cache", ".pytest_cache", "target",
+}
 
 # Extensions that are binary or generated; reading them as text produces noise.
 SKIP_SUFFIXES = {

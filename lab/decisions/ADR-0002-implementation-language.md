@@ -67,3 +67,11 @@ Two of them decided the outcome:
   Rust twin is expected to agree, and the divergence test is the point.
 - Nothing in this ADR changes the spec. It changes what a future implementation must be able to prove about
   itself.
+
+---
+
+**Implemented, 2026-10-31.** The first slice is in `rust/`: a dependency-free crate that canonicalises and hashes, and
+agrees with the Python twin byte for byte on **12 of 12** examples (`python lab/compare-rust-python-canonical.py`).
+The decision above said identity is over bytes and that a second implementation is the only real test of it; that test
+now runs. What remains is everything except identity — validation, anchoring, coverage, verdicts — and the record of
+what was deliberately not built is in [`docs/40`](../../docs/40-RUST-FIRST-SLICE.md) §3.

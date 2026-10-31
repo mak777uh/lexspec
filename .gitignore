@@ -8,3 +8,7 @@ __pycache__/
 # Локальные выгрузки и снимки
 state/
 _out/
+
+# Rust build artefacts
+rust/target/
+
