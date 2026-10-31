@@ -273,11 +273,23 @@ def main(argv: list[str] | None = None) -> int:
             print(f"selftest: {OUTPUT.relative_to(ROOT).as_posix()} is missing; run python tools/selftest.py")
             return 1
         committed = OUTPUT.read_text(encoding="utf-8")
-        if normalise_dates(committed) != normalise_dates(content):
+        left = normalise_dates(committed).splitlines()
+        right = normalise_dates(content).splitlines()
+        if left != right:
             print(
                 f"selftest: STALE {OUTPUT.relative_to(ROOT).as_posix()} — the published output no longer matches the "
                 f"tool; run python tools/selftest.py and commit the result"
             )
+            # Name the first difference: a gate that cannot say what is wrong sends the author hunting across two
+            # environments, which is exactly how this step failed the first time it ran on CI.
+            for index, (a, b) in enumerate(zip(left, right)):
+                if a != b:
+                    print(f"selftest: first difference at line {index + 1}:")
+                    print(f"  published: {a!r}")
+                    print(f"  generated: {b!r}")
+                    break
+            else:
+                print(f"selftest: published has {len(left)} lines, generated has {len(right)}")
             return 1
         print(f"selftest: {OUTPUT.relative_to(ROOT).as_posix()} matches the tool")
     else:
