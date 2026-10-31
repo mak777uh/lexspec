@@ -74,10 +74,16 @@ def determinism_note() -> str:
     first = subprocess.run(argv, cwd=str(ROOT), capture_output=True).stdout
     second = subprocess.run(argv, cwd=str(ROOT), capture_output=True).stdout
     same = hashlib.sha256(first).hexdigest() == hashlib.sha256(second).hexdigest()
+    # The digest is deliberately not printed: the report carries the statement's path, so the same statement checked
+    # in two checkout directories produces two different digests. What the measurement establishes is equality of two
+    # runs in one environment, and printing a value that changes with the directory made the published page differ per
+    # machine — which is how this gate failed on its first CI run.
     return (
         "Two consecutive `--json` runs of example 05 were compared by sha256: "
-        f"**{'identical' if same else 'DIFFERENT'}** "
-        f"(`{hashlib.sha256(first).hexdigest()[:16]}…`).\n"
+        f"**{'identical' if same else 'DIFFERENT'}**.\n\n"
+        "The digest value is not printed because the report names the statement's path: the same statement checked "
+        "from two directories yields two different digests, and comparing that value across machines would compare "
+        "paths rather than results. Determinism here means two runs in one environment agree.\n"
     )
 
 

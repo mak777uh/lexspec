@@ -589,7 +589,7 @@ test_the_twin_agrees_with_the_checker_on_the_judgment (__main__.TwinAgreement.te
 test_the_twin_uses_a_different_arithmetic_path (__main__.TwinAgreement.test_the_twin_uses_a_different_arithmetic_path) ... ok
 
 ----------------------------------------------------------------------
-Ran 88 tests in 25.047s
+Ran 88 tests in 29.150s
 
 OK
 
@@ -655,4 +655,6 @@ exit=2
 
 ## determinism
 
-Two consecutive `--json` runs of example 05 were compared by sha256: **identical** (`8d359c14c1200e28…`).
+Two consecutive `--json` runs of example 05 were compared by sha256: **identical**.
+
+The digest value is not printed because the report names the statement's path: the same statement checked from two directories yields two different digests, and comparing that value across machines would compare paths rather than results. Determinism here means two runs in one environment agree.
