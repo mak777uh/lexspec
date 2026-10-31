@@ -589,7 +589,7 @@ test_the_twin_agrees_with_the_checker_on_the_judgment (__main__.TwinAgreement.te
 test_the_twin_uses_a_different_arithmetic_path (__main__.TwinAgreement.test_the_twin_uses_a_different_arithmetic_path) ... ok
 
 ----------------------------------------------------------------------
-Ran 88 tests in 19.355s
+Ran 88 tests in 23.534s
 
 OK
 
