@@ -116,11 +116,20 @@ def main(argv: list[str]) -> int:
                 }
             )
 
+    # Two rows with one id are legal (the log is append-only) and the last one wins; say so instead of failing,
+    # because a status change is supposed to append. Silence about it was the audit's complaint.
+    seen: dict[str, int] = {}
+    for row in load(HYP):
+        seen[row['id']] = seen.get(row['id'], 0) + 1
+    duplicates = {hid: n for hid, n in seen.items() if n > 1}
+
     if args.json:
-        print(json.dumps({"findings": findings}, ensure_ascii=False, indent=2))
+        print(json.dumps({"findings": findings, "duplicate_ids": duplicates}, ensure_ascii=False, indent=2))
     else:
         for item in findings:
             print(f"{item['kind']:<14} {item['row']}: {item['detail']}")
+        for hid, count in sorted(duplicates.items()):
+            print(f"note: {hid} has {count} rows; the last one wins (append-only log)")
         print(
             f"\ncheck-experiments: {len(hypotheses)} hypothesis(es), {len(preregs)} pre-registration(s), "
             f"{len(experiments)} experiment row(s), {len(findings)} finding(s)"

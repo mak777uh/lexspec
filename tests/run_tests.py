@@ -953,5 +953,81 @@ class ReportPage(FixtureCase):
         self.assertIn("20731362", page, "the quantity total is part of the evidence, not a footnote")
 
 
+class BareCodes(FixtureCase):
+    """Every refusal code must be raised by something a reader can run.
+
+    Five codes were in the catalogue and in the checker and in nothing else, while docs/25 claimed otherwise. Each test
+    below is the smallest document that makes one of them fire, and the code name appears literally so the repository's
+    own generator counts it as exercised.
+    """
+
+    def _example(self, name: str) -> dict:
+        return json.loads((ROOT / "examples" / name).read_text(encoding="utf-8"))
+
+    def test_context_missing_for_a_short_span(self):
+        document = self._example("01-delivery-ok.lex.json")
+        atom = document["atoms"][0]
+        atom["anchor"]["span"] = "обязуется передать"          # 18 characters, unique in the corpora
+        atom["anchor"].pop("prefix", None)
+        atom["anchor"].pop("suffix", None)
+        _code, report, _out = self.check(document, threshold=0.0)
+        self.assertIn("S2_CONTEXT_MISSING", self.codes(report), report["findings"])
+
+    def test_context_mismatch_when_the_declared_context_is_wrong(self):
+        document = self._example("01-delivery-ok.lex.json")
+        atom = document["atoms"][0]
+        atom["anchor"]["span"] = "обязуется передать"
+        atom["anchor"]["prefix"] = "этого текста в корпусе нет"
+        atom["anchor"]["suffix"] = "и этого тоже нет"
+        _code, report, _out = self.check(document, threshold=0.0)
+        self.assertIn("S2_CONTEXT_MISMATCH", self.codes(report), report["findings"])
+
+    def test_revision_mismatch_against_the_file_header(self):
+        document = self._example("01-delivery-ok.lex.json")
+        document["corpus"][0]["revision"] = "1999-01-01"
+        _code, report, _out = self.check(document, threshold=0.0)
+        self.assertIn("S2_REVISION_MISMATCH", self.codes(report), report["findings"])
+
+    def test_revision_unchecked_when_the_file_has_no_header(self):
+        document = self._example("01-delivery-ok.lex.json")
+        fixture = ROOT / "tests" / "fixtures" / "no-revision.txt"
+        document["corpus"] = [{
+            "id": "fixture",
+            "title": "a text with no REVISION header",
+            "revision": "2026-10-31",
+            "text": "tests/fixtures/no-revision.txt",
+            "text_sha256": hashlib.sha256(fixture.read_bytes()).hexdigest(),
+        }]
+        for atom in document["atoms"]:
+            atom["anchor"]["corpus"] = "fixture"
+        _code, report, _out = self.check(document, threshold=0.0)
+        self.assertIn("S2_REVISION_UNCHECKED", self.codes(report), report["findings"])
+
+    def test_corpus_unreadable_when_the_bytes_are_not_utf8(self):
+        document = self._example("01-delivery-ok.lex.json")
+        fixture = ROOT / "tests" / "fixtures" / "bad-utf8.bin"
+        document["corpus"] = [{
+            "id": "fixture",
+            "title": "bytes that are not UTF-8",
+            "revision": "2026-10-31",
+            "text": "tests/fixtures/bad-utf8.bin",
+            "text_sha256": hashlib.sha256(fixture.read_bytes()).hexdigest(),
+        }]
+        for atom in document["atoms"]:
+            atom["anchor"]["corpus"] = "fixture"
+        _code, report, _out = self.check(document, threshold=0.0)
+        codes = self.codes(report)
+        self.assertIn("S2_CORPUS_UNREADABLE", codes, report["findings"])
+        self.assertNotIn("S2_HASH_MISMATCH", codes, "the hash matched; the bytes were unusable")
+
+    def test_unanchored_basis_leaves_the_atom_open(self):
+        document = self._example("10-gk-rf-395-quantified.lex.json")
+        document["series"][0].pop("basis")
+        _code, report, _out = self.check(document, threshold=0.0)
+        codes = self.codes(report)
+        self.assertIn("S8_UNANCHORED_BASIS", codes, report["findings"])
+        self.assertEqual("REFUSED", report["verdict"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -11,7 +11,7 @@ produced by the same analyse function the CLI uses (not a re-implementation —
 a status page that computes coverage its own way is how two numbers start
 disagreeing), plus the digest check of every pinned corpus.
 
-Exit codes: 0 always, unless the tree is unreadable (2).
+Exit codes: 0 when every declared corpus digest matches its file, 1 when one does not, 2 when the tree cannot be read. (Before 2026-10-31 this line said "0 always" and the code agreed with it — which made the digest check decorative.)
 """
 
 from __future__ import annotations
@@ -95,7 +95,10 @@ def main() -> int:
     print("  python tools/check_examples.py")
     print("  python tests/run_tests.py")
     print("  python lab/check-secrets.py")
-    return 0
+    # The audit of 2026-10-31 found the tool printing a digest mismatch and returning 0: the number
+    # existed and was never consulted. A status page that cannot fail is a page that can lie.
+    return 0 if digests_ok else 1
+
 
 
 if __name__ == "__main__":

@@ -128,6 +128,7 @@ group: a number must be traceable, and an arithmetic convention must be declared
 
 | Code | Raised when | Remedy |
 |---|---|---|
+| `S8_UNANCHORED_BASIS` | a series provides no checkable `basis` (`corpus` + `span`), so the numbers that rest on it have no provenance | state the basis, or do not use the series. **An absent basis is not a weaker basis**: the atom that cites the series stays open. Found by an external audit on 2026-10-31, which deleted the field and watched the quantified atom stay closed |
 | `S8_SERIES_NOT_PINNED` | a quantity references a series with no `path`, no `digest`, a missing file, a digest mismatch, or a file that is not a usable series | pin the artifact: save the retrieved values, hash the file, declare both |
 | `S8_UNANCHORED_QUANTITY` | a quantity is malformed, or a literal has no integer `value` | a number nobody can trace is not a number here |
 | `S8_SEGMENT_GAP` | the series has no value for part of the declared period | the period is outside the pin's coverage; narrow it or pin a wider series |

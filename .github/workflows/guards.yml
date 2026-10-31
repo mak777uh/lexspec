@@ -112,7 +112,15 @@ jobs:
       - name: Every document is reachable by a link
         run: python lab/check-orphans.py
 
-      - name: Status block
+      # docs/SELFTEST.md is quoted by both READMEs as 'the commands and their real output'. It is
+      # generated, and it had drifted by every number it printed (60 vs 82 tests, 30 vs 129 files, six
+      # digests with zero overlap). An external audit caught it; now the generator is the gate.
+      - name: The published self-test output matches the tool
+        run: python tools/selftest.py --check
+
+      # This step used to be printed for the log and never asserted, so a digest mismatch could not fail the
+      # build. Since 2026-10-31 the tool exits non-zero on a mismatch and the step asserts it.
+      - name: Status block (and its digest check)
         run: python tools/lexspec_status.py
 
   # The network is not the repository's business, so provenance liveness is not on the push path. It runs weekly and

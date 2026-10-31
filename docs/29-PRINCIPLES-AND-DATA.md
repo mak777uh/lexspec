@@ -175,3 +175,24 @@ changed and no guard notices.
 **Rule adopted, not yet implemented:** a digest in `experiments.jsonl` must either match the file in the tree or be
 marked `superseded_by` with the id of the row that replaced it. A declaration that outlives its referent is the same
 defect as `S2_STALE_ESCAPE`, and it should be caught by the same kind of mechanism rather than by a reader.
+
+
+### P4 re-measured, 2026-10-31 — the conclusion holds, the number did not
+
+An external audit re-ran the command recorded above and got different numbers. It was right; the count had drifted
+when the fifth corpus (`corpus/a09-14-2020-2026-10-29.txt`) joined the set, and the sampling loop skips spans that
+begin or end on whitespace, so the population changed with it.
+
+| run | long spans (40–120) | short spans (20–40) |
+|---|---|---|
+| 2026-10-29 (recorded, four corpora) | 585 spans, 100 % unique alone, 0 ambiguous | 604 spans, **98.2 %** unique alone, **11** ambiguous, 100 % unique with 32-char context |
+| 2026-10-31 (five corpora) | **711** spans, **99.9 %** unique alone, 0 ambiguous | **724** spans, **96.1 %** unique alone, **28** ambiguous alone, **100 %** unique with 32-char context |
+
+**What this changes:** the number "11 of 604" must not be quoted as the rule's basis. **What it does not change:** the
+finding that matters — *context resolves every ambiguity we have ever observed*, 11 of 11 then, 28 of 28 now — and the
+observation that long spans are unique on their own in our corpora.
+
+**What it costs:** the rule "context is required below 40 characters" (`docs/10` §5, `docs/11`) was justified by a
+number that does not reproduce, and it is now justified by a different one. The rule stands, its evidence is dated, and
+a reader can re-run the command in two minutes. That is the difference between a policy with evidence and a policy with
+a citation.

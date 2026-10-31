@@ -20,6 +20,10 @@ Usage
     python lab/hypothesis.py close H-0001 --status refuted --note "…"
     python lab/hypothesis.py list
 
+Precedence, stated because a log with two rows per id is ambiguous otherwise: **the last row for an id wins**,
+and `close` appends rather than edits. A reader of the file alone cannot know that, so `list` prints one line
+per id and `lab/check-experiments.py` says how many rows each id has.
+
 Exit: 0 written, 1 refused (unknown id, missing file), 2 usage.
 """
 

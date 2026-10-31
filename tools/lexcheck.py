@@ -126,6 +126,7 @@ CODE_ORDER = (
     "S2_CONTEXT_MISMATCH",
     "S2_CONTEXT_MISSING",
     "S8_SERIES_NOT_PINNED",
+    "S8_UNANCHORED_BASIS",
     "S8_UNANCHORED_QUANTITY",
     "S8_SEGMENT_GAP",
     "S8_UNDECLARED_ARITHMETIC",
@@ -172,6 +173,7 @@ CODE_CHECK = {
     "S2_CONTEXT_MISMATCH": "S2",
     "S2_CONTEXT_MISSING": "S2",
     "S8_SERIES_NOT_PINNED": "S8",
+    "S8_UNANCHORED_BASIS": "S8",
     "S8_UNANCHORED_QUANTITY": "S8",
     "S8_SEGMENT_GAP": "S8",
     "S8_UNDECLARED_ARITHMETIC": "S8",
@@ -1244,7 +1246,16 @@ def _series_paths(
         # sentence, and the audit of 2026-10-29 found the shipped example pointing at a span that existed nowhere.
         basis = entry.get("basis") or {}
         b_corpus, b_span = basis.get("corpus"), basis.get("span")
-        if isinstance(b_corpus, str) and isinstance(b_span, str):
+        if not (isinstance(b_corpus, str) and isinstance(b_span, str)):
+            # An absent basis is not a smaller claim than a false one: it is a number whose provenance was never
+            # stated, and the atom that cites it must not close on that.
+            findings.add(
+                "S8_UNANCHORED_BASIS",
+                None,
+                f"series {sid!r}: provides no checkable basis (corpus + span); a quantity that rests on it leaves its "
+                f"atom open, because an unstated provenance is not a weaker provenance",
+            )
+        else:
             target = statement.corpus.get(b_corpus)
             if target is None:
                 findings.add(

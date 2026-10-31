@@ -7,7 +7,7 @@ how much of it was actually closed.
 
 **What it is not.** Not an AI that reads contracts and tells you they are fine. Not legal advice. Not a
 theorem prover, not a statute parser, and not a claim that a clause passing the checker is lawful. The
-checker never outputs the word "legal"; it outputs a verdict over a triple `(statement, encoding,
+checker never issues a verdict about legality — its reports do print `legal validity` inside `not_claimed`, which is the opposite of a claim; it outputs a verdict over a triple `(statement, encoding,
 corpus@revision)` and a list of the things it did not check.
 
 Russian mirror: [README.ru.md](README.ru.md). This file is canonical; where they disagree, this one wins.
@@ -61,7 +61,7 @@ Exactly three, in ascending strength. The wording is part of the contract:
 | `CHECKED` | what is encoded is coherent and anchored where anchored, but at least one atom is open and declared as an escape; the threshold is a reporting metric, not a cause ([ADR-0010](lab/decisions/ADR-0010-threshold-is-reporting.md)) |
 | `CHECKED_ANCHORED` | every atom is closed and anchored; this is still **not** a statement about law |
 
-Every report carries, verbatim:
+Every report carries at least these, verbatim:
 
 ```json
 "not_claimed": ["legal validity",
@@ -118,7 +118,7 @@ refusals — what each code means, and what a reader should do — is
 | [docs/15-SUBSTRATE-INDEPENDENCE.md](docs/15-SUBSTRATE-INDEPENDENCE.md) | the optional outward layer, as a **resilience** requirement: at least two substrates able to produce and record the same decision, a handover protocol with proof, the anchored legal basis a switch needs, degraded modes, and the drill that makes the fallback real |
 | [AGENTS.md](AGENTS.md) | the twelve rules for anyone, human or agent, who changes this repository |
 | [schemas/statement-0.1.json](schemas/statement-0.1.json) | the schema, with the closed sets in one place |
-| [examples/](examples/) | three statements: one that passes, one with opposite positions, one with a broken anchor |
+| [examples/](examples/) | twelve statements: one that passes, and the rest exercising refusal codes, carve-outs, quantities and defeat — `python tools/lexspec_status.py` prints the live count |
 
 ## Repository map
 

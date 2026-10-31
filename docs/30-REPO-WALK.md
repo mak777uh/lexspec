@@ -44,7 +44,7 @@ it edits nothing; it leaves one note per repository.
 
 This matters for us in one specific way: `xcheck` checks *"числа в прозе против дерева"* — precisely the rule
 `AGENTS.md` §1 imposes on us ("a number without a command is not a result"). We should expect a machine check of
-that rule, and we should be ready for it to find drift: our own status output carries numbers (82 tests, 12 examples, 52 atoms, 38 closed) that are recomputed by `tools/lexspec_status.py` but not automatically compared to the prose.
+that rule, and we should be ready for it to find drift: our own status output carries numbers (88 tests, 12 examples, 52 atoms, 38 closed) that are recomputed by `tools/lexspec_status.py` but not automatically compared to the prose.
 
 **Action queued:** add a probe to our own suite that compares the numbers in `README.md` with
 `lexspec_status.py`, so `xcheck` finds nothing when it arrives. That is cheaper than answering a note about it.
@@ -444,3 +444,37 @@ Proven end to end: a fake stdout now yields `lexspec: cannot write UTF-8 to stdo
 Both findings are invisible to a green suite: one is a property of the suite's own shape, the other is a comment
 describing code that was never written. Every defect found by an outside reader in this repository has been of that
 kind — not a wrong result, but a claim about the machinery that the machinery did not support.
+
+
+---
+
+## §15 Fourth external audit, 2026-10-31 — fifteen findings, three of them HIGH, all reproducible
+
+`qoder` audited commit `9811138`, ran every command in both READMEs, all ten guards, the mutation self-tests, the twin
+loop, and a battery of mutation probes on a copy of the tree. It found fifteen things, and the three HIGH ones were all
+real:
+
+| # | finding | disposition |
+|---|---|---|
+| HIGH-1 | `docs/25` claimed "every code appears in an example or a test" while `tools/selftest.py` printed **25/30** and exited 1 | **fixed**: six tests added (`BareCodes`), one per bare code plus the new `S8_UNANCHORED_BASIS`; the generator now prints **31/31** and exits 0; the docs row quotes the command |
+| HIGH-2 | `tools/SELFTEST.md`, quoted by both READMEs as "the commands and their real output", had drifted on every number (60→82 tests, 30→129 files, six digests with **zero** overlap with the live twelve, three→eight `not_claimed`) | **fixed**: regenerated, and the generator gained `--check`, which normalises the date and the test duration and fails on any other difference. The step is in CI, and its red path was proved by editing one number in the file |
+| HIGH-3 | deleting `series[].basis` left the quantified atom **closed**: false values were refused, an absent one was not | **fixed**: new code `S8_UNANCHORED_BASIS` — an unstated provenance is not a weaker provenance. All four probes (removed, empty, span missing, corpus missing) now refuse; the twelve healthy examples are untouched |
+| MED | README claims: "three statements" (twelve ship), "never outputs the word legal" (it prints `legal validity`), "carries, verbatim" (the list grew to eight), and `README.ru` still described `CHECKED` with the pre-ADR-0010 threshold wording | **fixed** in both languages |
+| MED | the constitution described S8/S9, prefix/suffix and quantities as "planned for v0.1.1" while the machine applies them, and its verdict table contradicted ADR-0010 | **accepted, open**: the spec edit is a single commit's work and is not mixed into this one. Named here so it is not forgotten |
+| MED | `span_hint` defaults to 30 characters of context while the spec and the remedy text say 32; the shipped examples carry 30 and 31 | **accepted, open**: the number must become one number in three places, and the examples must be recomputed with it |
+| MED | the P4 measurement behind "context required below 40 characters" did not reproduce (585/604/11 then, 711/724/28 now) | **fixed as a correction, not a retraction**: re-measured and recorded with both rows and the date; the conclusion (context resolves every observed ambiguity, 28 of 28) is unchanged and better supported, but the old number is no longer quoted as the basis |
+| MED | `revision` means three different things in spec, headers and `not_claimed` | **accepted, open** — it needs a decision, not an edit: the four Russian corpora carry retrieval dates, and the act's edition is not stated anywhere |
+| MED | README's five commands are not all in CI; the spec path is hardcoded, so a second spec file would pass every gate | **accepted, open**; the `--json` and `--canonical` invocations are worth adding to the workflow, the single-spec gate needs a decision about what it should compare |
+| MED | relay finding 15 (`tools/lexspec_status.py` returns 0 unconditionally) still has no disposition | **fixed**: the status tool now exits on a digest mismatch, and the CI step asserts it |
+| MED | `lab/hypotheses.jsonl` has five rows and three ids with contradicting statuses, and the precedence was undeclared | **fixed**: last-row-wins is documented in the tool, printed by the checker as a note rather than a failure, and the audit's point — a reader of the file alone could not know — is answered in place |
+| LOW | status prints no commit, no `not_claimed`, and its exit code ignores its own measurement | **partly fixed** (exit code); printing the commit is queued |
+| LOW | two `§7` headings in `docs/25` | **fixed**: the usefulness section is now §8 and its references updated |
+| LOW | `check-experiments.py` hashes raw bytes rather than canonical text, so a CRLF snapshot drifts on the runner and stays green locally | **accepted, open**: the fix is to hash the canonical form, which means the checker's canonicaliser in the guard — the next slice of the Rust/Python parity work |
+| LOW | `README.md:64` "verbatim" over three of eight `not_claimed` items | **fixed** with the other README claims |
+
+### What this audit did better than the previous three
+
+It ran the *generator*, not just the guards, and it read the two READMEs as executable documents. Three of the four
+HIGH findings were in that gap: a published artefact no gate regenerated, a claim no gate recomputed, and a field the
+schema required and the checker ignored. The pattern from §14 holds and sharpens: **the defects live where a document
+says what the machine does and nothing compares the two.**

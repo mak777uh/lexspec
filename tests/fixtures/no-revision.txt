@@ -1,0 +1,4 @@
+An excerpt with no REVISION header at all, on purpose: the checker must say that a declared revision cannot be
+compared, rather than assuming the declaration is correct.
+
+Обязательства должны исполняться надлежащим образом в соответствии с условиями обязательства.
